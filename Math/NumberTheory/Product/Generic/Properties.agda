@@ -18,10 +18,12 @@ module CommutativeMonoidProductProperties {c e} (CM : CommutativeMonoid c e) =
   ; Σ≤-cong to Π≤-cong
   ; Σ≤-congˡ to Π≤-congˡ
   ; Σ≤-congʳ to Π≤-congʳ
+  ; Σrange-cong to Πrange-cong
   ; Σ<-0 to Π<-1
   ; Σ≤-0 to Π≤-1
   ; Σ<[f,1]≈f[0] to Π<[f,1]≈f[0]
   ; Σ≤[f,0]≈f[0] to Π≤[f,0]≈f[0]
+  ; Σrange[f,n,n]≈0 to Πrange[f,n,n]≈1
   ; Σ<-+ to Π<-+
   ; Σ<-push-suc to Π<-push-suc
   ; Σ<-const to Π<-const

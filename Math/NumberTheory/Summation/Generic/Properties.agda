@@ -40,6 +40,12 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
   Σ≤-congʳ : ∀ {f g} n → (∀ x → f x ≈ g x) → Σ≤ f n ≈ Σ≤ g n
   Σ≤-congʳ n = Σ<-congʳ (suc n)
 
+  Σrange-cong : ∀ {f g : ℕ → Carrier} {m n o p} →
+    (∀ x → f x ≈ g x) → m ≡ n → o ≡ p → Σrange f m o ≈ Σrange g n p
+  Σrange-cong {f} {g} {m} {.m} {o} {.o} f≈g ≡.refl ≡.refl = begin
+    Σ≤ (λ k → f (m ℕ.+ k)) (o ∸ m) ≈⟨ Σ≤-cong (λ x → f≈g (m ℕ.+ x)) ≡.refl ⟩
+    Σ≤ (λ k → g (m ℕ.+ k)) (o ∸ m) ∎
+
   Σ<-0 : ∀ n → Σ< (λ _ → ε) n ≈ ε
   Σ<-0 zero    = refl
   Σ<-0 (suc n) = begin
@@ -55,6 +61,13 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
 
   Σ≤[f,0]≈f[0] : ∀ f → Σ≤ f 0 ≈ f 0
   Σ≤[f,0]≈f[0] f = Σ<[f,1]≈f[0] f
+
+  Σrange[f,n,n]≈0 : ∀ f n → Σrange f n n ≈ f n
+  Σrange[f,n,n]≈0 f n = begin
+    Σ≤ (λ k → f (n ℕ.+ k)) (n ∸ n) ≈⟨ Σ≤-congˡ _ $ ℕₚ.n∸n≡0 n ⟩
+    Σ≤ (λ k → f (n ℕ.+ k)) 0       ≈⟨ Σ≤[f,0]≈f[0] (λ k → f (n ℕ.+ k)) ⟩
+    f (n ℕ.+ 0)                    ≈⟨ reflexive (≡.cong f (ℕₚ.+-identityʳ n)) ⟩
+    f n                            ∎
 
   Σ<-+ : ∀ f m n → Σ< f (m ℕ.+ n) ≈ Σ< (λ k → f (n ℕ.+ k)) m ∙ Σ< f n
   Σ<-+ f zero    n = sym $ identityˡ (Σ< f n)
