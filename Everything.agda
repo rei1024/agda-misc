@@ -23,3 +23,10 @@ import Math.Logic.NonConstructiveAxiom.Properties
 import Math.NumberTheory.Fibonacci.Generic
 
 import Math.NumberTheory.Fibonacci
+
+------------------------------------------------------------------------
+-- Googology
+
+import Math.Googology.Function
+
+import Math.Googology.Function.Properties
