@@ -1,0 +1,3 @@
+name: agda-misc
+depend: standard-library
+include: .

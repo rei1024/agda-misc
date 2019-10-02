@@ -1,0 +1,7 @@
+*.agdai
+*.agda.el
+*.lagda.el
+*.hi
+*.o
+*.tix
+*.vim
