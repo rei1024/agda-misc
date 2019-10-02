@@ -20,7 +20,7 @@ open SemiringSummationProperties *-+-semiring public
   renaming
   ( Σ<[f,1]≈f[0] to Σ<[f,1]≡f[0]
   ; Σ≤[f,0]≈f[0] to Σ≤[f,0]≡f[0]
-  ; Σrange[f,n,n]≈0 to Σrange[f,n,n]≡0
+  ; Σ<range[f,n,n]≈0 to Σ<range[f,n,n]≡0
   ; Σ<-const to Σ<-const-×
   ; Σ≤-const to Σ≤-const-×
   )

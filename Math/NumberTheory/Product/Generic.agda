@@ -14,6 +14,7 @@ module MonoidProduct {c e} (M : Monoid c e) =
   renaming
   ( Σ< to Π<
   ; Σ≤ to Π≤
-  ; Σrange to Πrange
+  ; Σ<range to Π<range
+  ; Σ≤range to Π≤range
   )
   using ()
