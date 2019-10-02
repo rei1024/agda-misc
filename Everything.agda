@@ -24,6 +24,18 @@ import Math.NumberTheory.Fibonacci.Generic
 
 import Math.NumberTheory.Fibonacci
 
+-- Summation
+import Math.NumberTheory.Summation.Generic.Base
+
+import Math.NumberTheory.Summation.Generic
+
+import Math.NumberTheory.Summation.Nat
+
+-- Product
+import Math.NumberTheory.Product.Generic
+
+import Math.NumberTheory.Product.Nat
+
 ------------------------------------------------------------------------
 -- Googology
 
