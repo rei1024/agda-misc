@@ -13,6 +13,7 @@ open import Function.Core
 
 -- agda-misc
 open import Math.NumberTheory.Summation.Generic
+import Math.NumberTheory.Summation.Generic.Properties.Lemma as Lemma
 
 module MonoidSummationProperties {c e} (M : Monoid c e) where
   open MonoidSummation M
@@ -22,8 +23,8 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
   Σ<-cong : ∀ {f g m n} → (∀ x → f x ≈ g x) → m ≡ n → Σ< f m ≈ Σ< g n
   Σ<-cong {f} {g} {0}     {.0}       f≈g ≡.refl = refl
   Σ<-cong {f} {g} {suc m} {.(suc m)} f≈g ≡.refl = begin
-    f m ∙ Σ< f m ≈⟨ ∙-cong (f≈g m) (Σ<-cong {m = m} {n = m} f≈g ≡.refl) ⟩
-    g m ∙ Σ< g m ∎
+    Σ< f m ∙ f m ≈⟨ ∙-cong (Σ<-cong {m = m} {n = m} f≈g ≡.refl) (f≈g m) ⟩
+    Σ< g m ∙ g m ∎
 
   Σ<-congˡ : ∀ f {m n} → m ≡ n → Σ< f m ≈ Σ< f n
   Σ<-congˡ f = Σ<-cong (λ _ → refl)
@@ -46,6 +47,22 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
     Σ< (λ k → f (m ℕ.+ k)) (o ∸ m) ≈⟨ Σ<-congʳ (o ∸ m) (λ x → f≈g (m ℕ.+ x)) ⟩
     Σ< (λ k → g (m ℕ.+ k)) (o ∸ m) ∎
 
+  Σ<range-cong₁ : ∀ {f g : ℕ → Carrier} m n →
+    (∀ x → f x ≈ g x) → Σ<range f m n ≈ Σ<range g m n
+  Σ<range-cong₁ m n f≈g = Σ<range-cong {m = m} {o = n} f≈g ≡.refl ≡.refl
+
+  Σ<range-cong₂₃ : ∀ (f : ℕ → Carrier) {m n o p} →
+    m ≡ n → o ≡ p → Σ<range f m o ≈ Σ<range f n p
+  Σ<range-cong₂₃ f ≡.refl ≡.refl = refl
+
+  Σ<range-cong₂ : ∀ (f : ℕ → Carrier) {m n} o →
+    m ≡ n → Σ<range f m o ≈ Σ<range f n o
+  Σ<range-cong₂ f o m≡n = Σ<range-cong₂₃ f {o = o} m≡n ≡.refl
+
+  Σ<range-cong₃ : ∀ (f : ℕ → Carrier) m {n o} →
+    n ≡ o → Σ<range f m n ≈ Σ<range f m o
+  Σ<range-cong₃ f m n≡o = Σ<range-cong₂₃ f {m = m} ≡.refl n≡o
+
   Σ≤range-cong : ∀ {f g : ℕ → Carrier} {m n o p} →
     (∀ x → f x ≈ g x) → m ≡ n → o ≡ p → Σ≤range f m o ≈ Σ≤range g n p
   Σ≤range-cong f≈g m≡n o≡p = Σ<range-cong f≈g m≡n (≡.cong suc o≡p)
@@ -53,7 +70,7 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
   Σ<-0 : ∀ n → Σ< (λ _ → ε) n ≈ ε
   Σ<-0 zero    = refl
   Σ<-0 (suc n) = begin
-    ε ∙ Σ< (λ _ → ε) n ≈⟨ ∙-congˡ $ Σ<-0 n ⟩
+    Σ< (λ _ → ε) n ∙ ε ≈⟨ ∙-congʳ $ Σ<-0 n ⟩
     ε ∙ ε              ≈⟨ identityʳ ε ⟩
     ε                  ∎
 
@@ -61,37 +78,112 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
   Σ≤-0 n = Σ<-0 (suc n)
 
   Σ<[f,1]≈f[0] : ∀ f → Σ< f 1 ≈ f 0
-  Σ<[f,1]≈f[0] f = identityʳ (f 0)
+  Σ<[f,1]≈f[0] f = identityˡ (f 0)
 
   Σ≤[f,0]≈f[0] : ∀ f → Σ≤ f 0 ≈ f 0
   Σ≤[f,0]≈f[0] f = Σ<[f,1]≈f[0] f
 
+  n≤m⇒Σ<range[f,m,n]≈0 : ∀ f {m n} → n ≤ m → Σ<range f m n ≈ ε
+  n≤m⇒Σ<range[f,m,n]≈0 f {m} {n} n≤m = begin
+    Σ< (λ k → f (m ℕ.+ k)) (n ∸ m) ≈⟨ Σ<-congˡ (λ k → f (m ℕ.+ k)) $ ℕₚ.m≤n⇒m∸n≡0 n≤m ⟩
+    Σ< (λ k → f (m ℕ.+ k)) 0       ∎
+
   Σ<range[f,n,n]≈0 : ∀ f n → Σ<range f n n ≈ ε
-  Σ<range[f,n,n]≈0 f n = begin
-    Σ< (λ k → f (n ℕ.+ k)) (n ∸ n) ≈⟨ Σ<-congˡ _ $ ℕₚ.n∸n≡0 n ⟩
-    Σ< (λ k → f (n ℕ.+ k)) 0       ∎
+  Σ<range[f,n,n]≈0 f n = n≤m⇒Σ<range[f,m,n]≈0 f {n} {n} ℕₚ.≤-refl
 
-  Σ<-+ : ∀ f m n → Σ< f (m ℕ.+ n) ≈ Σ< (λ k → f (n ℕ.+ k)) m ∙ Σ< f n
-  Σ<-+ f zero    n = sym $ identityˡ (Σ< f n)
-  Σ<-+ f (suc m) n = begin
-    f (m ℕ.+ n) ∙ Σ< f (m ℕ.+ n)
-      ≈⟨ ∙-congˡ $ Σ<-+ f m n ⟩
-    f (m ℕ.+ n) ∙ (Σ< (λ k → f (n ℕ.+ k)) m ∙ Σ< f n)
-      ≈⟨ sym $ assoc (f (m ℕ.+ n)) v (Σ< f n) ⟩
-    f (m ℕ.+ n) ∙ v ∙ Σ< f n
-      ≈⟨ ∙-congʳ $ ∙-congʳ $ reflexive (≡.cong f (ℕₚ.+-comm m n)) ⟩
-    f (n ℕ.+ m) ∙ v ∙ Σ< f n
-     ∎
-     where v = Σ< (λ k → f (n ℕ.+ k)) m
+  Σ<-+ : ∀ f m n → Σ< f (m ℕ.+ n) ≈ Σ< f m ∙ Σ< (λ k → f (m ℕ.+ k)) n
+  Σ<-+ f m zero    = begin
+    Σ< f (m ℕ.+ 0) ≈⟨ Σ<-congˡ f $ ℕₚ.+-identityʳ m ⟩
+    Σ< f m         ≈⟨ sym $ identityʳ (Σ< f m) ⟩
+    Σ< f m ∙ ε     ∎
+  Σ<-+ f m (suc n) = begin
+    Σ< f (m ℕ.+ suc n)
+      ≈⟨ Σ<-congˡ f $ ℕₚ.+-suc m n ⟩
+    Σ< f (suc m ℕ.+ n)
+      ≡⟨⟩
+    Σ< f (m ℕ.+ n) ∙ f (m ℕ.+ n)
+      ≈⟨ ∙-congʳ $ Σ<-+ f m n ⟩
+    Σ< f m ∙ Σ< (λ k → f (m ℕ.+ k)) n ∙ f (m ℕ.+ n)
+      ≈⟨ assoc (Σ< f m) (Σ< (λ k → f (m ℕ.+ k)) n) (f (m ℕ.+ n)) ⟩
+    Σ< f m ∙ Σ< (λ k → f (m ℕ.+ k)) (suc n)
+      ∎
 
-  -- TODO Σ≤-+ : ∀ f m n → Σ≤ f (1 + m + n) ≈ Σ≤ (λ k → f (1 + n + k)) (1 + n + k) ∙ Σ≤ f n
+  Σ≤-Σ<-+ : ∀ f m n →
+    Σ≤ f (m ℕ.+ n) ≈ Σ≤ f m ∙ Σ< (λ k → f (1 ℕ.+ m ℕ.+ k)) n
+  Σ≤-Σ<-+ f m n = Σ<-+ f (suc m) n
 
-  Σ<-push-suc : ∀ f n → Σ< f (suc n) ≈ Σ< (λ k → f (suc k)) n ∙ f 0
+  Σ≤-+ : ∀ f m n →
+    Σ≤ f (1 ℕ.+ m ℕ.+ n) ≈ Σ≤ f m ∙ Σ≤ (λ k → f (1 ℕ.+ m ℕ.+ k)) n
+  Σ≤-+ f m n = begin
+    Σ< f (2 ℕ.+ m ℕ.+ n)
+      ≈⟨ Σ<-congˡ f $ Lemma.lemma₁ m n ⟩
+    Σ< f (suc m ℕ.+ suc n)
+      ≈⟨ Σ<-+ f (suc m) (suc n) ⟩
+    Σ< f (suc m) ∙ Σ< (λ k → f (1 ℕ.+ m ℕ.+ k)) (suc n)
+      ∎
+
+  Σ<-push-suc : ∀ f n → Σ< f (suc n) ≈ f 0 ∙ Σ< (λ k → f (suc k)) n
   Σ<-push-suc f n = begin
-    Σ< f (suc n)                    ≈⟨ Σ<-congˡ f $ ℕₚ.+-comm 1 n ⟩
-    Σ< f (n ℕ.+ 1)                    ≈⟨ Σ<-+ f n 1 ⟩
-    Σ< (λ k → f (suc k)) n ∙ Σ< f 1 ≈⟨ ∙-congˡ $ Σ<[f,1]≈f[0] f ⟩
-    Σ< (λ k → f (suc k)) n ∙ f 0    ∎
+    Σ< f (suc n)                    ≈⟨ Σ<-+ f 1 n ⟩
+    Σ< f 1 ∙ Σ< (λ k → f (suc k)) n ≈⟨ ∙-congʳ $ Σ<[f,1]≈f[0] f ⟩
+    f 0 ∙ Σ< (λ k → f (suc k)) n    ∎
+
+  Σ≤-push-suc : ∀ f n → Σ≤ f (suc n) ≈ f 0 ∙ Σ≤ (λ k → f (suc k)) n
+  Σ≤-push-suc f n = Σ<-push-suc f (suc n)
+
+  Σ<range[f,0,n]≈Σ<[f,n] : ∀ f n → Σ<range f 0 n ≈ Σ< f n
+  Σ<range[f,0,n]≈Σ<[f,n] f n = refl
+
+  Σ≤range[f,0,n]≈Σ≤[f,n] : ∀ f n → Σ≤range f 0 n ≈ Σ≤ f n
+  Σ≤range[f,0,n]≈Σ≤[f,n] f n = refl
+
+  Σ<range[f,m,m+n+o]≈Σ<range[f,m,m+n]+Σ<range[m+n,m+n+o] : ∀ f m n o →
+    Σ<range f m (m ℕ.+ n ℕ.+ o) ≈
+    Σ<range f m (m ℕ.+ n) ∙ Σ<range f (m ℕ.+ n) (m ℕ.+ n ℕ.+ o)
+  Σ<range[f,m,m+n+o]≈Σ<range[f,m,m+n]+Σ<range[m+n,m+n+o] f m n o = begin
+    Σ< f′ (m+n+o ∸ m)
+      ≈⟨ Σ<-congˡ f′ (≡.cong (_∸ m) $ ℕₚ.+-assoc m n o) ⟩
+    Σ< f′ (m ℕ.+ n+o ∸ m)
+      ≈⟨ Σ<-congˡ f′ (ℕₚ.m+n∸m≡n m n+o) ⟩
+    Σ< f′ n+o
+      ≈⟨ Σ<-+ f′ n o ⟩
+    Σ< f′ n ∙ Σ< (λ k → f (m ℕ.+ (n ℕ.+ k))) o
+      ≈⟨ ∙-cong (sym $ Σ<-congˡ f′ $ ℕₚ.m+n∸m≡n m n)
+                (sym $ Σ<-cong (λ x → reflexive (≡.cong f (ℕₚ.+-assoc m n x)))
+                               (ℕₚ.m+n∸m≡n m+n o)) ⟩
+    Σ< f′ (m+n ∸ m) ∙ Σ< (λ k → f (m+n ℕ.+ k)) (m+n+o ∸ m+n)
+      ∎
+    where
+    m+n = m ℕ.+ n
+    n+o = n ℕ.+ o
+    m+n+o = m+n ℕ.+ o
+    f′ = λ k → f (m ℕ.+ k)
+
+  Σ<range[f,m,n]≈Σ<range[f,m,o]+Σ<range[f,o,n] : ∀ f {m n o} →
+    m ≤ o → o ≤ n →
+    Σ<range f m n ≈ Σ<range f m o ∙ Σ<range f o n
+  Σ<range[f,m,n]≈Σ<range[f,m,o]+Σ<range[f,o,n] f {m} {n} {o} m≤o o≤n = begin
+    Σ<range f m n
+      ≈⟨ reflexive (≡.cong (Σ<range f m) n≡m+p+q) ⟩
+    Σ<range f m m+p+q
+      ≈⟨ Σ<range[f,m,m+n+o]≈Σ<range[f,m,m+n]+Σ<range[m+n,m+n+o] f m p q ⟩
+    Σ<range f m m+p ∙ Σ<range f m+p m+p+q
+      ≈⟨ sym $ ∙-cong (Σ<range-cong₃ f m o≡m+p) (Σ<range-cong₂₃ f o≡m+p n≡m+p+q) ⟩
+    Σ<range f m o ∙ Σ<range f o n
+      ∎
+    where
+    p = o ∸ m
+    q = n ∸ o
+    m+p = m ℕ.+ p
+    m+p+q = m+p ℕ.+ q
+    o≡m+p : o ≡ m+p
+    o≡m+p = ≡.sym $ ℕₚ.m+[n∸m]≡n m≤o
+    n≡m+p+q : n ≡ m+p+q
+    n≡m+p+q = ≡.sym ( ≡R.begin
+      m ℕ.+ p ℕ.+ q ≡R.≡⟨ ≡.cong (ℕ._+ q) $ ≡.sym o≡m+p ⟩
+      o ℕ.+ (n ∸ o) ≡R.≡⟨ ℕₚ.m+[n∸m]≡n o≤n ⟩
+      n             ≡R.∎ )
+      where module ≡R = ≡.≡-Reasoning
 
 module CommutativeMonoidSummationProperties
   {c e} (CM : CommutativeMonoid c e) where
@@ -101,9 +193,20 @@ module CommutativeMonoidSummationProperties
   open CommutativeMonoidOperations CM
   open SetoidReasoning setoid
 
+  private
+    n×x+x≈x+n×x : ∀ n x → n × x ∙ x ≈ x ∙ n × x
+    n×x+x≈x+n×x zero    x = trans (identityˡ x) (sym $ identityʳ x)
+    n×x+x≈x+n×x (suc n) x = begin
+      x ∙ n × x ∙ x   ≈⟨ assoc x (n × x) x ⟩
+      x ∙ (n × x ∙ x) ≈⟨ ∙-congˡ $ n×x+x≈x+n×x n x ⟩
+      x ∙ (x ∙ n × x) ∎
+
   Σ<-const : ∀ x n → Σ< (const x) n ≈ n × x
   Σ<-const x zero    = refl
-  Σ<-const x (suc n) = ∙-congˡ (Σ<-const x n)
+  Σ<-const x (suc n) = begin
+    Σ< (const x) n ∙ x ≈⟨ ∙-congʳ $ Σ<-const x n ⟩
+    n × x ∙ x          ≈⟨ n×x+x≈x+n×x n x ⟩
+    x ∙ n × x          ∎
 
   Σ≤-const : ∀ x n → Σ≤ (const x) n ≈ suc n × x
   Σ≤-const x n = Σ<-const x (suc n)
@@ -121,9 +224,9 @@ module CommutativeMonoidSummationProperties
   Σ<-distrib-+ : ∀ f g n → Σ< (λ k → f k ∙ g k) n ≈ Σ< f n ∙ Σ< g n
   Σ<-distrib-+ f g zero    = sym $ identityʳ ε
   Σ<-distrib-+ f g (suc n) = begin
-    f n ∙ g n ∙ Σ< (λ k → f k ∙ g k) n ≈⟨ ∙-congˡ $ Σ<-distrib-+ f g n ⟩
-    f n ∙ g n ∙ (Σ< f n ∙ Σ< g n)      ≈⟨ lemma (f n) (g n) (Σ< f n) (Σ< g n) ⟩
-    (f n ∙ Σ< f n) ∙ (g n ∙ Σ< g n)    ∎
+    Σ< (λ k → f k ∙ g k) n ∙ (f n ∙ g n) ≈⟨ ∙-congʳ $ Σ<-distrib-+ f g n ⟩
+    (Σ< f n ∙ Σ< g n) ∙ (f n ∙ g n)      ≈⟨ lemma (Σ< f n) (Σ< g n) (f n) (g n) ⟩
+    (Σ< f n ∙ f n) ∙ (Σ< g n ∙ g n)      ∎
 
   Σ≤-distrib-+ : ∀ f g n → Σ≤ (λ k → f k ∙ g k) n ≈ Σ≤ f n ∙ Σ≤ g n
   Σ≤-distrib-+ f g n = Σ<-distrib-+ f g (suc n)
@@ -133,13 +236,13 @@ module CommutativeMonoidSummationProperties
   Σ<-comm f zero    n = sym $ Σ<-0 n
   Σ<-comm f (suc m) n = begin
     Σ< (λ i → Σ< (f i) n) (suc m)
-     ≈⟨ refl ⟩
-    Σ< (f m) n ∙ Σ< (λ i → Σ< (f i) n) m
-      ≈⟨ ∙-congˡ $ Σ<-comm f m n ⟩
-    Σ< (λ j → f m j) n ∙ Σ< (λ j → Σ< (λ i → f i j) m) n
-      ≈⟨ sym $ Σ<-distrib-+ (λ j → f m j) (λ j → Σ< (λ i → f i j) m) n ⟩
-    Σ< (λ j → f m j ∙ Σ< (λ i → f i j) m) n
-      ≈⟨ refl ⟩
+     ≡⟨⟩
+    Σ< (λ i → Σ< (f i) n) m ∙ Σ< (f m) n
+      ≈⟨ ∙-congʳ $ Σ<-comm f m n ⟩
+    Σ< (λ j → Σ< (λ i → f i j) m) n ∙ Σ< (λ j → f m j) n
+      ≈⟨ sym $ Σ<-distrib-+ (λ j → Σ< (λ i → f i j) m) (λ j → f m j) n ⟩
+    Σ< (λ j → Σ< (λ i → f i j) m ∙ f m j) n
+      ≡⟨⟩
     Σ< (λ j → Σ< (λ i → f i j) (suc m)) n
       ∎
 
@@ -156,9 +259,9 @@ module SemiringSummationProperties {c e} (SR : Semiring c e) where
   Σ<-*-commute : ∀ f n c → Σ< (λ k → c * f k) n ≈ c * Σ< f n
   Σ<-*-commute f ℕ.zero c  = sym $ zeroʳ c
   Σ<-*-commute f (suc n) c = begin
-    c * f n + Σ< (λ k → c * f k) n ≈⟨ +-congˡ $ Σ<-*-commute f n c ⟩
-    c * f n + c * Σ< f n           ≈⟨ sym $ distribˡ c (f n) (Σ< f n) ⟩
-    c * (f n + Σ< f n)             ∎
+    Σ< (λ k → c * f k) n + c * f n ≈⟨ +-congʳ $ Σ<-*-commute f n c ⟩
+    c * Σ< f n + c * f n           ≈⟨ sym $ distribˡ c (Σ< f n) (f n) ⟩
+    c * (Σ< f n + f n)             ∎
 
   Σ≤-*-commute : ∀ f n c → Σ≤ (λ k → c * f k) n ≈ c * Σ≤ f n
   Σ≤-*-commute f n c = Σ<-*-commute f (suc n) c

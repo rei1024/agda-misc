@@ -12,7 +12,7 @@ module MonoidSummation {c e} (M : Monoid c e) where
   -- Σ< f n = Σₖ₌₀ⁿ⁻¹[f k]
   Σ< : (ℕ → A) → ℕ → A
   Σ< f 0       = ε
-  Σ< f (suc n) = f n ∙ Σ< f n
+  Σ< f (suc n) = Σ< f n ∙ f n
 
   Σ≤ : (ℕ → A) → ℕ → A
   Σ≤ f n = Σ< f (suc n)
