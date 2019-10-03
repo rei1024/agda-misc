@@ -143,7 +143,7 @@ private
     go (suc m) 0       = P[m,0] m (go m 1)
     go (suc m) (suc n) = P[m,n] m n (go (suc m) n) (go m)
 
--- Ackermann function can be expressed in terms of Hoperation.
+-- Ackermann function can be expressed in terms of hyperoperation.
 -- 3 + Ack(m, n) = Hₙ(2, 3 + n)
 ack-H : ∀ m n → 3 + ack m n ≡ H m 2 (3 + n)
 ack-H = ack-H-helper P (λ _ → refl) P[m,0] P[m,n]
