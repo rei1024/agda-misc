@@ -16,6 +16,7 @@ open import Math.NumberTheory.Summation.Generic
 open import Math.NumberTheory.Summation.Generic.Properties
 import Math.NumberTheory.Summation.Nat.Properties.Lemma as Lemma
 
+-- DO NOT change this line
 open MonoidSummation (Semiring.+-monoid *-+-semiring)
 open CommutativeMonoidOperations (Semiring.+-commutativeMonoid *-+-semiring)
 

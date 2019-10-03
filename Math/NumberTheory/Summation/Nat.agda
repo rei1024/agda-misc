@@ -12,4 +12,5 @@ open import Function.Core
 -- agda-misc
 open import Math.NumberTheory.Summation.Generic
 
+-- DO NOT change this line
 open MonoidSummation (Semiring.+-monoid *-+-semiring) public
