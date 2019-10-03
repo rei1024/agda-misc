@@ -18,6 +18,8 @@ import Math.NumberTheory.Summation.Nat.Properties.Lemma as Lemma
 
 open MonoidSummation (Semiring.+-monoid *-+-semiring)
 open CommutativeMonoidOperations (Semiring.+-commutativeMonoid *-+-semiring)
+
+-- TODO rename _≈_ to _≡_
 open SemiringSummationProperties *-+-semiring public
   renaming
   ( Σ<[f,1]≈f[0] to Σ<[f,1]≡f[0]
@@ -28,8 +30,12 @@ open SemiringSummationProperties *-+-semiring public
       Σ<range[f,m,m+n+o]≡Σ<range[f,m,m+n]+Σ<range[m+n,m+n+o]
   ; Σ<range[f,m,n]≈Σ<range[f,m,o]+Σ<range[f,o,n] to
       Σ<range[f,m,n]≡Σ<range[f,m,o]+Σ<range[f,o,n]
+  ; Σ<range[f,m,n]≈Σ<range[i→f[i∸o],o+m,o+n] to
+      Σ<range[f,m,n]≡Σ<range[i→f[i∸o],o+m,o+n]
   ; Σ<-const to Σ<-const-×
   ; Σ≤-const to Σ≤-const-×
+  ; Σ<range-const to Σ<range-const-×
+  ; Σ≤range-const to Σ≤range-const-×
   )
 
 -- TODO move somewhere
@@ -47,6 +53,12 @@ private
 
 Σ≤-const : ∀ m n → Σ≤ (λ _ → m) n ≡ suc n * m
 Σ≤-const m n = Σ<-const m (suc n)
+
+Σ<range-const : ∀ x m n → Σ<range (const x) m n ≡ (n ∸ m) * x
+Σ<range-const x m n = trans (Σ<range-const-× x m n) (m×n≡m*n (n ∸ m) x)
+
+Σ≤range-const : ∀ x m n → Σ≤range (const x) m n ≡ (suc n ∸ m) * x
+Σ≤range-const x m n = Σ<range-const x m (suc n)
 
 2*Σ≤[id,n]≡n*[1+n] : ∀ n → 2 * Σ≤ id n ≡ n * (suc n)
 2*Σ≤[id,n]≡n*[1+n] zero    = refl
