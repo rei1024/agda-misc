@@ -6,6 +6,7 @@ module Math.NumberTheory.Summation.Generic.Properties where
 open import Algebra
 import Algebra.Operations.CommutativeMonoid as CommutativeMonoidOperations
 open import Data.Nat as ℕ hiding (_+_; _*_)
+import Data.Fin as Fin
 import Data.Nat.Properties as ℕₚ
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
@@ -90,6 +91,20 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
 
   Σ<range[f,n,n]≈0 : ∀ f n → Σ<range f n n ≈ ε
   Σ<range[f,n,n]≈0 f n = n≤m⇒Σ<range[f,m,n]≈0 f {n} {n} ℕₚ.≤-refl
+
+  n<m⇒Σ≤range[f,m,n]≈0 : ∀ f {m n} → n < m → Σ≤range f m n ≈ ε
+  n<m⇒Σ≤range[f,m,n]≈0 f {m} {n} n<m = n≤m⇒Σ<range[f,m,n]≈0 f n<m
+
+  Σ≤range[f,n,n]≈f[n] : ∀ f n → Σ≤range f n n ≈ f n
+  Σ≤range[f,n,n]≈f[n] f n = begin
+    Σ< (λ k → f (n ℕ.+ k)) (suc n ∸ n)
+      ≈⟨ Σ<-congˡ (λ k → f (n ℕ.+ k)) $ ℕₚ.m+n∸n≡m 1 n ⟩
+    Σ< (λ k → f (n ℕ.+ k)) 1
+      ≈⟨ Σ<[f,1]≈f[0] (λ k → f (n ℕ.+ k)) ⟩
+    f (n ℕ.+ 0)
+      ≈⟨ reflexive (≡.cong f (ℕₚ.+-identityʳ n)) ⟩
+    f n
+      ∎
 
   Σ<-+ : ∀ f m n → Σ< f (m ℕ.+ n) ≈ Σ< f m ∙ Σ< (λ k → f (m ℕ.+ k)) n
   Σ<-+ f m zero    = begin
@@ -211,6 +226,12 @@ module CommutativeMonoidSummationProperties
   Σ≤-const : ∀ x n → Σ≤ (const x) n ≈ suc n × x
   Σ≤-const x n = Σ<-const x (suc n)
 
+  Σ<range-const : ∀ x m n → Σ<range (const x) m n ≈ (n ∸ m) × x
+  Σ<range-const x m n = Σ<-const x (n ∸ m)
+
+  Σ≤range-const : ∀ x m n → Σ≤range (const x) m n ≈ (suc n ∸ m) × x
+  Σ≤range-const x m n = Σ<range-const x m (suc n)
+
   private
     lemma : ∀ a b c d → a ∙ b ∙ (c ∙ d) ≈ a ∙ c ∙ (b ∙ d)
     lemma a b c d = begin
@@ -231,6 +252,15 @@ module CommutativeMonoidSummationProperties
   Σ≤-distrib-+ : ∀ f g n → Σ≤ (λ k → f k ∙ g k) n ≈ Σ≤ f n ∙ Σ≤ g n
   Σ≤-distrib-+ f g n = Σ<-distrib-+ f g (suc n)
 
+  Σ<range-distrib-+ : ∀ f g m n →
+    Σ<range (λ k → f k ∙ g k) m n ≈ Σ<range f m n ∙ Σ<range g m n
+  Σ<range-distrib-+ f g m n =
+    Σ<-distrib-+ (λ k → f (m ℕ.+ k)) (λ k → g (m ℕ.+ k)) (n ∸ m)
+
+  Σ≤range-distrib-+ : ∀ f g m n →
+    Σ≤range (λ k → f k ∙ g k) m n ≈ Σ≤range f m n ∙ Σ≤range g m n
+  Σ≤range-distrib-+ f g m n = Σ<range-distrib-+ f g m (suc n)
+
   Σ<-comm : ∀ (f : ℕ → ℕ → Carrier) m n →
     Σ< (λ i → Σ< (λ j → f i j) n) m ≈ Σ< (λ j → Σ< (λ i → f i j) m) n
   Σ<-comm f zero    n = sym $ Σ<-0 n
@@ -250,6 +280,27 @@ module CommutativeMonoidSummationProperties
     Σ≤ (λ i → Σ≤ (λ j → f i j) n) m ≈ Σ≤ (λ j → Σ≤ (λ i → f i j) m) n
   Σ≤-comm f m n = Σ<-comm f (suc m) (suc n)
 
+  Σ<range-comm : ∀ (f : ℕ → ℕ → Carrier) m n o p →
+    Σ<range (λ i → Σ<range (λ j → f i j) o p) m n ≈
+    Σ<range (λ j → Σ<range (λ i → f i j) m n) o p
+  Σ<range-comm f m n o p =
+    Σ<-comm (λ i j → f (m ℕ.+ i) (o ℕ.+ j)) (n ∸ m) (p ∸ o)
+
+  Σ≤range-comm : ∀ (f : ℕ → ℕ → Carrier) m n o p →
+    Σ≤range (λ i → Σ≤range (λ j → f i j) o p) m n ≈
+    Σ≤range (λ j → Σ≤range (λ i → f i j) m n) o p
+  Σ≤range-comm f m n o p = Σ<range-comm f m (suc n) o (suc p)
+
+  Σ<-sumₜ-syntax : ∀ f n → Σ< f n ≈ sumₜ-syntax n (λ i → f (Fin.toℕ i))
+  Σ<-sumₜ-syntax f 0       = refl
+  Σ<-sumₜ-syntax f (suc n) = begin
+    Σ< f (suc n)
+      ≈⟨ Σ<-push-suc f n ⟩
+    f 0 ∙ Σ< (λ k → f (suc k)) n
+      ≈⟨ ∙-congˡ $ Σ<-sumₜ-syntax (λ k → f (suc k)) n ⟩
+    f 0 ∙ sumₜ-syntax n (λ i → f (Fin.toℕ (Fin.suc i)))
+      ∎
+
 module SemiringSummationProperties {c e} (SR : Semiring c e) where
   open Semiring SR
   open MonoidSummation +-monoid
@@ -265,3 +316,13 @@ module SemiringSummationProperties {c e} (SR : Semiring c e) where
 
   Σ≤-*-commute : ∀ f n c → Σ≤ (λ k → c * f k) n ≈ c * Σ≤ f n
   Σ≤-*-commute f n c = Σ<-*-commute f (suc n) c
+
+  Σ<range-*-commute : ∀ f m n c →
+    Σ<range (λ k → c * f k) m n ≈ c * Σ<range f m n
+  Σ<range-*-commute f m n c = Σ<-*-commute (λ k → f (m ℕ.+ k)) (n ∸ m) c
+
+  Σ≤range-*-commute : ∀ f m n c →
+    Σ≤range (λ k → c * f k) m n ≈ c * Σ≤range f m n
+  Σ≤range-*-commute f m n c = Σ<range-*-commute f m (suc n) c
+
+module GroupSummationProperties {c e} (G : Group c e) where

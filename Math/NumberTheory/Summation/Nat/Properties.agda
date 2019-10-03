@@ -3,6 +3,8 @@
 module Math.NumberTheory.Summation.Nat.Properties where
 
 -- agda-stdlib
+open import Algebra
+import Algebra.Operations.CommutativeMonoid as CommutativeMonoidOperations
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Nat.Solver
@@ -14,8 +16,8 @@ open import Math.NumberTheory.Summation.Generic
 open import Math.NumberTheory.Summation.Generic.Properties
 import Math.NumberTheory.Summation.Nat.Properties.Lemma as Lemma
 
-open MonoidSummation +-0-monoid
-
+open MonoidSummation (Semiring.+-monoid *-+-semiring)
+open CommutativeMonoidOperations (Semiring.+-commutativeMonoid *-+-semiring)
 open SemiringSummationProperties *-+-semiring public
   renaming
   ( Σ<[f,1]≈f[0] to Σ<[f,1]≡f[0]
@@ -30,16 +32,20 @@ open SemiringSummationProperties *-+-semiring public
   ; Σ≤-const to Σ≤-const-×
   )
 
-Σ<-const : ∀ m n → Σ< (λ _ → m) n ≡ m * n
-Σ<-const m zero    = sym (*-zeroʳ m)
-Σ<-const m (suc n) = begin-equality
-  Σ< (λ _ → m) n + m ≡⟨ cong (_+ m) $ Σ<-const m n ⟩
-  (m * n) + m        ≡⟨ +-comm (m * n) m ⟩
-  m + (m * n)        ≡⟨ sym $ *-suc m n ⟩
-  m * suc n          ∎
+-- TODO move somewhere
+private
+  m×n≡m*n : ∀ m n → m × n ≡ m * n
+  m×n≡m*n zero    n = refl
+  m×n≡m*n (suc m) n = cong (n +_) $ m×n≡m*n m n
+
+Σ<-const : ∀ m n → Σ< (λ _ → m) n ≡ n * m
+Σ<-const m n = begin-equality
+  Σ< (λ _ → m) n ≡⟨ Σ<-const-× m n ⟩
+  n × m          ≡⟨ m×n≡m*n n m ⟩
+  n * m          ∎
   where open ≤-Reasoning
 
-Σ≤-const : ∀ m n → Σ≤ (λ _ → m) n ≡ m * suc n
+Σ≤-const : ∀ m n → Σ≤ (λ _ → m) n ≡ suc n * m
 Σ≤-const m n = Σ<-const m (suc n)
 
 2*Σ≤[id,n]≡n*[1+n] : ∀ n → 2 * Σ≤ id n ≡ n * (suc n)
