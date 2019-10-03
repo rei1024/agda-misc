@@ -200,6 +200,18 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
       n             ≡R.∎ )
       where module ≡R = ≡.≡-Reasoning
 
+  Σ<range[f,m,n]≈Σ<range[i→f[i∸o],o+m,o+n] : ∀ f m n o →
+    Σ<range f m n ≈ Σ<range (λ i → f (i ∸ o)) (o ℕ.+ m) (o ℕ.+ n)
+  Σ<range[f,m,n]≈Σ<range[i→f[i∸o],o+m,o+n] f m n o = begin
+    Σ< (λ k → f (m ℕ.+ k)) (n ∸ m)
+      ≈⟨ Σ<-cong (λ x → reflexive $ ≡.cong f $ ≡.sym $ (≡R.begin
+          o ℕ.+ m ℕ.+ x ∸ o   ≡R.≡⟨ ≡.cong (_∸ o) $ ℕₚ.+-assoc o m x ⟩
+          o ℕ.+ (m ℕ.+ x) ∸ o ≡R.≡⟨ ℕₚ.m+n∸m≡n o (m ℕ.+ x) ⟩
+          m ℕ.+ x             ≡R.∎ ))
+                 (≡.sym $ ℕₚ.[m+n]∸[m+o]≡n∸o o n m) ⟩
+    Σ< (λ k → f ((o ℕ.+ m ℕ.+ k) ∸ o)) ((o ℕ.+ n) ∸ (o ℕ.+ m)) ∎
+    where module ≡R = ≡.≡-Reasoning
+
 module CommutativeMonoidSummationProperties
   {c e} (CM : CommutativeMonoid c e) where
   open CommutativeMonoid CM
