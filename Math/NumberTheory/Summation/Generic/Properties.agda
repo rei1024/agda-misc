@@ -212,6 +212,14 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
     Σ< (λ k → f ((o ℕ.+ m ℕ.+ k) ∸ o)) ((o ℕ.+ n) ∸ (o ℕ.+ m)) ∎
     where module ≡R = ≡.≡-Reasoning
 
+  Σ<-congʳ-with-< : ∀ {f g} n → (∀ i → i < n → f i ≈ g i) → Σ< f n ≈ Σ< g n
+  Σ<-congʳ-with-< {f} {g}  0      f≈g = refl
+  Σ<-congʳ-with-< {f} {g} (suc n) f≈g =
+    ∙-cong (Σ<-congʳ-with-< n (λ i i<n → f≈g i (ℕₚ.≤-step i<n))) (f≈g n ℕₚ.≤-refl)
+
+  Σ≤-congʳ-with-≤ : ∀ {f g} n → (∀ i → i ≤ n → f i ≈ g i) → Σ≤ f n ≈ Σ≤ g n
+  Σ≤-congʳ-with-≤ n f≈g = Σ<-congʳ-with-< (suc n) λ i 1+i≤1+n → f≈g i (ℕₚ.≤-pred 1+i≤1+n)
+
 module CommutativeMonoidSummationProperties
   {c e} (CM : CommutativeMonoid c e) where
   open CommutativeMonoid CM
@@ -312,6 +320,26 @@ module CommutativeMonoidSummationProperties
       ≈⟨ ∙-congˡ $ Σ<-sumₜ-syntax (λ k → f (suc k)) n ⟩
     f 0 ∙ sumₜ-syntax n (λ i → f (Fin.toℕ (Fin.suc i)))
       ∎
+
+  Σ<-reverse : ∀ f n → Σ< f n ≈ Σ< (λ i → f (n ∸ suc i)) n
+  Σ<-reverse f 0       = refl
+  Σ<-reverse f (suc n) = begin
+    Σ< f (suc n) ≈⟨ Σ<-push-suc f n ⟩
+    f 0 ∙ Σ< (λ i → f (suc i)) n
+      ≈⟨ comm (f 0) (Σ< (λ i → f (suc i)) n) ⟩
+    Σ< (λ i → f (suc i)) n ∙ f 0
+      ≈⟨ ∙-congʳ $ Σ<-reverse (λ i → f (suc i)) n ⟩
+    Σ< (λ i → f (suc (n ∸ suc i))) n ∙ f 0
+      ≈⟨ ∙-congʳ $ Σ<-congʳ-with-< n $ (λ i i<n → reflexive $ ≡.cong f $ ≡.sym $ ℕₚ.+-∸-assoc 1 i<n) ⟩
+    Σ< (λ i → f (suc n ∸ suc i)) n ∙ f 0
+      ≈⟨ ∙-congˡ $ reflexive $ ≡.cong f $ ≡.sym $ ℕₚ.n∸n≡0 (suc n) ⟩
+    Σ< (λ i → f (suc n ∸ suc i)) n ∙ f (suc n ∸ suc n)
+      ≈⟨ refl ⟩
+    Σ< (λ i → f (suc n ∸ suc i)) (suc n)
+      ∎
+
+  Σ≤-reverse : ∀ f n → Σ≤ f n ≈ Σ≤ (λ i → f (n ∸ i)) n
+  Σ≤-reverse f n = Σ<-reverse f (suc n)
 
 module SemiringSummationProperties {c e} (SR : Semiring c e) where
   open Semiring SR

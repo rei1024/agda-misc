@@ -58,5 +58,7 @@ module CommutativeMonoidProductProperties {c e} (CM : CommutativeMonoid c e) =
   ; Σ<range-comm to Π<range-comm
   ; Σ≤range-comm to Π≤range-comm
   ; Σ<-sumₜ-syntax to Π<-sumₜ-syntax
+  ; Σ<-reverse to Π<-reverse
+  ; Σ≤-reverse to Π≤-reverse
   )
   using ()
