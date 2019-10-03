@@ -1,5 +1,7 @@
 -- https://github.com/idris-lang/Idris-dev/blob/4e704011fb805fcb861cc9a1bd68a2e727cefdde/libs/contrib/Data/Nat/Fib.idr
 {-# OPTIONS --without-K --safe #-}
+
+-- agda-stdlib
 open import Relation.Binary.PropositionalEquality
 open import Algebra.FunctionProperties
 
@@ -9,6 +11,7 @@ module Math.NumberTheory.Fibonacci.Generic
   (v0 : A) (v1 : A)
   where
 
+-- agda-stdlib
 open import Data.Nat
 open import Function
 
