@@ -115,14 +115,19 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
   ... | no m≰n = trans (n≤m⇒Σ<range[f,m,n]≈0 f n≤m) (sym $ n≤m⇒Σ<range[f,m,n]≈0 g n≤m)
     where n≤m = ℕₚ.<⇒≤ $ ℕₚ.≰⇒> m≰n
 
+  Σ≤range-cong₁-with-≤ : ∀ {f g} m n →
+    (∀ i → m ≤ i → i ≤ n → f i ≈ g i) → Σ≤range f m n ≈ Σ≤range g m n
+  Σ≤range-cong₁-with-≤ {f} {g} m n f≈g = Σ<range-cong₁-with-< m (suc n)
+    λ i i≤n 1+i≤1+n → f≈g i i≤n (ℕₚ.≤-pred 1+i≤1+n)
+
   Σ<range[f,n,n]≈0 : ∀ f n → Σ<range f n n ≈ ε
   Σ<range[f,n,n]≈0 f n = n≤m⇒Σ<range[f,m,n]≈0 f {n} {n} ℕₚ.≤-refl
 
   n<m⇒Σ≤range[f,m,n]≈0 : ∀ f {m n} → n < m → Σ≤range f m n ≈ ε
   n<m⇒Σ≤range[f,m,n]≈0 f {m} {n} n<m = n≤m⇒Σ<range[f,m,n]≈0 f n<m
 
-  Σ≤range[f,n,n]≈f[n] : ∀ f n → Σ≤range f n n ≈ f n
-  Σ≤range[f,n,n]≈f[n] f n = begin
+  Σ<range[f,n,1+n]≈f[n] : ∀ f n → Σ<range f n (suc n) ≈ f n
+  Σ<range[f,n,1+n]≈f[n] f n = begin
     Σ< (λ k → f (n ℕ.+ k)) (suc n ∸ n)
       ≈⟨ Σ<-congˡ (λ k → f (n ℕ.+ k)) $ ℕₚ.m+n∸n≡m 1 n ⟩
     Σ< (λ k → f (n ℕ.+ k)) 1
@@ -131,6 +136,9 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
       ≈⟨ reflexive (≡.cong f (ℕₚ.+-identityʳ n)) ⟩
     f n
       ∎
+
+  Σ≤range[f,n,n]≈f[n] : ∀ f n → Σ≤range f n n ≈ f n
+  Σ≤range[f,n,n]≈f[n] = Σ<range[f,n,1+n]≈f[n]
 
   Σ<-+ : ∀ f m n → Σ< f (m ℕ.+ n) ≈ Σ< f m ∙ Σ< (λ k → f (m ℕ.+ k)) n
   Σ<-+ f m zero    = begin
@@ -236,7 +244,8 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
           o ℕ.+ (m ℕ.+ x) ∸ o ≡R.≡⟨ ℕₚ.m+n∸m≡n o (m ℕ.+ x) ⟩
           m ℕ.+ x             ≡R.∎ ))
                  (≡.sym $ ℕₚ.[m+n]∸[m+o]≡n∸o o n m) ⟩
-    Σ< (λ k → f ((o ℕ.+ m ℕ.+ k) ∸ o)) ((o ℕ.+ n) ∸ (o ℕ.+ m)) ∎
+    Σ< (λ k → f ((o ℕ.+ m ℕ.+ k) ∸ o)) ((o ℕ.+ n) ∸ (o ℕ.+ m))
+      ∎
     where module ≡R = ≡.≡-Reasoning
 
 module CommutativeMonoidSummationProperties
@@ -383,5 +392,24 @@ module SemiringSummationProperties {c e} (SR : Semiring c e) where
   Σ≤range-*-commute : ∀ f m n c →
     Σ≤range (λ k → c * f k) m n ≈ c * Σ≤range f m n
   Σ≤range-*-commute f m n c = Σ<range-*-commute f m (suc n) c
+
+  Σ<-distrib-* : ∀ f g m n →
+    Σ< f m * Σ< g n ≈ Σ< (λ i → Σ< (λ j → f i * g j) n) m
+  Σ<-distrib-* f g 0       n = zeroˡ (Σ< g n)
+  Σ<-distrib-* f g (suc m) n = begin
+    Σ< f (suc m) * Σ< g n
+      ≡⟨⟩
+    (Σ< f m + f m) * Σ< g n
+      ≈⟨ distribʳ (Σ< g n) (Σ< f m) (f m) ⟩
+    Σ< f m * Σ< g n + f m * Σ< g n
+      ≈⟨ +-cong (Σ<-distrib-* f g m n) (sym $ Σ<-*-commute g n (f m)) ⟩
+    Σ< (λ i → Σ< (λ j → f i * g j) n) m + Σ< (λ j → f m * g j) n
+      ≡⟨⟩
+    Σ< (λ i → Σ< (λ j → f i * g j) n) (suc m)
+      ∎
+
+  Σ≤-distrib-* : ∀ f g m n →
+    Σ≤ f m * Σ≤ g n ≈ Σ≤ (λ i → Σ≤ (λ j → f i * g j) n) m
+  Σ≤-distrib-* f g m n = Σ<-distrib-* f g (suc m) (suc n)
 
 module GroupSummationProperties {c e} (G : Group c e) where
