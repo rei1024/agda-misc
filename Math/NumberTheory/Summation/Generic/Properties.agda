@@ -8,6 +8,7 @@ import Algebra.Operations.CommutativeMonoid as CommutativeMonoidOperations
 open import Data.Nat as ℕ hiding (_+_; _*_)
 import Data.Fin as Fin
 import Data.Nat.Properties as ℕₚ
+open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 open import Function.Core
@@ -68,6 +69,14 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
     (∀ x → f x ≈ g x) → m ≡ n → o ≡ p → Σ≤range f m o ≈ Σ≤range g n p
   Σ≤range-cong f≈g m≡n o≡p = Σ<range-cong f≈g m≡n (≡.cong suc o≡p)
 
+  Σ<-congʳ-with-< : ∀ {f g} n → (∀ i → i < n → f i ≈ g i) → Σ< f n ≈ Σ< g n
+  Σ<-congʳ-with-< {f} {g}  0      f≈g = refl
+  Σ<-congʳ-with-< {f} {g} (suc n) f≈g =
+    ∙-cong (Σ<-congʳ-with-< n (λ i i<n → f≈g i (ℕₚ.≤-step i<n))) (f≈g n ℕₚ.≤-refl)
+
+  Σ≤-congʳ-with-≤ : ∀ {f g} n → (∀ i → i ≤ n → f i ≈ g i) → Σ≤ f n ≈ Σ≤ g n
+  Σ≤-congʳ-with-≤ n f≈g = Σ<-congʳ-with-< (suc n) λ i 1+i≤1+n → f≈g i (ℕₚ.≤-pred 1+i≤1+n)
+
   Σ<-0 : ∀ n → Σ< (λ _ → ε) n ≈ ε
   Σ<-0 zero    = refl
   Σ<-0 (suc n) = begin
@@ -88,6 +97,23 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
   n≤m⇒Σ<range[f,m,n]≈0 f {m} {n} n≤m = begin
     Σ< (λ k → f (m ℕ.+ k)) (n ∸ m) ≈⟨ Σ<-congˡ (λ k → f (m ℕ.+ k)) $ ℕₚ.m≤n⇒m∸n≡0 n≤m ⟩
     Σ< (λ k → f (m ℕ.+ k)) 0       ∎
+
+  Σ<range-cong₁-with-< : ∀ {f g} m n →
+    (∀ i → m ≤ i → i < n → f i ≈ g i) → Σ<range f m n ≈ Σ<range g m n
+  Σ<range-cong₁-with-< {f} {g} m n f≈g with m ℕₚ.≤? n
+  ... | yes m≤n =
+    Σ<-congʳ-with-< {λ i → f (m ℕ.+ i)} {λ i → g (m ℕ.+ i)} (n ∸ m)
+      λ i i<n∸m → f≈g (m ℕ.+ i) (ℕₚ.m≤m+n m i) (≤R.begin
+        1 ℕ.+ (m ℕ.+ i) ≤R.≡⟨ ≡.cong (1 ℕ.+_) $ ℕₚ.+-comm m i ⟩
+        suc i ℕ.+ m     ≤R.≤⟨ ℕₚ.+-monoˡ-≤ m i<n∸m ⟩
+        o ℕ.+ m         ≤R.≡⟨ ≡.sym n≡o+m ⟩
+        n               ≤R.∎ )
+      where o = n ∸ m
+            n≡o+m : n ≡ o ℕ.+ m
+            n≡o+m = ≡.sym $ ℕₚ.m∸n+n≡m m≤n
+            module ≤R = ℕₚ.≤-Reasoning
+  ... | no m≰n = trans (n≤m⇒Σ<range[f,m,n]≈0 f n≤m) (sym $ n≤m⇒Σ<range[f,m,n]≈0 g n≤m)
+    where n≤m = ℕₚ.<⇒≤ $ ℕₚ.≰⇒> m≰n
 
   Σ<range[f,n,n]≈0 : ∀ f n → Σ<range f n n ≈ ε
   Σ<range[f,n,n]≈0 f n = n≤m⇒Σ<range[f,m,n]≈0 f {n} {n} ℕₚ.≤-refl
@@ -200,6 +226,7 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
       n             ≡R.∎ )
       where module ≡R = ≡.≡-Reasoning
 
+  -- Reindex
   Σ<range[f,m,n]≈Σ<range[i→f[i∸o],o+m,o+n] : ∀ f m n o →
     Σ<range f m n ≈ Σ<range (λ i → f (i ∸ o)) (o ℕ.+ m) (o ℕ.+ n)
   Σ<range[f,m,n]≈Σ<range[i→f[i∸o],o+m,o+n] f m n o = begin
@@ -211,14 +238,6 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
                  (≡.sym $ ℕₚ.[m+n]∸[m+o]≡n∸o o n m) ⟩
     Σ< (λ k → f ((o ℕ.+ m ℕ.+ k) ∸ o)) ((o ℕ.+ n) ∸ (o ℕ.+ m)) ∎
     where module ≡R = ≡.≡-Reasoning
-
-  Σ<-congʳ-with-< : ∀ {f g} n → (∀ i → i < n → f i ≈ g i) → Σ< f n ≈ Σ< g n
-  Σ<-congʳ-with-< {f} {g}  0      f≈g = refl
-  Σ<-congʳ-with-< {f} {g} (suc n) f≈g =
-    ∙-cong (Σ<-congʳ-with-< n (λ i i<n → f≈g i (ℕₚ.≤-step i<n))) (f≈g n ℕₚ.≤-refl)
-
-  Σ≤-congʳ-with-≤ : ∀ {f g} n → (∀ i → i ≤ n → f i ≈ g i) → Σ≤ f n ≈ Σ≤ g n
-  Σ≤-congʳ-with-≤ n f≈g = Σ<-congʳ-with-< (suc n) λ i 1+i≤1+n → f≈g i (ℕₚ.≤-pred 1+i≤1+n)
 
 module CommutativeMonoidSummationProperties
   {c e} (CM : CommutativeMonoid c e) where
