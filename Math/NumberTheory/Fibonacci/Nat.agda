@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K --safe #-}
 
-module Math.NumberTheory.Fibonacci where
+module Math.NumberTheory.Fibonacci.Nat where
 
 -- agda-stdlib
 open import Data.Nat
