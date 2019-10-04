@@ -413,4 +413,34 @@ module SemiringSummationProperties {c e} (SR : Semiring c e) where
     Σ≤ m f * Σ≤ n g ≈ Σ≤ m (λ i → Σ≤ n (λ j → f i * g j))
   Σ≤-distrib-* m n f g = Σ<-distrib-* (suc m) (suc n) f g
 
+  Σ<range-distrib-* : ∀ m n o p f g →
+    Σ<range m n f * Σ<range o p g ≈ Σ<range m n (λ i → Σ<range o p (λ j → f i * g j))
+  Σ<range-distrib-* m n o p f g =
+    Σ<-distrib-* (n ∸ m) (p ∸ o) (λ i → f (m ℕ.+ i)) λ j → g (o ℕ.+ j)
+
+  Σ≤range-distrib-* : ∀ m n o p f g →
+    Σ≤range m n f * Σ≤range o p g ≈ Σ≤range m n (λ i → Σ≤range o p (λ j → f i * g j))
+  Σ≤range-distrib-* m n o p = Σ<range-distrib-* m (suc n) o (suc p)
+
 module GroupSummationProperties {c e} (G : Group c e) where
+  open Group G
+  open MonoidSummation monoid
+  open MonoidSummationProperties monoid
+  open SetoidReasoning setoid
+
+  Σ<-telescope : ∀ n (f : ℕ → Carrier) →
+    Σ< n (λ i → f i - f (suc i)) ≈ f 0 - f n
+  Σ<-telescope 0       f = sym $ inverseʳ (f 0)
+  Σ<-telescope (suc n) f = begin
+    Σ< n (λ i → f i - f (suc i)) ∙ (f n - f (suc n))
+      ≈⟨ ∙-congʳ $ Σ<-telescope n f ⟩
+    (f 0 - f n) ∙ (f n - f (suc n))
+      ≈⟨ assoc (f 0) (f n ⁻¹) (f n - f (suc n)) ⟩
+    f 0 ∙ (f n ⁻¹ ∙ (f n - f (suc n)))
+      ≈⟨ ∙-congˡ $ sym $ assoc (f n ⁻¹) (f n) (f (suc n) ⁻¹) ⟩
+    f 0 ∙ ((f n ⁻¹ ∙ f n) - f (suc n))
+      ≈⟨ ∙-congˡ $ ∙-congʳ $ inverseˡ (f n) ⟩
+    f 0 ∙ (ε - f (suc n))
+      ≈⟨ ∙-congˡ $ identityˡ (f (suc n) ⁻¹) ⟩
+    f 0 - f (suc n)
+      ∎
