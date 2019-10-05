@@ -601,3 +601,8 @@ module Lemma2-2 {a} {A : Set a} (searchable : Searchable A) where
   Exist[P]≡false⇔∃x→Px≡false = Eqv.sym ∃x→Px≡false⇔P[εP]≡false
 
 open Lemma2-2
+
+-- http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.127.3062&rep=rep1&type=pdf
+Exhaustible : ∀ {a} → Set a → Set a
+Exhaustible A = Σ ((A → Bool) → Bool) λ ∀K →
+  (P : A → Bool) → ∀K P ≡ true → ∀ x → P x ≡ true

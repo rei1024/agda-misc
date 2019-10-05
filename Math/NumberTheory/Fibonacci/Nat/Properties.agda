@@ -23,7 +23,7 @@ open ≤-Reasoning
 1≤fib[1+n] (suc n) = begin
   1                   ≤⟨ 1≤fib[1+n] n ⟩
   fib (suc n)         ≤⟨ m≤m+n (fib (suc n)) (fib n) ⟩
-  fib (suc n) + fib n ≡⟨ sym $ fib-rec n ⟩
+  fib (suc n) + fib n ≡⟨ fib[1+n]+fib[n]≡fib[2+n] n ⟩
   fib (suc (suc n))   ∎
 
 fib[n]<fib[1+n] : ∀ n {_ : True (2 ≤? n)} → fib n < fib (suc n)
@@ -32,7 +32,7 @@ fib[n]<fib[1+n] (suc (suc (suc n))) {wit} = begin-strict
   fib (3 + n)               <⟨ ≤-refl ⟩
   1 + fib (3 + n)           ≡⟨ +-comm 1 (fib (3 + n)) ⟩
   fib (3 + n) + 1           ≤⟨ +-monoʳ-≤ (fib (3 + n)) (1≤fib[1+n] (suc n)) ⟩
-  fib (3 + n) + fib (2 + n) ≡⟨ sym $ fib-rec (2 + n) ⟩
+  fib (3 + n) + fib (2 + n) ≡⟨ fib[1+n]+fib[n]≡fib[2+n] (2 + n) ⟩
   fib (4 + n)               ∎
 
 private
@@ -41,7 +41,7 @@ private
   fib-mono-<-lemma (suc m) n@(suc (suc _)) {wit} = begin-strict
     fib n                           <⟨ fib-mono-<-lemma m n {tt} ⟩
     fib (1 + (m + n))               ≤⟨ m≤m+n (fib (1 + (m + n))) (fib (m + n)) ⟩
-    fib (1 + (m + n)) + fib (m + n) ≡⟨ sym $ fib-rec (m + n) ⟩
+    fib (1 + (m + n)) + fib (m + n) ≡⟨ fib[1+n]+fib[n]≡fib[2+n] (m + n) ⟩
     fib (2 + (m + n))               ∎
 
 fib-mono-< : ∀ m n {_ : True (2 ≤? m)} → m < n → fib m < fib n
@@ -77,8 +77,6 @@ sum-of-fib (suc n) = begin-equality
   fib (1 + n) + (fib (2 + n) ∸ 1)
     ≡⟨ sym $ +-∸-assoc (fib (1 + n)) (1≤fib[1+n] (suc n)) ⟩
   (fib (1 + n) + fib (2 + n)) ∸ 1
-    ≡⟨ cong (_∸ 1) $ +-comm (fib (1 + n)) (fib (2 + n)) ⟩
-  (fib (2 + n) + fib (1 + n)) ∸ 1
-    ≡⟨ sym $ cong (_∸ 1) $ fib-rec (suc n) ⟩
+    ≡⟨ cong (_∸ 1) $ fib[n]+fib[1+n]≡fib[2+n] (suc n) ⟩
   fib (3 + n) ∸ 1
     ∎

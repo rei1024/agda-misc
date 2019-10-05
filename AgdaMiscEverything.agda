@@ -22,6 +22,8 @@ import Math.Logic.NonConstructiveAxiom.Properties
 -- Fibonacci number
 import Math.NumberTheory.Fibonacci.Generic
 
+import Math.NumberTheory.Fibonacci.Generic.Propositional
+
 import Math.NumberTheory.Fibonacci.Nat
 
 import Math.NumberTheory.Fibonacci.Nat.Properties
