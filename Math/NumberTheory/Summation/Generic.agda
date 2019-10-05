@@ -14,15 +14,19 @@ module MonoidSummation {c e} (M : Monoid c e) where
   Σ< 0       f = ε
   Σ< (suc n) f = Σ< n f ∙ f n
 
+  -- Σ≤ n f = Σₖ₌₀ⁿ[f k]
   Σ≤ : ℕ → (ℕ → A) → A
   Σ≤ n f = Σ< (suc n) f
 
+  -- Σ<range m n f = Σₖ₌ₘⁿ⁻¹[f k]
   Σ<range : ℕ → ℕ → (ℕ → A) → A
   Σ<range m n f = Σ< (n ∸ m) (λ o → f (m + o))
 
+  -- Σ≤range m n f = Σₖ₌ₘⁿ[f k]
   Σ≤range : ℕ → ℕ → (ℕ → A) → A
   Σ≤range m n f = Σ<range m (suc n) f
 
+  -- syntax
   syntax Σ< n (λ k → e) = Σ[ k < n ] e
   syntax Σ≤ n (λ k → e) = Σ[ k ≤ n ] e
   syntax Σ<range m n (λ k → e) = Σ[ m ≤ k < n ] e

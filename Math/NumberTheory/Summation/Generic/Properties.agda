@@ -22,6 +22,7 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
   open Monoid M
   open SetoidReasoning setoid
 
+  -- Congruence
   Σ<-cong : ∀ {m n f g} → m ≡ n → (∀ x → f x ≈ g x) → Σ< m f ≈ Σ< n g
   Σ<-cong {0}     {.0}       {f} {g} ≡.refl f≈g = refl
   Σ<-cong {suc m} {.(suc m)} {f} {g} ≡.refl f≈g = begin
@@ -98,6 +99,12 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
     Σ< (n ∸ m) (λ k → f (m ℕ.+ k)) ≈⟨ Σ<-congʳ (λ k → f (m ℕ.+ k)) $ ℕₚ.m≤n⇒m∸n≡0 n≤m ⟩
     Σ< 0       (λ k → f (m ℕ.+ k)) ∎
 
+  n<m⇒Σ≤range[m,n,f]≈0 : ∀ {m n} f → n < m → Σ≤range m n f ≈ ε
+  n<m⇒Σ≤range[m,n,f]≈0 {m} {n} f n<m = n≤m⇒Σ<range[m,n,f]≈0 f n<m
+
+  Σ<range[n,n,f]≈0 : ∀ n f → Σ<range n n f ≈ ε
+  Σ<range[n,n,f]≈0 n f = n≤m⇒Σ<range[m,n,f]≈0 {n} {n} f ℕₚ.≤-refl
+
   Σ<range-cong₃-with-< : ∀ m n {f g} →
     (∀ i → m ≤ i → i < n → f i ≈ g i) → Σ<range m n f ≈ Σ<range m n g
   Σ<range-cong₃-with-< m n {f} {g} f≈g with m ℕₚ.≤? n
@@ -119,12 +126,6 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
     (∀ i → m ≤ i → i ≤ n → f i ≈ g i) → Σ≤range m n f ≈ Σ≤range m n g
   Σ≤range-cong₃-with-≤ m n {f} {g} f≈g = Σ<range-cong₃-with-< m (suc n)
     λ i i≤n 1+i≤1+n → f≈g i i≤n (ℕₚ.≤-pred 1+i≤1+n)
-
-  Σ<range[n,n,f]≈0 : ∀ n f → Σ<range n n f ≈ ε
-  Σ<range[n,n,f]≈0 n f = n≤m⇒Σ<range[m,n,f]≈0 {n} {n} f ℕₚ.≤-refl
-
-  n<m⇒Σ≤range[m,n,f]≈0 : ∀ {m n} f → n < m → Σ≤range m n f ≈ ε
-  n<m⇒Σ≤range[m,n,f]≈0 {m} {n} f n<m = n≤m⇒Σ<range[m,n,f]≈0 f n<m
 
   Σ<range[n,1+n,f]≈f[n] : ∀ n f → Σ<range n (suc n) f ≈ f n
   Σ<range[n,1+n,f]≈f[n] n f = begin
@@ -248,6 +249,16 @@ module MonoidSummationProperties {c e} (M : Monoid c e) where
       ∎
     where module ≡R = ≡.≡-Reasoning
 
+  Σ≤range[m,n,f]≈Σ≤range[o+m,o+n,i→f[i∸o]] : ∀ m n o f →
+    Σ≤range m n f ≈ Σ≤range (o ℕ.+ m) (o ℕ.+ n) (λ i → f (i ∸ o))
+  Σ≤range[m,n,f]≈Σ≤range[o+m,o+n,i→f[i∸o]] m n o f = begin
+    Σ<range m (suc n) f
+      ≈⟨ Σ<range[m,n,f]≈Σ<range[o+m,o+n,i→f[i∸o]] m (suc n) o f ⟩
+    Σ<range (o ℕ.+ m) (o ℕ.+ suc n) (λ i → f (i ∸ o))
+      ≈⟨ Σ<range-cong₂ (o ℕ.+ m) (λ i → f (i ∸ o)) $ ℕₚ.+-suc o n ⟩
+    Σ<range (o ℕ.+ m) (suc o ℕ.+ n) (λ i → f (i ∸ o))
+      ∎
+
 module CommutativeMonoidSummationProperties
   {c e} (CM : CommutativeMonoid c e) where
   open CommutativeMonoid CM
@@ -370,6 +381,61 @@ module CommutativeMonoidSummationProperties
   Σ≤-reverse : ∀ n f → Σ≤ n f ≈ Σ≤ n (λ i → f (n ∸ i))
   Σ≤-reverse n f = Σ<-reverse (suc n) f
 
+  Σ<range-reverse : ∀ m n f → Σ<range m n f ≈ Σ<range m n (λ i → f (m ℕ.+ (n ∸ suc i)))
+  Σ<range-reverse m n f = begin
+    Σ< (n ∸ m) (λ i → f (m ℕ.+ i))
+      ≈⟨ Σ<-reverse (n ∸ m) (λ i → f (m ℕ.+ i)) ⟩
+    Σ< (n ∸ m) (λ i → f (m ℕ.+ ((n ∸ m) ∸ suc i)))
+      ≈⟨ Σ<-congˡ (n ∸ m) $ (λ i → reflexive $ ≡.cong f $ ≡.cong (m ℕ.+_) $ (≤R.begin-equality
+         n ∸ m ∸ suc i     ≤R.≡⟨ ℕₚ.∸-+-assoc n m (suc i) ⟩
+         n ∸ (m ℕ.+ suc i) ≤R.≡⟨ ≡.cong (n ∸_) $ ℕₚ.+-suc m i ⟩
+         n ∸ suc (m ℕ.+ i) ≤R.∎) ) ⟩
+    Σ< (n ∸ m) (λ i → f (m ℕ.+ (n ∸ suc (m ℕ.+ i))))
+      ≡⟨⟩
+    Σ<range m n (λ i → f (m ℕ.+ (n ∸ suc i))) ∎
+    where module ≤R = ℕₚ.≤-Reasoning
+
+  Σ≤range-reverse : ∀ m n f → Σ≤range m n f ≈ Σ≤range m n (λ i → f (m ℕ.+ (n ∸ i)))
+  Σ≤range-reverse m n f = Σ<range-reverse m (suc n) f
+
+  Σ<-split-even : ∀ n f →
+    Σ< (2 ℕ.* n) f ≈ Σ< n (λ i → f (2 ℕ.* i)) ∙ Σ< n (λ i → f (1 ℕ.+ 2 ℕ.* i))
+  Σ<-split-even 0       f = sym $ identityʳ ε
+  Σ<-split-even (suc n) f = begin
+    Σ< (2 ℕ.* suc n) f
+      ≈⟨ Σ<-congʳ f $ ℕₚ.*-distribˡ-+ 2 1 n ⟩
+    Σ< (2 ℕ.+ 2 ℕ.* n) f
+      ≡⟨⟩
+    Σ< (2 ℕ.* n) f ∙ f[2n] ∙ f[1+2n]
+      ≈⟨ ∙-congʳ $ ∙-congʳ $ Σ<-split-even n f ⟩
+    Σ< n ev ∙ Σ< n od ∙ f[2n] ∙ f[1+2n]
+      ≈⟨ assoc (Σ< n ev ∙ Σ< n od) f[2n] f[1+2n] ⟩
+    Σ< n ev ∙ Σ< n od ∙ (f[2n] ∙ f[1+2n])
+      ≈⟨ lemma (Σ< n ev) (Σ< n od) f[2n] f[1+2n] ⟩
+    Σ< (suc n) ev ∙ Σ< (suc n) od
+      ∎
+      where
+      f[2n]   = f (2 ℕ.* n)
+      f[1+2n] = f (1 ℕ.+ 2 ℕ.* n)
+      ev = λ i → f (2 ℕ.* i)
+      od = λ i → f (1 ℕ.+ 2 ℕ.* i)
+
+  Σ<-split-odd : ∀ n f →
+    Σ< (1 ℕ.+ 2 ℕ.* n) f ≈ Σ< (suc n) (λ i → f (2 ℕ.* i)) ∙ Σ< n (λ i → f (1 ℕ.+ 2 ℕ.* i))
+  Σ<-split-odd n f = begin
+    Σ< (2 ℕ.* n) f ∙ f[2n]
+      ≈⟨ ∙-congʳ $ Σ<-split-even n f ⟩
+    Σ< n ev ∙ Σ< n od ∙ f[2n]
+      ≈⟨ trans (assoc (Σ< n ev) (Σ< n od) f[2n]) (∙-congˡ $ comm (Σ< n od) f[2n]) ⟩
+    Σ< n ev ∙ (f[2n] ∙ Σ< n od)
+      ≈⟨ sym $ assoc (Σ< n ev) f[2n] (Σ< n od) ⟩
+    Σ< n ev ∙ f[2n] ∙ Σ< n od
+      ∎
+    where
+    f[2n]   = f (2 ℕ.* n)
+    ev = λ i → f (2 ℕ.* i)
+    od = λ i → f (1 ℕ.+ 2 ℕ.* i)
+
 module SemiringSummationProperties {c e} (SR : Semiring c e) where
   open Semiring SR
   open MonoidSummation +-monoid
@@ -444,3 +510,26 @@ module GroupSummationProperties {c e} (G : Group c e) where
       ≈⟨ ∙-congˡ $ identityˡ (f (suc n) ⁻¹) ⟩
     f 0 - f (suc n)
       ∎
+
+  Σ≤-telescope : ∀ n (f : ℕ → Carrier) →
+    Σ≤ n (λ i → f i - f (suc i)) ≈ f 0 - f (suc n)
+  Σ≤-telescope n f = Σ<-telescope (suc n) f
+
+  Σ<range-telescope : ∀ {m n} (f : ℕ → Carrier) → m ≤ n →
+    Σ<range m n (λ i → f i - f (suc i)) ≈ f m - f n
+  Σ<range-telescope {m} {n} f m≤n = begin
+    Σ< (n ∸ m) (λ i → f (m ℕ.+ i) - f (suc (m ℕ.+ i)))
+      ≈⟨ Σ<-congˡ (n ∸ m) $ (λ i → ∙-congˡ $ ⁻¹-cong $ reflexive $ ≡.cong f $ ≡.sym $ ℕₚ.+-suc m i) ⟩
+    Σ< (n ∸ m) (λ i → f (m ℕ.+ i) - f (m ℕ.+ suc i))
+      ≈⟨ Σ<-telescope (n ∸ m) (λ i → f (m ℕ.+ i)) ⟩
+    f (m ℕ.+ 0) - f (m ℕ.+ (n ∸ m))
+      ≈⟨ ∙-cong (reflexive $ ≡.cong f $ ℕₚ.+-identityʳ m) (⁻¹-cong $ reflexive $ ≡.cong f $ ℕₚ.m+[n∸m]≡n m≤n) ⟩
+    f m - f n
+      ∎
+
+  Σ≤range-telescope : ∀ {m n} (f : ℕ → Carrier) → m ≤ suc n →
+    Σ≤range m n (λ i → f i - f (suc i)) ≈ f m - f (suc n)
+  Σ≤range-telescope {m} {n} f m≤1+n = Σ<range-telescope {m} {suc n} f m≤1+n
+
+-- module AbelianGroupSummationProperties
+--  Σ<-minus-commute : ∀ n f → Σ< n (λ i → f i ⁻¹) ≈ Σ< n f ⁻¹
