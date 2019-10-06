@@ -24,13 +24,18 @@ module CommutativeMonoidProductProperties {c e} (CM : CommutativeMonoid c e) =
   ; Σ<range-cong₁ to Π<range-cong₁
   ; Σ<range-cong₂ to Π<range-cong₂
   ; Σ≤range-cong to Π≤range-cong
+  ; Σ<-congˡ-with-< to Π<-congˡ-with-<
+  ; Σ≤-congˡ-with-≤ to Π≤-congˡ-with-≤
   ; Σ<-0 to Π<-1
   ; Σ≤-0 to Π≤-1
   ; Σ<[1,f]≈f[0] to Π<[1,f]≈f[0]
   ; Σ≤[0,f]≈f[0] to Π≤[0,f]≈f[0]
   ; n≤m⇒Σ<range[m,n,f]≈0 to n≤m⇒Π<range[m,n,f]≈1
-  ; Σ<range[n,n,f]≈0 to Π<range[n,n,f]≈1
   ; n<m⇒Σ≤range[m,n,f]≈0 to n<m⇒Π≤range[m,n,f]≈1
+  ; Σ<range[n,n,f]≈0 to Π<range[n,n,f]≈1
+  ; Σ<range-cong₃-with-< to Π<range-cong₃-with-<
+  ; Σ≤range-cong₃-with-≤ to Π≤range-cong₃-wiht-≤
+  ; Σ<range[n,1+n,f]≈f[n] to Π<range[n,1+n,f]≈f[n]
   ; Σ≤range[n,n,f]≈f[n] to Π≤range[n,n,f]≈f[n]
   ; Σ<-+ to Π<-+
   ; Σ≤-Σ<-+ to Π≤-Π<-+
@@ -60,5 +65,9 @@ module CommutativeMonoidProductProperties {c e} (CM : CommutativeMonoid c e) =
   ; Σ<-sumₜ-syntax to Π<-sumₜ-syntax
   ; Σ<-reverse to Π<-reverse
   ; Σ≤-reverse to Π≤-reverse
+  ; Σ<range-reverse to Π<range-reverse
+  ; Σ≤range-reverse to Π≤range-reverse
+  ; Σ<-split-even to Π<-split-even
+  ; Σ<-split-odd to Π<-split-odd
   )
   using ()

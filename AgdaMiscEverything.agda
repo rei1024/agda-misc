@@ -17,6 +17,11 @@ import Math.Logic.Constructive
 import Math.Logic.NonConstructiveAxiom.Properties
 
 ------------------------------------------------------------------------
+-- Formal language
+
+import Math.FormalLanguage
+
+------------------------------------------------------------------------
 -- Number theory
 
 -- Fibonacci number

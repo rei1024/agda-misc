@@ -432,9 +432,11 @@ module CommutativeMonoidSummationProperties
     Σ< n ev ∙ f[2n] ∙ Σ< n od
       ∎
     where
-    f[2n]   = f (2 ℕ.* n)
+    f[2n] = f (2 ℕ.* n)
     ev = λ i → f (2 ℕ.* i)
     od = λ i → f (1 ℕ.+ 2 ℕ.* i)
+
+  -- Σ<-comm-triangle : ∀ n f → Σ n (λ i → Σ< i (λ j → f i j)) ≈
 
 module SemiringSummationProperties {c e} (SR : Semiring c e) where
   open Semiring SR
