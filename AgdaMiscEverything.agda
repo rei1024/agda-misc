@@ -10,11 +10,17 @@ module AgdaMiscEverything where
 ------------------------------------------------------------------------
 -- Logic
 
+-- Constructive mathematics
 import Math.Logic.NonConstructiveAxiom
 
 import Math.Logic.Constructive
 
 import Math.Logic.NonConstructiveAxiom.Properties
+
+-- Natural number
+import Math.Logic.Nat.Operations
+
+import Math.Logic.Nat.Properties
 
 ------------------------------------------------------------------------
 -- Formal language
@@ -27,6 +33,7 @@ import Math.FormalLanguage
 -- Fibonacci number
 import Math.NumberTheory.Fibonacci.Generic
 
+-- DEPRECATED
 import Math.NumberTheory.Fibonacci.Generic.Propositional
 
 import Math.NumberTheory.Fibonacci.Nat

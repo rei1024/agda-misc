@@ -165,13 +165,23 @@ iter : (ℕ → ℕ) → ℕ → ℕ
 iter f 0       = f 1
 iter f (suc n) = f (iter f n)
 
-ack-is-fold : ∀ m n → ack m n ≡ fold suc iter m n
-ack-is-fold 0       n       = refl
-ack-is-fold (suc m) 0       = ack-is-fold m 1
-ack-is-fold (suc m) (suc n) = begin-equality
+iter-is-fold : ∀ f n → iter f n ≡ fold (f 1) f n
+iter-is-fold f zero    = refl
+iter-is-fold f (suc n) = cong f (iter-is-fold f n)
+
+ack-is-fold′ : ∀ m n → ack m n ≡ fold suc iter m n
+ack-is-fold′ 0       n       = refl
+ack-is-fold′ (suc m) 0       = ack-is-fold′ m 1
+ack-is-fold′ (suc m) (suc n) = begin-equality
   ack m (ack (suc m) n)
-    ≡⟨ ack-is-fold m (ack (suc m) n) ⟩
+    ≡⟨ ack-is-fold′ m (ack (suc m) n) ⟩
   fold suc iter m (ack (suc m) n)
-    ≡⟨ cong (fold suc iter m) $ ack-is-fold (suc m) n ⟩
+    ≡⟨ cong (fold suc iter m) $ ack-is-fold′ (suc m) n ⟩
   fold suc iter m (iter (fold suc iter m) n)
     ∎
+
+ack-is-fold : ∀ m n → ack m n ≡ fold suc (λ f n → fold (f 1) f n) m n
+ack-is-fold zero    n       = refl
+ack-is-fold (suc m) zero    = ack-is-fold m 1
+ack-is-fold (suc m) (suc n) = trans (ack-is-fold m (ack (suc m) n))
+  (cong (fold suc (λ f n → fold (f 1) f n) m) (ack-is-fold (suc m) n))

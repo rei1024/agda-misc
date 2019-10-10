@@ -72,3 +72,20 @@ private
    n * (1 + n) * (1 + 2 * n) + 6 * ((1 + n) ^ 2) ≡⟨ Lemma.lemma₁ n ⟩
   (1 + n) * (2 + n) * (1 + 2 * (1 + n))          ∎
   where open ≤-Reasoning
+
+-- Arithmetic sequence
+{-
+2*Σ<[n,i→d+a*i]≡??? : ∀ n d a → 2 * Σ< n (λ i → d + a * i) ≡ n * (2 * d + a * suc n)
+2*Σ<[n,i→d+a*i]≡??? n d a = begin-equality
+  2 * Σ< n (λ i → d + a * i)
+    ≡⟨ {!   !} ⟩
+  2 * (Σ< n (λ _ → d) + Σ< n (λ i → a * i))
+
+  2 * (n * d + a * Σ< n id)
+  2 * (n * d) + 2 * (a * Σ< n id)
+  2 * n * d + a * (2 * Σ< n id)
+  2 * n * d + a * (n * suc n)
+  n * (2 * d + a * suc n)
+    ∎
+  where oepn ≤-Reasoning
+-}

@@ -13,10 +13,12 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
 open import Relation.Unary hiding (∅; ｛_｝)
 import Relation.Unary as U
+import Relation.Unary.Properties as Uₚ
 open import Function using (_$_)
 import Function as F
 import Algebra.FunctionProperties as FP
 import Algebra.Structures as Structures
+
 
 -- Equivalence of predicate
 infix 4 _≡ᴾ_
@@ -60,6 +62,9 @@ data EmptyLang {a l} {A : Set a} : Lang A (a ⊔ l) where
   mkEmptyLang : EmptyLang []
 
 -- TODO Move Math.FormalLanguage.Construct.Concat
+-- TODO Hetero
+-- Lang A l → Lang B l → Lang (A ⊎ B) l
+-- map inj₁ xs ++ map inj₂ ys
 -- concatenation of formal language
 data _<>_ {a l} {A : Set a} (L₁ L₂ : Lang A l) : Lang A (a ⊔ l) where
   mk<> : ∀ {xs ys} → L₁ xs → L₂ ys → (L₁ <> L₂) (xs ++ ys)
@@ -68,19 +73,26 @@ data _<>_ {a l} {A : Set a} (L₁ L₂ : Lang A l) : Lang A (a ⊔ l) where
 module _ {s l} {Σ : Set s} where
   open FP {A = Lang Σ (s ⊔ l)} _≡ᴾ_
 
-  ++-identityˡ : LeftIdentity (EmptyLang {l = l}) _<>_
-  ++-identityˡ L = to , from
+  <>-identityˡ : LeftIdentity (EmptyLang {l = l}) _<>_
+  <>-identityˡ L = to , from
     where
     to : EmptyLang <> L ⊆ L
     to (mk<> mkEmptyLang x₁) = x₁
     from : L ⊆ EmptyLang <> L
     from Lx = mk<> mkEmptyLang Lx
 
-  ++-identityʳ  : RightIdentity (EmptyLang {l = l}) _<>_
-  ++-identityʳ L = to , from
+  <>-identityʳ  : RightIdentity (EmptyLang {l = l}) _<>_
+  <>-identityʳ L = to , from
     where
     to : L <> EmptyLang ⊆ L
     to (mk<> Lx mkEmptyLang) = subst L (sym $ Lₚ.++-identityʳ _) Lx
     from : L ⊆ L <> EmptyLang
     from {xs} x = subst (L <> EmptyLang) (Lₚ.++-identityʳ xs) $
       mk<> {xs = xs} {ys = []} x mkEmptyLang
+
+{- TODO move contents of agda-combinatorics to agda-misc
+  <>-dec : ∀ {L₁ L₂ : Lang Σ l} →
+    U.Decidable L₁ → U.Decidable L₂ → U.Decidable (L₁ <> L₂)
+  <>-dec L₁? L₂? zs with L.filter (L₁? Uₚ.×? L₂?) (splits₂ zs)
+  ... | x = ?
+-}
