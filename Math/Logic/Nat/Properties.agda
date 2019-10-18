@@ -24,6 +24,7 @@ import Data.Product.Properties as Prodₚ
 open import Data.Sum as Sum
 open import Data.Bool using (Bool ; true ; false)
 open import Function.Core
+import Relation.Binary as B
 open import Relation.Nullary
 import Relation.Nullary.Decidable as NDec
 open import Axiom.UniquenessOfIdentityProofs
@@ -513,9 +514,9 @@ m <? n with order? m n
 ... | gt m>n = ⊥-elim $ ≤⇒≯ m≤n m>n
 
 private
-  subst-refl : ∀ {x b} {X : Set x} (B : X → Set b) {u : X} (v : B u) →
-    subst B refl v ≡ v
-  subst-refl B v = refl
+  subst-refl : ∀ {a b} {A : Set a} (B : A → Set b) {x : A} (y : B x) →
+    subst B refl y ≡ y
+  subst-refl _ _ = refl
 
   subst-app : ∀ {a b} {A : Set a} {B : A → Set b}
     (f : (x : A) → B x) {x y} (x≡y : x ≡ y) → subst B x≡y (f x) ≡ f y
@@ -529,17 +530,24 @@ private
     subst (C ∘ g) x≡y (f x)    ≡⟨ subst-app f x≡y ⟩
     f y                        ∎
 
---  subst-cong-app′ : ∀ {a b c} {A : Set a} {B : Set b} {C : B → Set c}
---    (g : A → B) (f : (x : A) → C (g x)) {x y} (x≡y : x ≡ y) →
-
   subst-other : ∀ {a b} {A : Set a} {B : A → Set b}
     (f : (x : A) → B x) {x y z} (x≡z : x ≡ z) (y≡z : y ≡ z) →
     subst B x≡z (f x) ≡ subst B y≡z (f y)
   subst-other _ refl refl = refl
-{-
-  subst-other-g : ∀ {a b c} {A : Set a} {B : Set b} {C : B → Set c}
-   (g : A → B) (f : (x : A) → C (g x))
--}
+
+  subst-other-g : ∀ {a b c} {A : Set a} {B : Set b} {C : B → Set c} → B.Irrelevant (_≡_ {A = B}) → ∀
+   (g : A → B) (f : (x : A) → C (g x)) {x y z} (x≡y : x ≡ y) (gx≡z : g x ≡ z) (gy≡z : g y ≡ z) →
+   subst C gx≡z (f x) ≡ subst C gy≡z (f y)
+  subst-other-g B-irrelevant g f refl refl gy≡z with B-irrelevant gy≡z refl
+  subst-other-g B-irrelevant g f refl refl .refl | refl = refl
+
+  subst-lemma : ∀ {a₁ a₂ b₁ b₂} {A₁ : Set a₁} {A₂ : Set a₂}
+    {B₁ : A₁ → Set b₁} {B₂ : A₂ → Set b₂}
+    (f : A₁ → A₂) (g : ∀ x → B₁ x → B₂ (f x))
+    {x₁ x₂ : A₁} (x₁≡x₂ : x₁ ≡ x₂) {y : B₁ x₁} →
+    subst B₂ (cong f x₁≡x₂) (g x₁ y) ≡ g x₂ (subst B₁ x₁≡x₂ y)
+  subst-lemma _ _ refl = refl
+
 module _ {p} (P : N → N → Set p) where
   inddiag-< :
     (∀ n → P zero (suc n)) → (∀ m n → P m n → P (suc m) (suc n)) →
@@ -582,8 +590,10 @@ module _ {p} (P : N → N → Set p) where
       ≡⟨ cong (λ v → subst (P zero) v _ ) (≡-irrelevant m≡n refl) ⟩
     subst (P zero) refl (ind (λ k → P k k) Pzz (λ k → Pss k k) zero)
       ≡⟨ subst-refl (P zero) (ind (λ k → P k k) Pzz (λ k → Pss k k) zero) ⟩
-    ind (λ k → P k k) Pzz (λ k → Pss k k) zero ≡⟨ ind-base _ _ _ ⟩
-    Pzz ∎
+    ind (λ k → P k k) Pzz (λ k → Pss k k) zero
+      ≡⟨ ind-base _ _ _ ⟩
+    Pzz
+      ∎
   ... | gt m>n = ⊥-elim $ n≮n zero m>n
 
   inddiag-zs : ∀ Pzz Pzs Psz Pss n → inddiag Pzz Pzs Psz Pss zero (suc n) ≡ Pzs n
@@ -597,7 +607,8 @@ module _ {p} (P : N → N → Set p) where
       ≡⟨ cong (λ v → subst (P zero) v (Pzs o)) $ ≡-irrelevant so≡sn (cong suc o≡n) ⟩
     subst (P zero) (cong suc o≡n) (Pzs o)
       ≡⟨ subst-cong-app suc Pzs o≡n ⟩
-    Pzs n ∎
+    Pzs n
+      ∎
     where
     so≡sn : suc o ≡ suc n
     so≡sn = trans (suc≡one+ o) one+o≡suc[n]
@@ -619,16 +630,17 @@ module _ {p} (P : N → N → Set p) where
       ≡⟨ cong (λ v → subst (λ k → P k zero) v (Psz o)) $ ≡-irrelevant so≡sm (cong suc o≡m) ⟩
     subst (λ k → P k zero) (cong suc o≡m) (Psz o)
       ≡⟨ subst-cong-app suc Psz o≡m ⟩
-    Psz m ∎
+    Psz m
+      ∎
     where
     so≡sm = trans (suc≡one+ o) one+o≡suc[m]
     o≡m = suc-injective so≡sm
-{-
+
   inddiag-ss : ∀ Pzz Pzs Psz Pss m n →
     inddiag Pzz Pzs Psz Pss (suc m) (suc n) ≡
     Pss m n (inddiag Pzz Pzs Psz Pss m n)
   inddiag-ss Pzz Pzs Psz Pss m n with order? (suc m) (suc n) | order? m n
-  inddiag-ss Pzz Pzs Psz Pss m n | lt sm<sn@(o , ssm+o≡sn) | lt m<n@(p , sm+p≡n) =
+  ... | lt sm<sn@(o , ssm+o≡sn) | lt m<n@(p , sm+p≡n) =
     begin
     subst (P (suc m)) ssm+o≡sn (inddiag-< Pzs Pss (suc m) o)
       ≡⟨ cong (subst (P (suc m)) ssm+o≡sn) $ ind-step _ _ _ m ⟩
@@ -640,29 +652,54 @@ module _ {p} (P : N → N → Set p) where
       ≡⟨ cong (λ v → subst (P (suc m)) v (Pss m (suc m + o) (inddiag-< Pzs Pss m o))) $
            ≡-irrelevant suc[sm+o]≡sn (cong suc sm+o≡n) ⟩
     subst (P (suc m)) (cong suc sm+o≡n) (Pss m (suc m + o) (inddiag-< Pzs Pss m o))
-      ≡⟨ {! subst-cong-app suc _ sm+o≡n  !} ⟩
+      ≡⟨ subst-lemma suc (Pss m) sm+o≡n ⟩
     Pss m n (subst (P m) sm+o≡n (inddiag-< Pzs Pss m o))
-      ≡⟨ {!   !} ⟩
+      ≡⟨ cong (Pss m n) $ subst-other-g ≡-irrelevant (suc m +_) (inddiag-< Pzs Pss m) o≡p sm+o≡n sm+p≡n ⟩
     Pss m n (subst (P m) sm+p≡n (inddiag-< Pzs Pss m p))
       ∎
     where
-
     suc[sm+o]≡sn : suc (suc m + o) ≡ suc n
     suc[sm+o]≡sn = trans (sym $ suc-+ (suc m) o) ssm+o≡sn
     sm+o≡n : suc m + o ≡ n
     sm+o≡n = suc-injective suc[sm+o]≡sn
     o≡p : o ≡ p
     o≡p = ≤-proj₁-≡ (<-pred sm<sn) m<n
-    {-
-    (λ k P[k,suc[k]+o] → subst (P (suc k)) (sym $ suc-+ (suc k) o)
-      $ Pss k (suc k + o) P[k,suc[k]+o]) m
-    -}
   ... | lt sm<sn | eq m≡n = ⊥-elim $ <⇒≢ (<-pred sm<sn) m≡n
   ... | lt sm<sn | gt m>n = ⊥-elim $ <⇒≯ (<-pred sm<sn) m>n
   ... | eq sm≡sn | lt m<n = ⊥-elim $ <⇒≢ m<n (suc-injective sm≡sn)
-  ... | eq sm≡sn | eq m≡n = {!   !}
+  ... | eq sm≡sn | eq m≡n = begin
+    subst (P (suc m)) sm≡sn (i (suc m))
+      ≡⟨ cong (subst (P (suc m)) sm≡sn) $ ind-step _ _ _ m ⟩
+    subst (P (suc m)) sm≡sn (Pss m m (i m))
+      ≡⟨ cong (λ v → subst (P (suc m)) v (Pss m m (i m))) $ ≡-irrelevant sm≡sn (cong suc m≡n) ⟩
+    subst (P (suc m)) (cong suc m≡n) (Pss m m (i m))
+      ≡⟨ subst-lemma suc (Pss m) m≡n ⟩
+    Pss m n (subst (P m) m≡n (i m))
+      ∎
+      where
+      i = ind (λ k → P k k) Pzz (λ k → Pss k k)
   ... | eq sm≡sn | gt m>n = ⊥-elim $ >⇒≢ m>n (suc-injective sm≡sn)
   ... | gt sm>sn | lt m<n = ⊥-elim $ <⇒≯ (<-pred sm>sn) m<n
   ... | gt sm>sn | eq m≡n = ⊥-elim $ >⇒≢ (<-pred sm>sn) m≡n
-  ... | gt sm>sn | gt m>n = {!   !}
--}
+  ... | gt sm>sn@(o , ssn+o≡sm) | gt m>n@(p , sn+p≡m) = begin
+    subst B₁ ssn+o≡sm (inddiag-> Psz Pss (suc n) o)
+      ≡⟨ cong (subst B₁ ssn+o≡sm) $ ind-step _ _ _ n ⟩
+    subst B₁ ssn+o≡sm (subst B₁ (sym $ suc-+ (suc n) o) (Pss (suc n + o) n u))
+      ≡⟨ subst-subst (sym $ suc-+ (suc n) o) ⟩
+    subst B₁ suc[sn+o]≡sm (Pss (suc n + o) n u)
+      ≡⟨ cong (λ v → subst B₁ v (Pss (suc n + o) n u)) $ ≡-irrelevant suc[sn+o]≡sm (cong suc sn+o≡m) ⟩
+    subst B₁ (cong suc sn+o≡m) (Pss (suc n + o) n u)
+      ≡⟨ subst-lemma suc (λ k → Pss k n) sn+o≡m ⟩
+    Pss m n (subst B₂ sn+o≡m (inddiag-> Psz Pss n o))
+      ≡⟨ cong (Pss m n) $ subst-other-g ≡-irrelevant (suc n +_) (inddiag-> Psz Pss n) o≡p sn+o≡m sn+p≡m ⟩
+    Pss m n (subst B₂ sn+p≡m (inddiag-> Psz Pss n p))
+      ∎
+    where
+    B₁ = λ k → P k (suc n)
+    B₂ = λ k → P k n
+    u = inddiag-> Psz Pss n o
+    suc[sn+o]≡sm : suc (suc n + o) ≡ suc m
+    suc[sn+o]≡sm = trans (sym $ suc-+ (suc n) o) ssn+o≡sm
+    sn+o≡m = suc-injective suc[sn+o]≡sm
+    o≡p : o ≡ p
+    o≡p = ≤-proj₁-≡ (<-pred sm>sn) m>n
