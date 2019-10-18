@@ -2,11 +2,7 @@
 
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 -- https://pdfs.semanticscholar.org/deb5/23b6078032c845d8041ee6a5383fec41191c.pdf
--- EM -> LPO
--- WLPO -> WKL
--- WKL -> LLPO
--- LLPO -> MP⊎ -- ?
--- WKL = LLPO
+
 -- http://www.math.lmu.de/~schwicht/pc16transparencies/ishihara/lecture1.pdf
 
 module Math.Logic.NonConstructiveAxiom.Properties where
@@ -96,6 +92,13 @@ dns-i-Fin {suc n} {p} {P} ∀¬¬P = ?
 
 -- LPO <=> WLPO + MP
 -- MP  <=> WMP + MP⊎
+
+--
+-- EM -> LPO
+-- WLPO -> WKL
+-- WKL -> LLPO
+-- LLPO -> MP⊎ -- ?
+-- WKL = LLPO
 
 ------------------------------------------------------------------------
 
@@ -348,6 +351,37 @@ mp⊎-Alt⇒mp⊎ mp⊎-Alt P? Q? =
   Sum.map (contraposition ¬∃P→∀¬P) (contraposition ¬∃P→∀¬P) ∘′
   mp⊎-Alt (¬-DecU P?) (¬-DecU Q?) ∘′
   contraposition (Prod.map ∀¬P→¬∃P ∀¬P→¬∃P)
+
+-- MP⊎ <=> MP∨
+mp⊎⇒mp∨ : ∀ {a p} {A : Set a} → MP⊎ A p → MP∨ A p
+mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]→¬[¬∃P×¬∃Q] ¬¬∃x→Px⊎Qx)
+
+mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
+mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
+
+{-
+llpo⇒mp∨ : ∀ {a p} {A : Set a} → LLPO A p → MP∨ A p
+llpo⇒mp∨ {p = p} {A = A} llpo {P = P} {Q = Q} P? Q? ¬¬[∃x→Px⊎Qx] =
+  Sum.swap ¬¬∃Q⊎¬¬∃P
+  where
+  R S : A → Set p
+  R x = P x × ¬ Q x
+  S x = ¬ P x × Q x
+  R? : DecU R
+  R? = DecU-× P? (¬-DecU Q?)
+  S? : DecU S
+  S? = DecU-× (¬-DecU P?) Q?
+  ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
+  ¬[∃R×∃S] (∃R , ∃S) = {!   !}
+  ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
+  ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
+  ¬∃R→¬∃Q→⊥ : ¬ ∃ R → ¬ ∃ Q → ⊥
+  ¬∃R→¬∃Q→⊥ ¬∃R ¬∃Q = ¬∃P→∀¬P ¬∃Q {!   !} {!   !}
+  -- ¬ ∃ λ x → P x × ¬ Q x
+  -- ¬ ∃ λ x → ¬ Q x
+  ¬¬∃Q⊎¬¬∃P : ¬ ¬ ∃ Q ⊎ ¬ ¬ ∃ P
+  ¬¬∃Q⊎¬¬∃P = Sum.map ¬∃R→¬∃Q→⊥ {!   !} ¬∃R⊎¬∃S
+-}
 
 {-
 -- LLPO -> MP⊎

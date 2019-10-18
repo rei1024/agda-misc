@@ -22,6 +22,8 @@ import Math.Logic.Nat.Operations
 
 import Math.Logic.Nat.Properties
 
+import Math.Logic.Nat.Instance
+
 ------------------------------------------------------------------------
 -- Formal language
 

@@ -210,6 +210,13 @@ MP⊎-Alt-i P Q = DecU P → DecU Q →
 MP⊎-Alt : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP⊎-Alt A p = {P Q : A → Set p} → MP⊎-Alt-i P Q
 
+MP∨-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
+MP∨-i P Q = DecU P → DecU Q →
+  ¬ ¬ (∃ λ x → P x ⊎ Q x) → ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
+
+MP∨ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
+
 -- https://plato.stanford.edu/entries/axiom-choice/choice-and-type-theory.html
 ACLT : ∀ {a b} → Set a → Set b → ∀ p → Set (a ⊔ b ⊔ lsuc p)
 ACLT A B p = {P : A → B → Set p} →
