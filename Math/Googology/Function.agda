@@ -4,6 +4,7 @@ module Math.Googology.Function where
 
 -- agda-stdlib
 open import Data.Nat
+open import Data.Nat.GeneralisedArithmetic
 open import Function
 
 -- Ackermann function.
@@ -57,3 +58,11 @@ graham's-number = go 64 where
   go : ℕ → ℕ
   go 0       = 4
   go (suc n) = 3 ↑[ go n ] 3
+
+-- FGH
+FGHℕ[_][_] : ℕ → ℕ → ℕ
+FGHℕ[ zero  ][ x ] = suc x
+FGHℕ[ suc n ][ x ] = fold x FGHℕ[ n ][_] x
+
+FGHω : ℕ → ℕ
+FGHω n = FGHℕ[ n ][ n ]

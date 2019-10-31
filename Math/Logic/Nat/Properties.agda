@@ -447,20 +447,12 @@ private
   order?-zero : ∀ n → Order zero n
   order?-zero = ind (λ n → Order zero n) (eq refl) λ k _ → lt (zero<suc[n] k)
 
-  order?-suc-lemma : ∀ {m k} →
-    Order k (suc m) → Order (suc k) (suc m)
-  order?-suc-lemma {m} {k} (lt k<suc[m]) with ≤⇒<∨≡ k<suc[m]
-  ... | inj₁ suc[k]<suc[m]               = lt suc[k]<suc[m]
-  ... | inj₂ suc[k]≡suc[m]               = eq suc[k]≡suc[m]
-  order?-suc-lemma {m} {k} (eq k≡suc[m]) =
-    gt (subst (_< suc k) k≡suc[m] $ n<suc[n] k)
-  order?-suc-lemma {m} {k} (gt k>suc[m]) = gt (<-step k>suc[m])
-
   order?-suc : ∀ n k → Order k n → Order (suc k) n
-  order?-suc n₀ k = ind
-    (λ n → Order k n → Order (suc k) n) (λ _ → gt (zero<suc[n] k))
-    (λ m _ o → order?-suc-lemma o)
-    n₀
+  order?-suc n k (lt k<n) with ≤⇒<∨≡ k<n
+  ... | inj₁ suc[k]<n = lt suc[k]<n
+  ... | inj₂ suc[k]≡n = eq suc[k]≡n
+  order?-suc n k (eq k≡n) = gt (subst (_< suc k) k≡n $ n<suc[n] k)
+  order?-suc n k (gt k>n) = gt (<-step k>n)
 
 order? : ∀ m n → Order m n
 order? m₀ n₀ =
