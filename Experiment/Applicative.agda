@@ -364,6 +364,9 @@ record Monad (F : Set → Set) : Set₁ where
     where open ≡-Reasoning
 
 {-
+kleisli-assoc
+-}
+{-
   kleisli-identityˡ : ∀ {A B : Set} (f : A → F B) (x : A) → join (fmap return (f x)) ≡ f x
   kleisli-identityˡ f x = identityˡ (f x)
 
