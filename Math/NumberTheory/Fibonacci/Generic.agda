@@ -75,8 +75,9 @@ fibRec≈fib (suc (suc n)) = begin
   fib (2 + n)                            ∎
 
 fib[2+n]≈fib[1+n]∙fib[n] : ∀ n → fib (suc (suc n)) ≈ fib (suc n) ∙ fib n
-fib[2+n]≈fib[1+n]∙fib[n] n = trans (sym $ fibRec≈fib (suc (suc n)))
-                            (∙-cong (fibRec≈fib (suc n)) (fibRec≈fib n))
+fib[2+n]≈fib[1+n]∙fib[n] n =
+  trans (sym $ fibRec≈fib (suc (suc n)))
+        (∙-cong (fibRec≈fib (suc n)) (fibRec≈fib n))
 
 fib[1+n]∙fib[n]≈fib[2+n] : ∀ n → fib (suc n) ∙ fib n ≈ fib (suc (suc n))
 fib[1+n]∙fib[n]≈fib[2+n] n = sym $ fib[2+n]≈fib[1+n]∙fib[n] n

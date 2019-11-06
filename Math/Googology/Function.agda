@@ -59,7 +59,7 @@ graham's-number = go 64 where
   go 0       = 4
   go (suc n) = 3 ↑[ go n ] 3
 
--- FGH
+-- Fast-growing hierarchy
 FGHℕ[_][_] : ℕ → ℕ → ℕ
 FGHℕ[ zero  ][ x ] = suc x
 FGHℕ[ suc n ][ x ] = fold x FGHℕ[ n ][_] x

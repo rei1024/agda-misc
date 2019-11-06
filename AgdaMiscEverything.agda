@@ -8,6 +8,15 @@
 module AgdaMiscEverything where
 
 ------------------------------------------------------------------------
+-- Experiment
+
+-- Insertion sort
+import Experiment.InsertionSort
+
+-- Quicksort
+import Experiment.Quicksort
+
+------------------------------------------------------------------------
 -- Logic
 
 -- Constructive mathematics

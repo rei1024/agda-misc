@@ -17,20 +17,23 @@ open import Relation.Binary as B
 open import Relation.Binary.PropositionalEquality using (_≡_)
 import      Relation.Binary.PropositionalEquality as ≡ hiding ([_])
 import      Relation.Binary.Reasoning.Setoid as SetoidReasoning
-open import Relation.Unary as U
+open import Relation.Unary as U hiding (_∈_)
 open import Relation.Nullary
+import      Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
 
-import      Data.List.Relation.Binary.Equality.Setoid as ListSetoidEquality
+
 open import Data.List.Relation.Unary.All as All
 import      Data.List.Relation.Unary.All.Properties as Allₚ
+open import Data.List.Relation.Unary.Any as Any
 open import Data.List.Relation.Unary.Linked
 import      Data.List.Relation.Unary.Linked.Properties as Linkedₚ
 open import Data.List.Relation.Unary.AllPairs as AllPairs
-import Data.List.Relation.Unary.AllPairs.Properties as AllPairsₚ
-import Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
+import      Data.List.Relation.Unary.AllPairs.Properties as AllPairsₚ
+import      Data.List.Relation.Binary.Equality.Setoid as ListSetoidEquality
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
 import Data.List.Relation.Binary.Permutation.Setoid.Properties
   as PermutationSetoidProperties
+open import Data.List.Membership.Propositional
 
 open import Function.Core using (_∘_; _$_; flip)
 
@@ -43,6 +46,12 @@ foldr-preservesʳ pres Pe []       = Pe
 foldr-preservesʳ pres Pe (x ∷ xs) = pres _ (foldr-preservesʳ pres Pe xs)
 
 -- stdlib
+module _ {a p q} {A : Set a} {P : U.Pred A p} {Q : U.Pred A q} where
+  All-mapWith∈ : ∀ {xs : List A} → (∀ {x} → x ∈ xs → P x → Q x) → All P xs → All Q xs
+  All-mapWith∈          f []         = []
+  All-mapWith∈ {x ∷ xs} f (px ∷ pxs) =
+    f (here ≡.refl) px ∷ All-mapWith∈ (λ x∈xs Px → f (there x∈xs) Px) pxs
+
 module _ {a p} {A : Set a} {P : U.Pred A p} where
   All-singleton⁺ : ∀ {x} → P x → All P [ x ]
   All-singleton⁺ px = px ∷ []
@@ -96,13 +105,26 @@ module _ {a r} {A : Set a} {R : Rel A r} where
             (AllPairs-∷ʳ⁺ (AllPairs-reverse⁺ rxs) (All-reverse⁺ rx))
 
 module _ {a r} {A : Set a} {R : Rel A r} where
+  AllPairs-sym-reverse⁺ : Symmetric R → ∀ {xs} → AllPairs R xs → AllPairs R (reverse xs)
+  AllPairs-sym-reverse⁺ sym = AllPairs.map sym ∘ AllPairs-reverse⁺
+
+AllAll : ∀ {a b r} {A : Set a} {B : Set b} → REL A B r → List A → List B → Set _
+AllAll R xs ys = All (λ x → All (R x) ys) xs
+
+module _ {a r} {A : Set a} {R : Rel A r} where
   AllPairs-reverse⁻ : ∀ {xs} → AllPairs R (reverse xs) → AllPairs (flip R) xs
   AllPairs-reverse⁻ {xs} rxs =
     ≡.subst (AllPairs (flip R)) (Listₚ.reverse-involutive xs)
             (AllPairs-reverse⁺ rxs)
 
   -- concat⁻
-
+{-
+  AllPairs-concat⁺ : ∀ {xss} → AllAll (AllAll R) xss xss →
+                     All (AllPairs R) xss → AllPairs R (concat xss)
+  AllPairs-concat⁺ {[]}       rxss         pxss         = []
+  AllPairs-concat⁺ {xs ∷ xss} (rxs ∷ rxss) (pxs ∷ pxss) =
+    AllPairsₚ.++⁺ {xs = xs} pxs (AllPairs-concat⁺ {! proj₂ (unconsʳ rxs)  !} pxss) {!   !}
+-}
   AllPairs-universal : B.Universal R → U.Universal (AllPairs R)
   AllPairs-universal u []       = []
   AllPairs-universal u (x ∷ xs) = All.universal (u _) _ ∷ AllPairs-universal u xs

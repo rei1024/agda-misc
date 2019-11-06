@@ -15,4 +15,4 @@ import Math.Logic.Nat.Operations as NatOperations
 ℕ-ind P P-base P-step (suc n) = P-step n (ℕ-ind P P-base P-step n)
 
 open NatOperations ℕ zero suc ℕ-ind
-  (λ P P-base P-step → refl) (λ P P-base P-step n → refl) public
+  (λ _ _ _ → refl) (λ _ _ _ _ → refl) public

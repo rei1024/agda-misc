@@ -5,12 +5,18 @@ open import Relation.Binary.PropositionalEquality
 
 module Math.Logic.Nat.Operations
   {a}
+  -- | Type of natural number
   (N : Set a)
+  -- | Zero
   (zero : N)
+  -- | Successor function
   (suc : N → N)
+  -- | Induction principle
   (ind : ∀ {p} (P : N → Set p) → P zero → (∀ k → P k → P (suc k)) → ∀ n → P n)
+  -- | Computaton rule for `zero`
   (ind-base : ∀ {p} (P : N → Set p) P-base P-step →
     ind P P-base P-step zero ≡ P-base)
+  -- | Computaton rule for `suc`
   (ind-step : ∀ {p} (P : N → Set p) P-base P-step n →
     ind P P-base P-step (suc n) ≡ P-step n (ind P P-base P-step n))
   where
@@ -19,19 +25,21 @@ module Math.Logic.Nat.Operations
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Data.Empty
 open import Data.Product
-open import Data.Bool using (Bool ; true ; false)
+open import Data.Bool using (Bool; true; false)
 open import Function.Core
 
 private
   variable
     A : Set a
 
+-- recursion
 rec : ∀ {l} {A : Set l} → A → (A → A) → N → A
 rec {l} {A} z s n = ind (λ _ → A) z (λ k x → s x) n
 
 caseNat : ∀ {l} {A : Set l} (z s : A) → N → A
 caseNat {A = A} z s n = ind (λ x → A) z (λ k x → s) n
 
+-- predcessor
 pred : N → N
 pred n = ind (λ _ → N) zero (λ k x → k) n
 
@@ -41,12 +49,15 @@ infixl 7 _*_
 infix 4 _≤_ _≰_ _≥_ _≱_ _<_ _≮_ _>_ _≯_
 infix 5 _≤ᵇ_
 
+-- Addition
 _+_ : N → N → N
 m + n = rec n suc m
 
+-- Multiplication
 _*_ : N → N → N
 m * n = rec zero (λ k → n + k) m
 
+-- Monus
 _∸_ : N → N → N
 m ∸ n = rec m pred n
 
@@ -75,7 +86,7 @@ m > n = n < m
 _≯_ : N → N → Set a
 m ≯ n = m > n → ⊥
 
--- order (Bool)
+-- Order (Bool)
 _≤ᵇ_ : N → N → Bool
 m ≤ᵇ n = caseNat true false (m ∸ n)
 

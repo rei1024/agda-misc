@@ -2,7 +2,7 @@
 
 module Experiment.ListConstruction where
 
-open import Level renaming (zero to lzero ; suc to lsuc)
+open import Level renaming (zero to lzero; suc to lsuc)
 
 data ⊥ : Set where
 
@@ -13,7 +13,7 @@ data ℕ : Set where
   zero : ℕ
   suc  : ℕ → ℕ
 
-module Ordinary where
+module Inductive where
   data List (A : Set) : Set where
     [] : List A
     _∷_ : A → List A → List A

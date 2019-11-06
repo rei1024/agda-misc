@@ -247,7 +247,7 @@ record Applicative (F : Set → Set) : Set₁ where
     (∀ x y → f x y ≡ g x y) → liftA2 f fx fy ≡ liftA2 g fx fy
   liftA2-cong {_} {_} {_} {f} {g} {fx} {gx} f≡g = fmap-cong λ v → f≡g (proj₁ v) (proj₂ v)
 
-  <*>-defn : ∀ {A B C} (ff : F (A → B)) (fx : F A) → ff <*> fx ≡ liftA2 _$′_ ff fx
+  <*>-defn : ∀ {A B} (ff : F (A → B)) (fx : F A) → ff <*> fx ≡ liftA2 _$′_ ff fx
   <*>-defn ff fx = refl
 
   -- liftA2 f fx fy = pure f <*> fx <*> fy
@@ -282,7 +282,7 @@ record ApplicativeViaAp (F : Set → Set) : Set₁ where
 
   unit : F ⊤
   unit = pure tt
-
+{-
   <,>-natural : ∀ {A B C D} (f : A → C) (g : B → D) (fx : F A) (fy : F B) →
     fmap f fx <,> fmap g fy ≡ fmap (Prod.map f g) (fx <,> fy)
   <,>-natural f g fx fy = begin
@@ -301,7 +301,7 @@ record ApplicativeViaAp (F : Set → Set) : Set₁ where
   liftA2-defn : ∀ {A B C} (f : A → B → C) (fx : F A) (fy : F B) →
     liftA2 f fx fy ≡ pure f <*> fx <*> fy
   liftA2-defn f fx fy = {!   !}
-
+-}
 record Monad (F : Set → Set) : Set₁ where
   infixl 5 _>>=_
   field
@@ -424,7 +424,7 @@ kleisli-assoc
     m1 >>= (λ x → fmap f (fmap (g x) m2)) ≡⟨ >>=-cong (λ x → fmap-∘ f (g x) m2) ⟩
     m1 >>= (λ x → fmap (f ∘′ g x) m2)     ∎
     where open ≡-Reasoning
-
+{-
   applicative : Applicative F
   applicative = record
     { functor = functor
@@ -460,3 +460,4 @@ kleisli-assoc
     ; unitʳ   = {!   !}
     }
     where open ≡-Reasoning
+-}

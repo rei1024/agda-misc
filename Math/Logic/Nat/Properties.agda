@@ -22,7 +22,7 @@ open import Data.Unit using (⊤ ; tt)
 open import Data.Product
 import Data.Product.Properties as Prodₚ
 open import Data.Sum as Sum
-open import Data.Bool using (Bool ; true ; false)
+open import Data.Bool using (Bool; true; false)
 open import Function.Core
 import Relation.Binary as B
 open import Relation.Nullary
@@ -306,7 +306,8 @@ n≮zero : ∀ n → n ≮ zero
 n≮zero n (m , sucn+m≡zero) = s≢z (n + m) $ trans (sym $ suc-+ n m) sucn+m≡zero
 
 ≤⇒≯ : ∀ {m n} → m ≤ n → m ≯ n
-≤⇒≯  {m} {n} (o , m+o≡n) (p , suc[n]+p≡m) = s≢z (p + o) $ +-cancelˡ-≡ n (suc (p + o)) zero $ begin
+≤⇒≯  {m} {n} (o , m+o≡n) (p , suc[n]+p≡m) =
+  s≢z (p + o) $ +-cancelˡ-≡ n (suc (p + o)) zero $ begin
   n + suc (p + o) ≡⟨ +-suc n (p + o) ⟩
   suc n + (p + o) ≡⟨ sym $ +-assoc (suc n) p o ⟩
   suc n + p + o   ≡⟨ cong (_+ o) $ suc[n]+p≡m ⟩
@@ -449,8 +450,8 @@ private
 
   order?-suc : ∀ n k → Order k n → Order (suc k) n
   order?-suc n k (lt k<n) with ≤⇒<∨≡ k<n
-  ... | inj₁ suc[k]<n = lt suc[k]<n
-  ... | inj₂ suc[k]≡n = eq suc[k]≡n
+  ... | inj₁ suc[k]<n     = lt suc[k]<n
+  ... | inj₂ suc[k]≡n     = eq suc[k]≡n
   order?-suc n k (eq k≡n) = gt (subst (_< suc k) k≡n $ n<suc[n] k)
   order?-suc n k (gt k>n) = gt (<-step k>n)
 
@@ -533,6 +534,7 @@ private
   subst-other-g B-irrelevant g f refl refl gy≡z with B-irrelevant gy≡z refl
   subst-other-g B-irrelevant g f refl refl .refl | refl = refl
 
+  -- variant of subst-application
   subst-lemma : ∀ {a₁ a₂ b₁ b₂} {A₁ : Set a₁} {A₂ : Set a₂}
     {B₁ : A₁ → Set b₁} {B₂ : A₂ → Set b₂}
     (f : A₁ → A₂) (g : ∀ x → B₁ x → B₂ (f x))
@@ -562,6 +564,7 @@ module _ {p} (P : N → N → Set p) where
       (Pss (suc k + o) k P[suc[k]+o,k]))
     n
 
+  -- diagonal induction
   inddiag :
     P zero zero →
     (∀ n → P zero (suc n)) →
