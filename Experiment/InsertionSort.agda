@@ -113,7 +113,7 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
     where open SetoidReasoning ↭-setoid
 
   insert-cong-≋ : ∀ {x y xs ys} → x ≈ y → xs ≋ ys → insert x xs ≋ insert y ys
-  insert-cong-≋ {x} {y} {[]} {[]} x≈y xs≋ys = x≈y ∷ []
+  insert-cong-≋ {x} {y} {[]}      {[]}      x≈y xs≋ys = x≈y ∷ []
   insert-cong-≋ {x} {y} {x₁ ∷ xs} {y₁ ∷ ys} x≈y (x₁≈y₁ ∷ xs≋ys) with x ≤? x₁ | y ≤? y₁
   ... | yes p | yes p₁ = x≈y ∷ x₁≈y₁ ∷ xs≋ys
   ... | yes p | no ¬p  = ⊥-elim (¬p (≤-respʳ-≈ x₁≈y₁ (≤-respˡ-≈ x≈y p)))
@@ -137,12 +137,15 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
   sort-isSorted-id : ∀ xs → IsSorted xs → sort xs ≋ xs
   sort-isSorted-id []       xs-isSorted   = ≋-refl
   sort-isSorted-id (x ∷ xs) x∷xs-isSorted = begin
-    sort (x ∷ xs)      ≡⟨⟩
+    sort (x ∷ xs)
+      ≡⟨⟩
     insert x (sort xs)
       ≈⟨ insert-cong-≋ Eq.refl
                        (sort-isSorted-id xs (Linked-∷⁻ʳ x∷xs-isSorted)) ⟩
-    insert x xs        ≈⟨ isSorted-insert x∷xs-isSorted ⟩
-    x ∷ xs             ∎
+    insert x xs
+      ≈⟨ isSorted-insert x∷xs-isSorted ⟩
+    x ∷ xs
+      ∎
     where open SetoidReasoning ≋-setoid
 
   sort-idem : ∀ xs → sort (sort xs) ≋ sort xs
@@ -152,49 +155,46 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
     ≰∧≱⇒⊥ : ∀ {x y} → x ≰ y → y ≰ x → ⊥
     ≰∧≱⇒⊥ x≰y y≰x = x≰y (≰⇒≥ y≰x)
 
-  insert-swap : ∀ x y xs → insert x (insert y xs) ≋ insert y (insert x xs)
-  insert-swap x y [] with x ≤? y | y ≤? x
-  ... | yes x≤y | yes y≤x = x≈y ∷ Eq.sym x≈y ∷ []
-    where x≈y = antisym x≤y y≤x
-  ... | yes _   | no  _   = ≋-refl
-  ... | no  _   | yes _   = ≋-refl
-  ... | no  x≰y | no  y≰x = ⊥-elim $ ≰∧≱⇒⊥ x≰y y≰x
-  insert-swap x y (z ∷ zs) with y ≤? z | x ≤? z
-  insert-swap x y (z ∷ zs) | yes _   | yes _ with x ≤? y | y ≤? x
-  insert-swap x y (z ∷ zs) | yes y≤z | yes x≤z | yes x≤y | yes y≤x =
-    x≈y ∷ Eq.sym x≈y ∷ ≋-refl
-    where x≈y = antisym x≤y y≤x
-  insert-swap x y (z ∷ zs) | yes y≤z | yes _   | yes _  | no _ = begin
-    x ∷ y ∷ z ∷ zs        ≈˘⟨ Eq.refl ∷ insert-stop zs y≤z ⟩
-    x ∷ insert y (z ∷ zs) ∎
-    where open SetoidReasoning ≋-setoid
-  insert-swap x y (z ∷ zs) | yes _   | yes x≤z | no _   | yes _ = begin
-    y ∷ insert x (z ∷ zs) ≈⟨ Eq.refl ∷ insert-stop zs x≤z ⟩
-    y ∷ x ∷ z ∷ zs        ∎
-    where open SetoidReasoning ≋-setoid
-  insert-swap x y (z ∷ zs) | yes y≤z | yes x≤z | no x≰y | no y≰x =
-    ⊥-elim $ ≰∧≱⇒⊥ x≰y y≰x
-  insert-swap x y (z ∷ zs) | yes _   | no  _ with x ≤? y
-  insert-swap x y (z ∷ zs) | yes y≤z | no  x≰z | yes x≤y =
-    ⊥-elim $ x≰z (trans x≤y y≤z)
-  insert-swap x y (z ∷ zs) | yes y≤z | no  x≰z | no  x≰y = begin
-    y ∷ insert x (z ∷ zs)      ≈⟨ Eq.refl ∷ insert-into zs x≰z ⟩
-    y ∷ z ∷ insert x zs        ≈˘⟨ insert-stop (insert x zs) y≤z ⟩
-    insert y (z ∷ insert x zs) ∎
-    where open SetoidReasoning ≋-setoid
-  insert-swap x y (z ∷ zs) | no _   | yes _ with y ≤? x
-  insert-swap x y (z ∷ zs) | no y≰z | yes x≤z | yes y≤x = ⊥-elim (y≰z (trans y≤x x≤z))
-  insert-swap x y (z ∷ zs) | no y≰z | yes x≤z | no  _   = begin
-    insert x (z ∷ insert y zs) ≈⟨ insert-stop (insert y zs) x≤z ⟩
-    x ∷ z ∷ insert y zs        ≈˘⟨ Eq.refl ∷ insert-into zs y≰z ⟩
-    x ∷ insert y (z ∷ zs)      ∎
-    where open SetoidReasoning ≋-setoid
-  insert-swap x y (z ∷ zs) | no y≰z | no  x≰z = begin
-    insert x (z ∷ insert y zs) ≈⟨ insert-into (insert y zs) x≰z ⟩
-    z ∷ insert x (insert y zs) ≈⟨ Eq.refl ∷ insert-swap x y zs ⟩
-    z ∷ insert y (insert x zs) ≈˘⟨ insert-into (insert x zs) y≰z ⟩
-    insert y (z ∷ insert x zs) ∎
-    where open SetoidReasoning ≋-setoid
+  module _ where
+    open SetoidReasoning ≋-setoid
+    insert-swap : ∀ x y xs → insert x (insert y xs) ≋ insert y (insert x xs)
+    insert-swap x y [] with x ≤? y | y ≤? x
+    ... | yes x≤y | yes y≤x = x≈y ∷ Eq.sym x≈y ∷ []
+      where x≈y = antisym x≤y y≤x
+    ... | yes _   | no  _   = ≋-refl
+    ... | no  _   | yes _   = ≋-refl
+    ... | no  x≰y | no  y≰x = ⊥-elim $ ≰∧≱⇒⊥ x≰y y≰x
+    insert-swap x y (z ∷ zs) with y ≤? z | x ≤? z
+    insert-swap x y (z ∷ zs) | yes _   | yes _ with x ≤? y | y ≤? x
+    insert-swap x y (z ∷ zs) | yes y≤z | yes x≤z | yes x≤y | yes y≤x =
+      x≈y ∷ Eq.sym x≈y ∷ ≋-refl
+      where x≈y = antisym x≤y y≤x
+    insert-swap x y (z ∷ zs) | yes y≤z | yes _   | yes _  | no _ = begin
+      x ∷ y ∷ z ∷ zs        ≈˘⟨ Eq.refl ∷ insert-stop zs y≤z ⟩
+      x ∷ insert y (z ∷ zs) ∎
+    insert-swap x y (z ∷ zs) | yes _   | yes x≤z | no _   | yes _ = begin
+      y ∷ insert x (z ∷ zs) ≈⟨ Eq.refl ∷ insert-stop zs x≤z ⟩
+      y ∷ x ∷ z ∷ zs        ∎
+    insert-swap x y (z ∷ zs) | yes y≤z | yes x≤z | no x≰y | no y≰x =
+      ⊥-elim $ ≰∧≱⇒⊥ x≰y y≰x
+    insert-swap x y (z ∷ zs) | yes _   | no  _ with x ≤? y
+    insert-swap x y (z ∷ zs) | yes y≤z | no  x≰z | yes x≤y =
+      ⊥-elim $ x≰z (trans x≤y y≤z)
+    insert-swap x y (z ∷ zs) | yes y≤z | no  x≰z | no  x≰y = begin
+      y ∷ insert x (z ∷ zs)      ≈⟨ Eq.refl ∷ insert-into zs x≰z ⟩
+      y ∷ z ∷ insert x zs        ≈˘⟨ insert-stop (insert x zs) y≤z ⟩
+      insert y (z ∷ insert x zs) ∎
+    insert-swap x y (z ∷ zs) | no _   | yes _ with y ≤? x
+    insert-swap x y (z ∷ zs) | no y≰z | yes x≤z | yes y≤x = ⊥-elim (y≰z (trans y≤x x≤z))
+    insert-swap x y (z ∷ zs) | no y≰z | yes x≤z | no  _   = begin
+      insert x (z ∷ insert y zs) ≈⟨ insert-stop (insert y zs) x≤z ⟩
+      x ∷ z ∷ insert y zs        ≈˘⟨ Eq.refl ∷ insert-into zs y≰z ⟩
+      x ∷ insert y (z ∷ zs)      ∎
+    insert-swap x y (z ∷ zs) | no y≰z | no  x≰z = begin
+      insert x (z ∷ insert y zs) ≈⟨ insert-into (insert y zs) x≰z ⟩
+      z ∷ insert x (insert y zs) ≈⟨ Eq.refl ∷ insert-swap x y zs ⟩
+      z ∷ insert y (insert x zs) ≈˘⟨ insert-into (insert x zs) y≰z ⟩
+      insert y (z ∷ insert x zs) ∎
 
   sort-cong-↭-≋ : ∀ {xs ys} → xs ↭ ys → sort xs ≋ sort ys
   sort-cong-↭-≋ {xs}           {.xs}        PSrefl               = ≋-refl
