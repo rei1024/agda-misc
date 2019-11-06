@@ -102,19 +102,21 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
                         (swap Eq.refl Eq.refl ↭-refl)
 
   insert-isSorted : ∀ x {xs} → IsSorted xs → IsSorted (insert x xs)
-  insert-isSorted x {[]}     xs-isSorted = [-]
+  insert-isSorted x {[]}     _ = [-]
   insert-isSorted x {y ∷ ys} xs-isSorted with x ≤? y
   ... | yes x≤y = x≤y ∷ xs-isSorted
-  ... | no  x≰y = Linkedₚ.AllPairs⇒Linked (lem ∷ ap)
+  ... | no  x≰y = Linkedₚ.AllPairs⇒Linked (hd ∷ tl)
     where
+    y≤x : y ≤ x
     y≤x = ≰⇒≥ x≰y
+    lem : All (y ≤_) ys
+    lem = AllPairs.head (Linkedₚ.Linked⇒AllPairs trans xs-isSorted)
+    hd : All (y ≤_) (insert x ys)
+    hd = All-resp-↭ ≤-respʳ-≈ (↭-sym (insert-permutation x ys)) (y≤x ∷ lem)
     insert[x,ys]-isSorted : IsSorted (insert x ys)
     insert[x,ys]-isSorted = insert-isSorted x {ys} (Linked-∷⁻ʳ xs-isSorted)
-    ap : AllPairs _≤_ (insert x ys)
-    ap = Linkedₚ.Linked⇒AllPairs trans insert[x,ys]-isSorted
-    lem : All (y ≤_) (insert x ys)
-    lem = All-resp-↭ ≤-respʳ-≈ (↭-sym (insert-permutation x ys))
-          (y≤x ∷ AllPairs.head (Linkedₚ.Linked⇒AllPairs trans xs-isSorted) )
+    tl : AllPairs _≤_ (insert x ys)
+    tl = Linkedₚ.Linked⇒AllPairs trans insert[x,ys]-isSorted
 
   sort-isSorted : ∀ xs → IsSorted (sort xs)
   sort-isSorted xs = foldr-preservesʳ insert-isSorted [] xs
@@ -223,6 +225,7 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
     sort ys ∎
     where open SetoidReasoning ≋-setoid
 
+  -- TODO move to ListRelationProperties
   IsSorted-transport : ∀ {xs ys} → xs ≋ ys → IsSorted xs → IsSorted ys
   IsSorted-transport []                []        = []
   IsSorted-transport (x≈y ∷ [])        [-]       = [-]
