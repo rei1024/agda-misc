@@ -13,6 +13,8 @@ module AgdaMiscEverything where
 -- Insertion sort
 import Algorithms.List.Sort.Insertion
 
+import Algorithms.List.Sort.Insertion.Properties
+
 -- Quicksort
 import Algorithms.List.Sort.Quick
 
