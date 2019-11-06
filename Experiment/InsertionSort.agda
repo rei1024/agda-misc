@@ -5,21 +5,13 @@ module Experiment.InsertionSort where
 -- agda-stdlib
 open import Level
 
+open import Data.Bool hiding (_≤_; _≤?_; _<_)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.List
-open import Data.Bool hiding (_≤_; _≤?_; _<_)
+import      Data.List.Properties as Listₚ
 import      Data.Nat as ℕ
+import      Data.Nat.Properties as ℕₚ
 open import Data.Product hiding (swap)
-
-import Data.List.Properties as Listₚ
-import Data.Nat.Properties as ℕₚ
-
-open import Relation.Binary as B
-open import Relation.Binary.PropositionalEquality using (_≡_)
-import      Relation.Binary.PropositionalEquality as ≡ hiding ([_])
-import      Relation.Binary.Reasoning.Setoid as SetoidReasoning
-open import Relation.Unary as U
-open import Relation.Nullary
 
 import      Data.List.Relation.Binary.Equality.Setoid as ListSetoidEquality
 open import Data.List.Relation.Unary.All as All
@@ -27,13 +19,20 @@ import      Data.List.Relation.Unary.All.Properties as Allₚ
 open import Data.List.Relation.Unary.Linked as Linked
 import      Data.List.Relation.Unary.Linked.Properties as Linkedₚ
 open import Data.List.Relation.Unary.AllPairs as AllPairs
-import Data.List.Relation.Unary.AllPairs.Properties as AllPairsₚ
-import Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
-import Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
-import Data.List.Relation.Binary.Permutation.Setoid.Properties
+import      Data.List.Relation.Unary.AllPairs.Properties as AllPairsₚ
+import      Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
+import      Data.List.Relation.Binary.Permutation.Setoid.Properties
   as PermutationSetoidProperties
 
 open import Function.Core using (_∘_; _$_; flip)
+
+open import Relation.Binary as B
+import      Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
+open import Relation.Binary.PropositionalEquality using (_≡_)
+import      Relation.Binary.PropositionalEquality as ≡ hiding ([_])
+import      Relation.Binary.Reasoning.Setoid as SetoidReasoning
+open import Relation.Nullary
+open import Relation.Unary as U
 
 -- agda-misc
 open import Experiment.ListRelationProperties using (foldr-preservesʳ; Linked-∷⁻ʳ)
@@ -74,6 +73,23 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
 
     ≰⇒≥ : ∀ {x y} → x ≰ y → y ≤ x
     ≰⇒≥ = <⇒≤ ∘ ≰⇒>
+
+    ≰∧≱⇒⊥ : ∀ {x y} → x ≰ y → y ≰ x → ⊥
+    ≰∧≱⇒⊥ x≰y y≰x = x≰y (≰⇒≥ y≰x)
+
+    ≰⇒≉ : ∀ {x y} → x ≰ y → ¬ (x ≈ y)
+    ≰⇒≉ x≰y x≈y = x≰y (≤-respʳ-≈ x≈y refl)
+
+    ≱⇒≉ : ∀ {x y} → y ≰ x → ¬ (x ≈ y)
+    ≱⇒≉ x≱y x≈y = ≰⇒≉ x≱y (Eq.sym x≈y)
+
+-- stdlib
+  _≈?_ : ∀ x y → Dec (x ≈ y)
+  x ≈? y with x ≤? y | y ≤? x
+  (x ≈? y) | yes x≤y | yes y≤x = yes (antisym x≤y y≤x)
+  (x ≈? y) | yes x≤y | no  y≰x = no (≱⇒≉ y≰x)
+  (x ≈? y) | no  x≰y | yes y≤x = no (≰⇒≉ x≰y)
+  (x ≈? y) | no  x≰y | no  y≰x = ⊥-elim $ ≰∧≱⇒⊥ x≰y y≰x
 
   IsSorted : List A → Set _
   IsSorted = Linked _≤_
@@ -151,10 +167,6 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
   sort-idem : ∀ xs → sort (sort xs) ≋ sort xs
   sort-idem xs = sort-isSorted-id (sort xs) (sort-isSorted xs)
 
-  private
-    ≰∧≱⇒⊥ : ∀ {x y} → x ≰ y → y ≰ x → ⊥
-    ≰∧≱⇒⊥ x≰y y≰x = x≰y (≰⇒≥ y≰x)
-
   module _ where
     open SetoidReasoning ≋-setoid
     insert-swap : ∀ x y xs → insert x (insert y xs) ≋ insert y (insert x xs)
@@ -197,8 +209,8 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
       insert y (z ∷ insert x zs) ∎
 
   sort-cong-↭-≋ : ∀ {xs ys} → xs ↭ ys → sort xs ≋ sort ys
-  sort-cong-↭-≋ {xs}           {.xs}        PSrefl               = ≋-refl
-  sort-cong-↭-≋ {_ ∷ _}        {_ ∷ _}      (prep eq xs↭ys)      =
+  sort-cong-↭-≋ {xs}         {.xs}          PSrefl               = ≋-refl
+  sort-cong-↭-≋ {_ ∷ _}      {_ ∷ _}        (prep eq xs↭ys)      =
     insert-cong-≋ eq (sort-cong-↭-≋ xs↭ys)
   sort-cong-↭-≋ {x ∷ y ∷ xs} {y′ ∷ x′ ∷ ys} (swap eq₁ eq₂ xs↭ys) = begin
     insert x  (insert y  (sort xs)) ≈⟨ insert-cong-≋ eq₁ (insert-cong-≋ eq₂ (sort-cong-↭-≋ xs↭ys)) ⟩
@@ -211,10 +223,6 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
     sort ys ∎
     where open SetoidReasoning ≋-setoid
 
-
--- internal error
--- Location of the error: src/full//Agda//TypeChecking//Rules//LHS.hs:767
-
 module InsertionSortProperties2 {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ ℓ₂) where
   open DecTotalOrder DTO renaming (Carrier to A)
   open InsertionSortOperation DTO
@@ -224,65 +232,16 @@ module InsertionSortProperties2 {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ 
   open ListSetoidEquality Eq.setoid
   open InsertionSortProperties DTO public
 
-{-
-  isSorted-Unique′ : ∀ {xs ys} → xs ↭ ys → IsSorted xs → IsSorted ys → xs ≋ ys
-  isSorted-Unique′ {xs} {.xs} PSrefl isxs isys = ≋-refl
-  isSorted-Unique′ {_ ∷ _} {_ ∷ _} (prep eq xs↭ys) isxs isys =
-    eq ∷ isSorted-Unique′ xs↭ys (Linked-∷⁻ʳ isxs) (Linked-∷⁻ʳ isys)
-  isSorted-Unique′ {x ∷ y ∷ xs} {x′ ∷ y′ ∷ ys} (swap eq₁ eq₂ xs↭ys) isxs isys = begin
-    x ∷ y ∷ xs ≈⟨ eq₁ ∷ eq₂ ∷ isSorted-Unique′ xs↭ys
-                                (Linked-∷⁻ʳ (Linked.tail isxs))
-                                (Linked-∷⁻ʳ (Linked.tail isys)) ⟩
-    y′ ∷ x′ ∷ ys ≈⟨ ? ⟩
-    insert y′ (insert x′ ys)
-    insert x′ (insert y′ ys)
-    x′ ∷ y′ ∷ ys ∎
-    where
-    open SetoidReasoning ≋-setoid
-    x≤y = Linked.head isxs
-    x′≤y′ = Linked.head isys
-    -- y′≤x′ : y′ ≤ x′
-    -- y′≤x′ = Linked.head isys
+  IsSorted-transport : ∀ {xs ys} → xs ≋ ys → IsSorted xs → IsSorted ys
+  IsSorted-transport []                []        = []
+  IsSorted-transport (x≈y ∷ [])        [-]       = [-]
+  IsSorted-transport (e₁ ∷ e₂ ∷ xs≋ys) (x ∷ ixs) =
+   (≤-respʳ-≈ e₂ $ ≤-respˡ-≈ e₁ x) ∷ IsSorted-transport (e₂ ∷ xs≋ys) ixs
 
-  isSorted-Unique′ {xs} {ys} (PStrans xs↭zs zs↭ys) isxs isys = {!   !}
--}
-
-
-  {- begin
-    xs  isSorted-Unique′ (xs↭zs↭sortzs) isxs sort-isSorted
-    sort zs
-    ys ∎
-    where open SetoidReasoning ≋-setoid
-  -}
-
-  isSorted-Unique : ∀ {xs ys} → xs ↭ ys → IsSorted ys → sort xs ≋ ys
-  isSorted-Unique {xs}     {.xs}    PSrefl            ys-isSorted =
-    sort-isSorted-id xs ys-isSorted
-  isSorted-Unique {x ∷ xs} {y ∷ ys} (prep eq xs↭ys) ys-isSorted = begin
-    insert x (sort xs)
-      ≈⟨ insert-cong-≋ eq (isSorted-Unique xs↭ys (Linked-∷⁻ʳ ys-isSorted)) ⟩
-    insert y ys
-      ≈⟨ isSorted-insert ys-isSorted ⟩
-    y ∷ ys
-      ∎
-    where open SetoidReasoning ≋-setoid
-  isSorted-Unique {x₁ ∷ x₂ ∷ xs} {y₁ ∷ y₂ ∷ ys}
-    (swap eq₁ eq₂ xs↭ys) yyys-iS@(_ ∷ yys-iS) = begin
-      insert x₁ (insert x₂ (sort xs))
-        ≈⟨ insert-cong-≋ eq₁ (insert-cong-≋ {xs = sort xs} {ys = ys} eq₂
-            (isSorted-Unique xs↭ys (Linked-∷⁻ʳ yys-iS))) ⟩
-      insert y₂ (insert y₁ ys)
-        ≈⟨ insert-swap y₂ y₁ ys ⟩
-      insert y₁ (insert y₂ ys)
-        ≈⟨ insert-cong-≋ {xs = insert y₂ ys} {ys = y₂ ∷ ys} Eq.refl
-          (isSorted-insert yys-iS) ⟩
-      insert y₁ (y₂ ∷ ys)
-        ≈⟨ isSorted-insert yyys-iS ⟩
-      y₁ ∷ y₂ ∷ ys
-        ∎
-      where open SetoidReasoning ≋-setoid
-  isSorted-Unique {xs} {ys} (PStrans {ys = zs} xs↭zs zs↭ys) ys-isSorted = begin
-    sort xs ≈⟨ sort-cong-↭-≋ xs↭zs ⟩
-    sort zs ≈⟨ isSorted-Unique zs↭ys ys-isSorted ⟩
+  isSorted-unique : ∀ {xs ys} → xs ↭ ys → IsSorted xs → IsSorted ys → xs ≋ ys
+  isSorted-unique {xs} {ys} xs↭ys ixs iys = begin
+    xs      ≈⟨ ≋-sym $ sort-isSorted-id xs ixs ⟩
+    sort xs ≈⟨ sort-cong-↭-≋ xs↭ys ⟩
+    sort ys ≈⟨ sort-isSorted-id ys iys ⟩
     ys      ∎
     where open SetoidReasoning ≋-setoid
