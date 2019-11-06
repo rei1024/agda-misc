@@ -223,15 +223,6 @@ module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
     sort ys ∎
     where open SetoidReasoning ≋-setoid
 
-module InsertionSortProperties2 {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ ℓ₂) where
-  open DecTotalOrder DTO renaming (Carrier to A)
-  open InsertionSortOperation DTO
-  open DecTotalOrderProperties DTO
-  open PermutationSetoid Eq.setoid renaming (refl to PSrefl; trans to PStrans)
-  open PermutationSetoidProperties Eq.setoid
-  open ListSetoidEquality Eq.setoid
-  open InsertionSortProperties DTO public
-
   IsSorted-transport : ∀ {xs ys} → xs ≋ ys → IsSorted xs → IsSorted ys
   IsSorted-transport []                []        = []
   IsSorted-transport (x≈y ∷ [])        [-]       = [-]
