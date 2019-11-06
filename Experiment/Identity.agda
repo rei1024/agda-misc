@@ -2,8 +2,9 @@
 module Experiment.Identity where
 
 open import Level renaming (zero to lzero ; suc to lsuc)
-open import Relation.Binary.PropositionalEquality using (refl; _≡_)
+open import Relation.Binary.PropositionalEquality as P using (refl; _≡_)
   renaming (trans to ≡-trans ; sym to ≡-sym ; cong to ≡-cong)
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 open import Relation.Binary
 
 -- HoTT 1.12.1
@@ -29,9 +30,9 @@ record JBundle a : Set (lsuc a) where
     _≈_     : Rel Carrier a
     ≈-refl  : ∀ {x} → x ≈ x
     J       : (C : ∀ x y → x ≈ y → Set a) → (∀ x → C x x ≈-refl) →
-        ∀ x y (p : x ≈ y) → C x y p
+              ∀ x y (p : x ≈ y) → C x y p
     J-β     : ∀ (C : ∀ x y → x ≈ y → Set a) (c : ∀ x → C x x ≈-refl) x →
-      J C c x x ≈-refl ≡ c x
+              J C c x x ≈-refl ≡ c x
 
 ≡-jBundle : ∀ {a} (A : Set a) → JBundle a
 ≡-jBundle A = record
@@ -51,5 +52,14 @@ module JBundleProperties {a} (jBundle : JBundle a) where
   sym-≈-refl x = J-β (λ x₁ y₁ x₁≈y₁ → y₁ ≈ x₁) (λ _ → ≈-refl) x
 
   sym-involutive : ∀ {x y} (p : x ≈ y) → sym (sym p) ≡ p
-  sym-involutive {x} {y} p = J (λ x₁ y₁ x₁≈y₁ → sym (sym x₁≈y₁) ≡ x₁≈y₁)
-    (λ z → ≡-trans (≡-cong sym (sym-≈-refl z)) (sym-≈-refl z)) x y p
+  sym-involutive {x} {y} p =
+   J (λ x₁ y₁ x₁≈y₁ → sym (sym x₁≈y₁) ≡ x₁≈y₁)
+     (λ z → ≡-trans (≡-cong sym (sym-≈-refl z)) (sym-≈-refl z)) x y p
+
+  sym-injective : ∀ {x y} {p q : x ≈ y} → sym p ≡ sym q → p ≡ q
+  sym-injective {p = p} {q} eq = begin
+    p           ≡⟨ ≡-sym (sym-involutive p) ⟩
+    sym (sym p) ≡⟨ ≡-cong sym eq ⟩
+    sym (sym q) ≡⟨ sym-involutive q ⟩
+    q           ∎
+    where open P.≡-Reasoning

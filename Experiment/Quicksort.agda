@@ -50,7 +50,7 @@ module _ {A : Set a} {_≤_ : Rel A r} (_≤?_ : B.Decidable _≤_) where
   _L<_ = ℕ._<_ on length
 
   sort-acc : ∀ xs → Acc _L<_ xs → List A
-  sort-acc []       a        = []
+  sort-acc []       _        = []
   sort-acc (x ∷ xs) (acc rs) =
     sort-acc (proj₁ splitted) (rs _ (ℕ.s≤s $ split-decr₁ x xs)) ++
     [ x ] ++
