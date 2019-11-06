@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K --safe #-}
 
-module Experiment.InsertionSort where
+module Algorithms.List.Sort.Insertion where
 
 -- agda-stdlib
 open import Level
@@ -37,8 +37,9 @@ open import Relation.Unary as U
 -- agda-misc
 open import Experiment.ListRelationProperties using (foldr-preservesʳ; Linked-∷⁻ʳ)
 
-module InsertionSortOperation {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ ℓ₂) where
-  open DecTotalOrder DTO renaming (Carrier to A)
+module InsertionSortOperation
+  {a r} {A : Set a} {_≤_ : Rel A r} (_≤?_ : B.Decidable _≤_)
+  where
 
   insert : A → List A → List A
   insert x []           = [ x ]
@@ -50,14 +51,14 @@ module InsertionSortOperation {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ �
   sort = foldr insert []
 
 module Test where
-  open InsertionSortOperation ℕₚ.≤-decTotalOrder
+  open InsertionSortOperation ℕ._≤?_
 
   _ : sort (5 ∷ 2 ∷ 4 ∷ 3 ∷ 1 ∷ []) ≡.≡ 1 ∷ 2 ∷ 3 ∷ 4 ∷ 5 ∷ []
   _ = ≡.refl
 
 module InsertionSortProperties {c ℓ₁ ℓ₂} (DTO : DecTotalOrder c ℓ₁ ℓ₂) where
   open DecTotalOrder DTO renaming (Carrier to A)
-  open InsertionSortOperation DTO
+  open InsertionSortOperation _≤?_
   open DecTotalOrderProperties DTO
   open PermutationSetoid Eq.setoid renaming (refl to PSrefl; trans to PStrans)
   open PermutationSetoidProperties Eq.setoid

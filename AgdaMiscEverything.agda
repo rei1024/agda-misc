@@ -8,13 +8,13 @@
 module AgdaMiscEverything where
 
 ------------------------------------------------------------------------
--- Experiment
+-- Algorithms
 
 -- Insertion sort
-import Experiment.InsertionSort
+import Algorithms.List.Sort.Insertion
 
 -- Quicksort
-import Experiment.Quicksort
+import Algorithms.List.Sort.Quick
 
 ------------------------------------------------------------------------
 -- Logic

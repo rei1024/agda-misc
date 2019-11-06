@@ -2,7 +2,7 @@
 
 -- Quicksort
 
-module Experiment.Quicksort where
+module Algorithms.List.Sort.Quick where
 
 -- agda-stdlib
 open import Level
