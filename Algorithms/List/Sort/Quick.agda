@@ -61,5 +61,6 @@ module _ {A : Set a} {_≤_ : Rel A r} (_≤?_ : B.Decidable _≤_) where
   L<-wf : WellFounded _L<_
   L<-wf = InverseImage.wellFounded length Ind.<-wellFounded
 
+  -- Quicksort
   sort : List A → List A
   sort xs = sort-acc xs (L<-wf xs)

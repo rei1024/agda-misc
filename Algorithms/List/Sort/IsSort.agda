@@ -6,18 +6,33 @@ module Algorithms.List.Sort.IsSort {c l₁ l₂} (DTO : DecTotalOrder c l₁ l�
 
 open import Level
 open import Data.List
+import      Data.List.Relation.Binary.Equality.Setoid as SetoidEquality
 import      Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
 open import Data.List.Relation.Unary.Linked as Linked
 
 import Algorithms.List.Sort.Insertion as I
+import Algorithms.List.Sort.Insertion.Properties as Iₚ
 
 open DecTotalOrder DTO renaming (Carrier to A)
 open PermutationSetoid Eq.setoid
+open SetoidEquality Eq.setoid
+
+Sorted : List A → Set _
+Sorted = Linked _≤_
 
 record IsSort (sort : List A → List A) : Set (c ⊔ l₁ ⊔ l₂) where
   field
-    sorted : (xs : List A) → Linked _≤_ (sort xs)
+    sorted : (xs : List A) → Sorted (sort xs)
     perm   : (xs : List A) → sort xs ↭ xs
+
+  open I.InsertionSortOperation _≤?_ renaming (sort to Isort)
+  open Iₚ DTO
+  private
+    sort-Isort : ∀ xs → sort xs ≋ Isort xs
+    sort-Isort xs =
+      isSorted-unique (↭-trans (perm xs) (↭-sym (sort-permutation xs)))
+      (sorted xs)
+      (sort-isSorted xs)
 
   {-
   sort-id : ∀ {xs} → Linked _≤_ xs → sort xs ≋ xs

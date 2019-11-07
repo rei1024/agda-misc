@@ -5,7 +5,6 @@
 module Algorithms.List.Sort.Insertion where
 
 -- agda-stdlib
-
 open import Data.Bool hiding (_≤_; _≤?_; _<_)
 open import Data.List
 import      Data.Nat as ℕ
@@ -27,7 +26,7 @@ module InsertionSortOperation
   sort : List A → List A
   sort = foldr insert []
 
-module Test where
+private
   open InsertionSortOperation ℕ._≤?_
 
   _ : sort (5 ∷ 2 ∷ 4 ∷ 3 ∷ 1 ∷ []) ≡ 1 ∷ 2 ∷ 3 ∷ 4 ∷ 5 ∷ []

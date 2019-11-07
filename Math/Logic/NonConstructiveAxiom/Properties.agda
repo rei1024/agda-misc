@@ -8,6 +8,7 @@
 module Math.Logic.NonConstructiveAxiom.Properties where
 
 -- agda-stdlib
+open import Axiom.Extensionality.Propositional
 open import Level renaming (suc to lsuc; zero to lzero)
 open import Data.Empty
 open import Data.Unit
@@ -19,7 +20,7 @@ import Data.Fin.Properties as Finₚ
 open import Function.Core
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 import Function.Equivalence as Eqv
@@ -45,16 +46,6 @@ assume-EM-in-DN f = DN-bind f DN-EM-i
 
 assume-DNE-in-DN : ∀ {a b} {A : Set a} {B : Set b} → ((¬ ¬ A → A) → ¬ ¬ B) → ¬ ¬ B
 assume-DNE-in-DN f = assume-EM-in-DN λ em → f (A⊎B→¬B→A em)
-
-{-
-{-# TERMINATING #-}
-mp-ℕ : ∀ {p} → MP ℕ p
-mp-ℕ {P = P} P? _ = go 0 where
-  go : ℕ → ∃ λ n → ¬ P n
-  go n with P? n
-  ... | inj₁ _   = go (ℕ.suc n)
-  ... | inj₂ ¬Pn = n , ¬Pn
--}
 
 -- LPO for finite set
 lpo-Fin : ∀ {n p} → LPO (Fin n) p
@@ -250,6 +241,19 @@ DN-ip q f = DN-map
 
 dne⇒ip : ∀ {a b c} → DNE (a ⊔ b ⊔ c) → IP a b c
 dne⇒ip dne q f = dne (DN-ip q f)
+
+dne⁻¹⇒em⁻¹ : ∀ {a} → Extensionality a lzero → DNE⁻¹ a → EM⁻¹ a
+dne⁻¹⇒em⁻¹ ext dne⁻¹ isP = dne⁻¹ isP′ DN-EM-i where
+  isP′ : ∀ x y → x ≡ y
+  isP′ (inj₁  x) (inj₁  y) = cong inj₁ (isP x y)
+  isP′ (inj₁  x) (inj₂ ¬y) = ⊥-elim $ ¬y x
+  isP′ (inj₂ ¬x) (inj₁  y) = ⊥-elim $ ¬x y
+  isP′ (inj₂ ¬x) (inj₂ ¬y) = cong inj₂ (ext λ x → ⊥-elim $ ¬x x)
+
+em⁻¹⇒dne⁻¹ : ∀ {a} → EM⁻¹ a → DNE⁻¹ a
+em⁻¹⇒dne⁻¹ em⁻¹ isP ¬¬x with em⁻¹ isP
+... | inj₁  x = x
+... | inj₂ ¬x = ⊥-elim $ ¬¬x ¬x
 
 -----------------------------------------------------------------------
 -- Properties of LPO, LLPO, WLPO, MP, MP⊎, WMP

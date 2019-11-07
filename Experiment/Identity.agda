@@ -1,28 +1,11 @@
 {-# OPTIONS --without-K --safe #-}
 module Experiment.Identity where
 
-open import Level renaming (zero to lzero ; suc to lsuc)
+open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Binary.PropositionalEquality as P using (refl; _≡_)
-  renaming (trans to ≡-trans ; sym to ≡-sym ; cong to ≡-cong)
+  renaming (trans to ≡-trans; sym to ≡-sym; cong to ≡-cong)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 open import Relation.Binary
-
--- HoTT 1.12.1
--- Path induction
-PathInd : ∀ {a l} {A : Set a} (C : (x y : A) → x ≡ y → Set l) →
-  (∀ x → C x x refl) → ∀ x y (p : x ≡ y) → C x y p
-PathInd C c x .x refl = c x
-
-PathInd-β : ∀ {a l} {A : Set a}
-  (C : (x y : A) → x ≡ y → Set l) (c : ∀ x → C x x refl) x →
-  PathInd C c x x refl ≡ c x
-PathInd-β C c x = refl
-
--- Based path induction
-BasedPathInd : ∀ {al l} {A : Set al}
-  (a : A) (C : ∀ x → a ≡ x → Set l) → C a refl →
-  ∀ x (p : a ≡ x) → C x p
-BasedPathInd a C c .a refl = c
 
 record JBundle a : Set (lsuc a) where
   field
@@ -33,15 +16,6 @@ record JBundle a : Set (lsuc a) where
               ∀ x y (p : x ≈ y) → C x y p
     J-β     : ∀ (C : ∀ x y → x ≈ y → Set a) (c : ∀ x → C x x ≈-refl) x →
               J C c x x ≈-refl ≡ c x
-
-≡-jBundle : ∀ {a} (A : Set a) → JBundle a
-≡-jBundle A = record
-  { Carrier = A
-  ; _≈_     = _≡_
-  ; ≈-refl  = refl
-  ; J       = PathInd
-  ; J-β     = PathInd-β
-  }
 
 module JBundleProperties {a} (jBundle : JBundle a) where
   open JBundle jBundle renaming (Carrier to A)
@@ -63,3 +37,9 @@ module JBundleProperties {a} (jBundle : JBundle a) where
     sym (sym q) ≡⟨ sym-involutive q ⟩
     q           ∎
     where open P.≡-Reasoning
+
+  trans : ∀ {x y z} → x ≈ y → y ≈ z → x ≈ z
+  trans {x} {y} {z} x≈y y≈z = J D (λ u → λ w q → q) x y x≈y z y≈z
+    where
+    D : ∀ u v → u ≈ v → Set _
+    D u v u≈v = ∀ w → (q : v ≈ w) → u ≈ w
