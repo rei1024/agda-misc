@@ -95,7 +95,7 @@ DNS a p = {A : Set a} {P : A → Set p} → DNS-i P
 -- Independence-of-premise
 IP : ∀ p q r → Set (lsuc (p ⊔ q ⊔ r))
 IP p q r = ∀ {P : Set p} {Q : Set q} {R : Q → Set r} →
-             Q → (P → Σ Q R) → (Σ Q λ x → (P → R x))
+           Q → (P → Σ Q R) → (Σ Q λ x → (P → R x))
 
 -- Unary decidable predicate
 DecU : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
@@ -185,7 +185,7 @@ WMP-Bool-i : ∀ {a} {A : Set a} → (A → Bool) → Set a
 WMP-Bool-i {A = A} P =
   ((Q : A → Bool) →
     ¬ ¬ ∃ (λ x → Q x ≡ true) ⊎ (¬ ¬ ∃ λ x → P x ≡ true × Q x ≢ true)) →
-   ∃ λ x → P x ≡ true
+  ∃ λ x → P x ≡ true
 
 WMP-Bool : ∀ {a} (A : Set a) → Set a
 WMP-Bool A = (P : A → Bool) → WMP-Bool-i P
@@ -193,27 +193,27 @@ WMP-Bool A = (P : A → Bool) → WMP-Bool-i P
 -- Disjunctive Markov’s principle
 MP⊎-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
 MP⊎-i P Q = DecU P → DecU Q → ¬ (¬ ∃ P × ¬ ∃ Q) → ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
--- ¬ ¬ (∃ λ x → P x ⊎ Q x)
 
 MP⊎ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP⊎ A p = {P Q : A → Set p} → MP⊎-i P Q
 
 MP⊎-Bool-i : ∀ {a} {A : Set a} → (P Q : A → Bool) → Set a
-MP⊎-Bool-i P Q = ¬ (¬ ∃ (toPred P) × ¬ ∃ (toPred Q)) → ¬ ¬ ∃ (toPred P) ⊎ ¬ ¬ ∃ (toPred Q)
+MP⊎-Bool-i P Q = ¬ (¬ ∃ (toPred P) × ¬ ∃ (toPred Q)) →
+                 ¬ ¬ ∃ (toPred P) ⊎ ¬ ¬ ∃ (toPred Q)
 
 MP⊎-Bool : ∀ {a} → Set a → Set a
 MP⊎-Bool A = (P Q : A → Bool) → MP⊎-Bool-i P Q
 
 MP⊎-Alt-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
 MP⊎-Alt-i P Q = DecU P → DecU Q →
-  ¬ ((∀ x → P x) × (∀ x → Q x)) → ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
+                ¬ ((∀ x → P x) × (∀ x → Q x)) → ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
 
 MP⊎-Alt : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP⊎-Alt A p = {P Q : A → Set p} → MP⊎-Alt-i P Q
 
 MP∨-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
 MP∨-i P Q = DecU P → DecU Q →
-  ¬ ¬ (∃ λ x → P x ⊎ Q x) → ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
+            ¬ ¬ (∃ λ x → P x ⊎ Q x) → ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
 
 MP∨ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
@@ -221,7 +221,7 @@ MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 -- https://plato.stanford.edu/entries/axiom-choice/choice-and-type-theory.html
 ACLT : ∀ {a b} → Set a → Set b → ∀ p → Set (a ⊔ b ⊔ lsuc p)
 ACLT A B p = {P : A → B → Set p} →
-  ((x : A) → ∃ λ y → P x y) → Σ (A → B) λ f → (x : A) → P x (f x)
+             ((x : A) → ∃ λ y → P x y) → Σ (A → B) λ f → (x : A) → P x (f x)
 
 -- HoTT
 isProp : ∀ {a} → Set a → Set a

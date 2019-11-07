@@ -15,10 +15,10 @@ module Math.Logic.Nat.Operations
   (ind : ∀ {p} (P : N → Set p) → P zero → (∀ k → P k → P (suc k)) → ∀ n → P n)
   -- | Computaton rule for `zero`
   (ind-base : ∀ {p} (P : N → Set p) P-base P-step →
-    ind P P-base P-step zero ≡ P-base)
+              ind P P-base P-step zero ≡ P-base)
   -- | Computaton rule for `suc`
   (ind-step : ∀ {p} (P : N → Set p) P-base P-step n →
-    ind P P-base P-step (suc n) ≡ P-step n (ind P P-base P-step n))
+              ind P P-base P-step (suc n) ≡ P-step n (ind P P-base P-step n))
   where
 
 -- agda-stdlib
@@ -91,7 +91,8 @@ _≤ᵇ_ : N → N → Bool
 m ≤ᵇ n = caseNat true false (m ∸ n)
 
 -- induction
-ind2 : ∀ {p} (P : N → N → Set p) →
+ind2 :
+  ∀ {p} (P : N → N → Set p) →
   P zero zero →
   (∀ m n → P m n → P m (suc n)) →
   (∀ m n → P m n → P (suc m) n) →

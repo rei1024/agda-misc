@@ -16,7 +16,7 @@ open import Math.Googology.Function
 open ≤-Reasoning
 
 ------------------------------------------------------------------------
--- Properties of `H`
+-- Properties of hyperoperation
 
 H-rec : ∀ n a b → H (suc n) a (suc b) ≡ H n a (H (suc n) a b)
 H-rec zero          a b = refl
@@ -134,7 +134,8 @@ H[4+n,0,1+2*b]≡0 n b = begin-equality
 -- Properties of `ack`
 
 private
-  ack-H-helper : ∀ (P : ℕ → ℕ → Set) → (∀ n → P 0 n) →
+  ack-H-helper :
+    ∀ (P : ℕ → ℕ → Set) → (∀ n → P 0 n) →
     (∀ m → P m 1 → P (suc m) 0) →
     (∀ m n → P (suc m) n → (∀ n′ → P m n′) → P (suc m) (suc n)) → ∀ m n → P m n
   ack-H-helper P P[0,n] P[m,0] P[m,n] = go where
@@ -183,5 +184,6 @@ ack-is-fold′ (suc m) (suc n) = begin-equality
 ack-is-fold : ∀ m n → ack m n ≡ fold suc (λ f n → fold (f 1) f n) m n
 ack-is-fold zero    n       = refl
 ack-is-fold (suc m) zero    = ack-is-fold m 1
-ack-is-fold (suc m) (suc n) = trans (ack-is-fold m (ack (suc m) n))
-  (cong (fold suc (λ f n → fold (f 1) f n) m) (ack-is-fold (suc m) n))
+ack-is-fold (suc m) (suc n) =
+ trans (ack-is-fold m (ack (suc m) n))
+       (cong (fold suc (λ f n → fold (f 1) f n) m) (ack-is-fold (suc m) n))

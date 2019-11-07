@@ -52,7 +52,7 @@ lpo-Fin : ∀ {n p} → LPO (Fin n) p
 lpo-Fin = dec⇒em-i ∘ Finₚ.any? ∘ DecU⇒decidable
 
 dec-dns-i : ∀ {a p} {A : Set a} {P : A → Set p} → DecU P → DNS-i P
-dec-dns-i P? ∀¬¬P ¬∀P = ¬∀P (λ x → (DecU⇒stable P? x (∀¬¬P x)))
+dec-dns-i P? ∀¬¬P ¬∀P = ¬∀P (λ x → DecU⇒stable P? x (∀¬¬P x))
 
 ------------------------------------------------------------------------
 -- Equivalence between classical proposition

@@ -13,7 +13,8 @@ open import Math.Logic.NonConstructiveAxiom
 
 {-# TERMINATING #-}
 mp-ℕ : ∀ {p} → MP ℕ p
-mp-ℕ {P = P} P? _ = go 0 where
+mp-ℕ {P = P} P? _ = go 0
+  where
   go : ℕ → ∃ λ n → ¬ P n
   go n with P? n
   ... | inj₁ _   = go (suc n)

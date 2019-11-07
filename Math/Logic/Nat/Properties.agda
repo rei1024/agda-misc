@@ -10,9 +10,9 @@ module Math.Logic.Nat.Properties
   (suc : N → N)
   (ind : ∀ {p} (P : N → Set p) → P zero → (∀ k → P k → P (suc k)) → ∀ n → P n)
   (ind-base : ∀ {p} (P : N → Set p) P-base P-step →
-    ind P P-base P-step zero ≡ P-base)
+              ind P P-base P-step zero ≡ P-base)
   (ind-step : ∀ {p} (P : N → Set p) P-base P-step n →
-    ind P P-base P-step (suc n) ≡ P-step n (ind P P-base P-step n))
+              ind P P-base P-step (suc n) ≡ P-step n (ind P P-base P-step n))
   where
 
 -- agda-stdlib
@@ -332,13 +332,14 @@ n≮n n (m , sucn+m≡n) = z≢s m $ +-cancelˡ-≡ n zero (suc m) (begin
 >⇒≢ {m} {n} m>n m≡n = <⇒≢ m>n (sym m≡n)
 
 ≤⇒<∨≡ : ∀ {m n} → m ≤ n → m < n ⊎ m ≡ n
-≤⇒<∨≡ {m} {n} (o , m+o≡n) = ind (λ k → m + k ≡ n → m < n ⊎ m ≡ n)
-  (λ m+zero≡n → inj₂ (trans (sym $ +-identityʳ m) m+zero≡n))
-  (λ k _ m+suc[k]≡n → inj₁ (k , (begin
-    suc m + k ≡⟨ sym $ +-suc m k ⟩
-    m + suc k ≡⟨ m+suc[k]≡n ⟩
-    n ∎ )))
-  o m+o≡n
+≤⇒<∨≡ {m} {n} (o , m+o≡n) =
+  ind (λ k → m + k ≡ n → m < n ⊎ m ≡ n)
+      (λ m+zero≡n → inj₂ (trans (sym $ +-identityʳ m) m+zero≡n))
+      (λ k _ m+suc[k]≡n → inj₁ (k , (begin
+        suc m + k ≡⟨ sym $ +-suc m k ⟩
+        m + suc k ≡⟨ m+suc[k]≡n ⟩
+        n ∎ )))
+      o m+o≡n
 
 <⇒≤ : ∀ {m n} → m < n → m ≤ n
 <⇒≤ = ≤-back
@@ -359,40 +360,43 @@ m∸suc[n]≡pred[m∸n] : ∀ m n → m ∸ suc n ≡ pred (m ∸ n)
 m∸suc[n]≡pred[m∸n] m n = rec-step _ _ _
 
 zero∸n≡zero : ∀ n → zero ∸ n ≡ zero
-zero∸n≡zero = ind (λ n → zero ∸ n ≡ zero) (n∸zero≡n zero)
-  λ k zero∸k≡zero → (begin
-    zero ∸ suc k    ≡⟨ m∸suc[n]≡pred[m∸n] zero k ⟩
-    pred (zero ∸ k) ≡⟨ cong pred zero∸k≡zero ⟩
-    pred zero       ≡⟨ pred-zero ⟩
-    zero            ∎ )
+zero∸n≡zero =
+  ind (λ n → zero ∸ n ≡ zero) (n∸zero≡n zero)
+      λ k zero∸k≡zero → (begin
+        zero ∸ suc k    ≡⟨ m∸suc[n]≡pred[m∸n] zero k ⟩
+        pred (zero ∸ k) ≡⟨ cong pred zero∸k≡zero ⟩
+        pred zero       ≡⟨ pred-zero ⟩
+        zero            ∎ )
 
 suc[m]∸suc[n]≡m∸n : ∀ m n → suc m ∸ suc n ≡ m ∸ n
-suc[m]∸suc[n]≡m∸n m = ind (λ n → suc m ∸ suc n ≡ m ∸ n)
-  (begin
-    suc m ∸ suc zero    ≡⟨ m∸suc[n]≡pred[m∸n] (suc m) zero ⟩
-    pred (suc m ∸ zero) ≡⟨ cong pred (n∸zero≡n (suc m)) ⟩
-    pred (suc m)        ≡⟨ pred-suc m ⟩
-    m                   ≡⟨ sym $ n∸zero≡n m ⟩
-    m ∸ zero            ∎ )
-  λ k suc[m]∸suc[k]≡m∸k → begin
-      suc m ∸ suc (suc k)  ≡⟨ m∸suc[n]≡pred[m∸n] (suc m) (suc k) ⟩
-      pred (suc m ∸ suc k) ≡⟨ cong pred suc[m]∸suc[k]≡m∸k ⟩
-      pred (m ∸ k)         ≡⟨ sym $ m∸suc[n]≡pred[m∸n] m k ⟩
-      m ∸ suc k            ∎
+suc[m]∸suc[n]≡m∸n m =
+  ind (λ n → suc m ∸ suc n ≡ m ∸ n)
+      (begin
+        suc m ∸ suc zero    ≡⟨ m∸suc[n]≡pred[m∸n] (suc m) zero ⟩
+        pred (suc m ∸ zero) ≡⟨ cong pred (n∸zero≡n (suc m)) ⟩
+        pred (suc m)        ≡⟨ pred-suc m ⟩
+        m                   ≡⟨ sym $ n∸zero≡n m ⟩
+        m ∸ zero            ∎ )
+      λ k suc[m]∸suc[k]≡m∸k → begin
+          suc m ∸ suc (suc k)  ≡⟨ m∸suc[n]≡pred[m∸n] (suc m) (suc k) ⟩
+          pred (suc m ∸ suc k) ≡⟨ cong pred suc[m]∸suc[k]≡m∸k ⟩
+          pred (m ∸ k)         ≡⟨ sym $ m∸suc[n]≡pred[m∸n] m k ⟩
+          m ∸ suc k            ∎
 
 m+n∸m≡n : ∀ m n → m + n ∸ m ≡ n
-m+n∸m≡n m n = ind (λ k → (k + n) ∸ k ≡ n)
-  (begin
-    (zero + n) ∸ zero ≡⟨ cong (_∸ zero) $ +-identityˡ n ⟩
-    n ∸ zero          ≡⟨ n∸zero≡n n ⟩
-    n                 ∎)
-  (λ k k+n∸k≡n → begin
-      suc k + n ∸ suc k   ≡⟨ cong (_∸ suc k) $ suc-+ k n ⟩
-      suc (k + n) ∸ suc k ≡⟨ suc[m]∸suc[n]≡m∸n (k + n) k ⟩
-      k + n ∸ k           ≡⟨ k+n∸k≡n ⟩
-      n                   ∎
-    )
-  m
+m+n∸m≡n m n =
+  ind (λ k → (k + n) ∸ k ≡ n)
+      (begin
+        (zero + n) ∸ zero ≡⟨ cong (_∸ zero) $ +-identityˡ n ⟩
+        n ∸ zero          ≡⟨ n∸zero≡n n ⟩
+        n                 ∎)
+      (λ k k+n∸k≡n → begin
+          suc k + n ∸ suc k   ≡⟨ cong (_∸ suc k) $ suc-+ k n ⟩
+          suc (k + n) ∸ suc k ≡⟨ suc[m]∸suc[n]≡m∸n (k + n) k ⟩
+          k + n ∸ k           ≡⟨ k+n∸k≡n ⟩
+          n                   ∎
+        )
+      m
 
 m≤n⇒m+[n∸m]≡n : ∀ {m n} → m ≤ n → m + (n ∸ m) ≡ n
 m≤n⇒m+[n∸m]≡n {m} {n} (o , m+o≡n) = begin
@@ -402,12 +406,13 @@ m≤n⇒m+[n∸m]≡n {m} {n} (o , m+o≡n) = begin
   n               ∎
 
 m∸[m+n]≡zero : ∀ m n → m ∸ (m + n) ≡ zero
-m∸[m+n]≡zero m n = ind (λ k → k ∸ (k + n) ≡ zero) (zero∸n≡zero (zero + n))
-  (λ k k∸[k+n]≡zero → begin
-    suc k ∸ (suc k + n) ≡⟨ cong (suc k ∸_) $ suc-+ k n ⟩
-    suc k ∸ suc (k + n) ≡⟨ suc[m]∸suc[n]≡m∸n k (k + n) ⟩
-    k ∸ (k + n)         ≡⟨ k∸[k+n]≡zero ⟩
-    zero                ∎ ) m
+m∸[m+n]≡zero m n =
+  ind (λ k → k ∸ (k + n) ≡ zero) (zero∸n≡zero (zero + n))
+      (λ k k∸[k+n]≡zero → begin
+        suc k ∸ (suc k + n) ≡⟨ cong (suc k ∸_) $ suc-+ k n ⟩
+        suc k ∸ suc (k + n) ≡⟨ suc[m]∸suc[n]≡m∸n k (k + n) ⟩
+        k ∸ (k + n)         ≡⟨ k∸[k+n]≡zero ⟩
+        zero                ∎ ) m
 
 m≤n⇒m∸n≡zero : ∀ {m n} → m ≤ n → m ∸ n ≡ zero
 m≤n⇒m∸n≡zero {m} {n} (o , m+o≡n) = begin
@@ -416,17 +421,19 @@ m≤n⇒m∸n≡zero {m} {n} (o , m+o≡n) = begin
   zero        ∎
 
 pred[n]≡zero⇒n≡zero∨n≡one : ∀ n → pred n ≡ zero → n ≡ zero ⊎ n ≡ one
-pred[n]≡zero⇒n≡zero∨n≡one = ind (λ n → pred n ≡ zero → n ≡ zero ⊎ n ≡ suc zero)
-  (λ _ → inj₁ refl)
-  λ k pred[k]≡zero→k≡zero∨k≡one pred[suc[k]]≡zero → inj₂
-  (cong suc (trans (sym $ pred-suc k) pred[suc[k]]≡zero))
+pred[n]≡zero⇒n≡zero∨n≡one =
+  ind (λ n → pred n ≡ zero → n ≡ zero ⊎ n ≡ suc zero)
+      (λ _ → inj₁ refl)
+      λ k pred[k]≡zero→k≡zero∨k≡one pred[suc[k]]≡zero → inj₂
+      (cong suc (trans (sym $ pred-suc k) pred[suc[k]]≡zero))
 
 pred[m]≡suc[n]⇒m≡suc[suc[n]] : ∀ {m n} → pred m ≡ suc n → m ≡ suc (suc n)
-pred[m]≡suc[n]⇒m≡suc[suc[n]] {m} {n} = ind (λ k → pred k ≡ suc n → k ≡ suc (suc n))
-  (λ pred[zero]≡suc[n] → ⊥-elim $ z≢s n $ trans (sym pred-zero) pred[zero]≡suc[n] )
-  (λ k _ pred[suc[k]]≡suc[n] →
-      cong suc (trans (sym $ pred-suc k) pred[suc[k]]≡suc[n]))
-  m
+pred[m]≡suc[n]⇒m≡suc[suc[n]] {m} {n} =
+  ind (λ k → pred k ≡ suc n → k ≡ suc (suc n))
+      (λ pred[zero]≡suc[n] → ⊥-elim $ z≢s n $ trans (sym pred-zero) pred[zero]≡suc[n] )
+      (λ k _ pred[suc[k]]≡suc[n] →
+          cong suc (trans (sym $ pred-suc k) pred[suc[k]]≡suc[n]))
+      m
 
 ≤⇒≤ᵇ : ∀ {m n} → m ≤ n → m ≤ᵇ n ≡ true
 ≤⇒≤ᵇ {m} {n} (o , m+o≡n) = begin
@@ -470,7 +477,8 @@ m ≟ n with order? m n
   where module M = Decidable⇒UIP _≟_
 
 ≤-irrelevant : ∀ {m n : N} (p q : m ≤ n) → p ≡ q
-≤-irrelevant {m} {n} (o , m+o≡n) (p , m+p≡n) with +-cancelˡ-≡ m o p (trans m+o≡n (sym m+p≡n))
+≤-irrelevant {m} {n} (o , m+o≡n) (p , m+p≡n)
+  with +-cancelˡ-≡ m o p (trans m+o≡n (sym m+p≡n))
 ... | refl = cong (o ,_) (≡-irrelevant m+o≡n m+p≡n)
 
 ≤-proj₁-≡ : ∀ {m n : N} (p q : m ≤ n) → proj₁ p ≡ proj₁ q
@@ -508,61 +516,64 @@ m <? n with order? m n
 
 private
   subst-refl : ∀ {a b} {A : Set a} (B : A → Set b) {x : A} (y : B x) →
-    subst B refl y ≡ y
+               subst B refl y ≡ y
   subst-refl _ _ = refl
 
   subst-app : ∀ {a b} {A : Set a} {B : A → Set b}
-    (f : (x : A) → B x) {x y} (x≡y : x ≡ y) → subst B x≡y (f x) ≡ f y
+              (f : (x : A) → B x) {x y} (x≡y : x ≡ y) → subst B x≡y (f x) ≡ f y
   subst-app f refl = refl
 
   subst-cong-app : ∀ {a b c} {A : Set a} {B : Set b} {C : B → Set c}
-    (g : A → B) (f : (x : A) → C (g x)) {x y} (x≡y : x ≡ y) →
-    subst C (cong g x≡y) (f x) ≡ f y
+                   (g : A → B) (f : (x : A) → C (g x)) {x y} (x≡y : x ≡ y) →
+                   subst C (cong g x≡y) (f x) ≡ f y
   subst-cong-app {C = C} g f {x} {y} x≡y = begin
     subst C (cong g x≡y) (f x) ≡⟨ sym $ subst-∘ x≡y ⟩
     subst (C ∘ g) x≡y (f x)    ≡⟨ subst-app f x≡y ⟩
     f y                        ∎
 
   subst-other : ∀ {a b} {A : Set a} {B : A → Set b}
-    (f : (x : A) → B x) {x y z} (x≡z : x ≡ z) (y≡z : y ≡ z) →
-    subst B x≡z (f x) ≡ subst B y≡z (f y)
+                (f : (x : A) → B x) {x y z} (x≡z : x ≡ z) (y≡z : y ≡ z) →
+                subst B x≡z (f x) ≡ subst B y≡z (f y)
   subst-other _ refl refl = refl
 
-  subst-other-g : ∀ {a b c} {A : Set a} {B : Set b} {C : B → Set c} → B.Irrelevant (_≡_ {A = B}) → ∀
-   (g : A → B) (f : (x : A) → C (g x)) {x y z} (x≡y : x ≡ y) (gx≡z : g x ≡ z) (gy≡z : g y ≡ z) →
-   subst C gx≡z (f x) ≡ subst C gy≡z (f y)
+  subst-other-g : ∀ {a b c} {A : Set a} {B : Set b} {C : B → Set c} →
+                  B.Irrelevant (_≡_ {A = B}) →
+                  ∀ (g : A → B) (f : (x : A) → C (g x))
+                  {x y z} (x≡y : x ≡ y) (gx≡z : g x ≡ z) (gy≡z : g y ≡ z) →
+                  subst C gx≡z (f x) ≡ subst C gy≡z (f y)
   subst-other-g B-irrelevant g f refl refl gy≡z with B-irrelevant gy≡z refl
   subst-other-g B-irrelevant g f refl refl .refl | refl = refl
 
   -- variant of subst-application
   subst-lemma : ∀ {a₁ a₂ b₁ b₂} {A₁ : Set a₁} {A₂ : Set a₂}
-    {B₁ : A₁ → Set b₁} {B₂ : A₂ → Set b₂}
-    (f : A₁ → A₂) (g : ∀ x → B₁ x → B₂ (f x))
-    {x₁ x₂ : A₁} (x₁≡x₂ : x₁ ≡ x₂) {y : B₁ x₁} →
-    subst B₂ (cong f x₁≡x₂) (g x₁ y) ≡ g x₂ (subst B₁ x₁≡x₂ y)
+                  {B₁ : A₁ → Set b₁} {B₂ : A₂ → Set b₂}
+                  (f : A₁ → A₂) (g : ∀ x → B₁ x → B₂ (f x))
+                  {x₁ x₂ : A₁} (x₁≡x₂ : x₁ ≡ x₂) {y : B₁ x₁} →
+                  subst B₂ (cong f x₁≡x₂) (g x₁ y) ≡ g x₂ (subst B₁ x₁≡x₂ y)
   subst-lemma _ _ refl = refl
 
 module _ {p} (P : N → N → Set p) where
   inddiag-< :
     (∀ n → P zero (suc n)) → (∀ m n → P m n → P (suc m) (suc n)) →
     ∀ m o → P m (suc m + o)
-  inddiag-< Pzs Pss m o = ind (λ k → P k (suc k + o))
-    (subst (P zero) (suc≡one+ o) (Pzs o))
-    (λ k P[k,suc[k]+o] → subst (P (suc k)) (sym $ suc-+ (suc k) o)
-      $ Pss k (suc k + o) P[k,suc[k]+o]) m
+  inddiag-< Pzs Pss m o =
+    ind (λ k → P k (suc k + o))
+        (subst (P zero) (suc≡one+ o) (Pzs o))
+        (λ k P[k,suc[k]+o] → subst (P (suc k)) (sym $ suc-+ (suc k) o)
+          $ Pss k (suc k + o) P[k,suc[k]+o]) m
 
-  inddiag-≡ :
-    P zero zero → (∀ m n → P m n → P (suc m) (suc n)) → ∀ n → P n n
+  inddiag-≡ : P zero zero → (∀ m n → P m n → P (suc m) (suc n)) → ∀ n → P n n
   inddiag-≡ Pzz Pss n = ind (λ k → P k k) Pzz (λ k Pkk → Pss k k Pkk) n
 
   inddiag-> :
     (∀ n → P (suc n) zero) → (∀ m n → P m n → P (suc m) (suc n)) →
     ∀ n o → P (suc n + o) n
-  inddiag-> Psz Pss n o = ind (λ k → P (suc k + o) k)
-    (subst (λ k → P k zero) (suc≡one+ o) (Psz o))
-    (λ k P[suc[k]+o,k] → subst (λ v → P v (suc k)) (sym $ suc-+ (suc k) o)
-      (Pss (suc k + o) k P[suc[k]+o,k]))
-    n
+  inddiag-> Psz Pss n o =
+    ind (λ k → P (suc k + o) k)
+        (subst (λ k → P k zero) (suc≡one+ o) (Psz o))
+        (λ k P[suc[k]+o,k] → subst (λ v → P v (suc k)) (sym $ suc-+ (suc k) o)
+          (Pss (suc k + o) k P[suc[k]+o,k]))
+        n
 
   -- diagonal induction
   inddiag :
