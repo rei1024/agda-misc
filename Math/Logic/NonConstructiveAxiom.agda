@@ -85,11 +85,12 @@ LC a b = {A : Set a} {B : Set b} → LC-i A B
 -- Double-negation shift
 -- if domain of P is finite this can be proved.
 -- https://ncatlab.org/nlab/show/double-negation+shift
-DNS-i : ∀ {a} p → Set a → Set (a ⊔ lsuc p)
-DNS-i {a} p A = {P : A → Set p} → (∀ x → ¬ ¬ P x) → ¬ ¬ (∀ x → P x)
+
+DNS-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
+DNS-i P = (∀ x → ¬ ¬ P x) → ¬ ¬ (∀ x → P x)
 
 DNS : ∀ a p → Set (lsuc (a ⊔ p))
-DNS a p = {A : Set a} → DNS-i p A
+DNS a p = {A : Set a} {P : A → Set p} → DNS-i P
 
 -- Independence-of-premise
 IP : ∀ p q r → Set (lsuc (p ⊔ q ⊔ r))

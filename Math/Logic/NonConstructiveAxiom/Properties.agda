@@ -50,20 +50,21 @@ assume-DNE-in-DN f = assume-EM-in-DN λ em → f (A⊎B→¬B→A em)
 -- LPO for finite set
 lpo-Fin : ∀ {n p} → LPO (Fin n) p
 lpo-Fin = dec⇒em-i ∘ Finₚ.any? ∘ DecU⇒decidable
-{-
-dns-i-Fin : ∀ {n p} → DNS-i p (Fin n)
-dns-i-Fin {0} {p} {P} ∀¬¬P = λ x → x (⊥-elim ∘ Finₚ.¬Fin0)
-dns-i-Fin {suc n} {p} {P} ∀¬¬P = ?
--}
+
+dec-dns-i : ∀ {a p} {A : Set a} {P : A → Set p} → DecU P → DNS-i P
+dec-dns-i P? ∀¬¬P ¬∀P = ¬∀P (λ x → (DecU⇒stable P? x (∀¬¬P x)))
 
 ------------------------------------------------------------------------
 -- Equivalence between classical proposition
 
 ------------------------------------------------------------------------
 -- ->  : implication
--- <=> : equivalent
+-- <=> : equivalence
 -- +   : and
 
+--     EM⁻¹ <=> DNE⁻¹
+--      ^
+--      |
 --  ┌- EM <=> DNE <=> Peirce <=> MI <=> DEM₁ <=> DEM₂
 --  |   |              |         |
 --  |   v              v         v
@@ -72,13 +73,13 @@ dns-i-Fin {suc n} {p} {P} ∀¬¬P = ?
 --    v  \     DN-distrib-⊎
 --   LPO  \
 --   /  \ |
---  v    v
+--  v    vv
 -- MP    WLPO
 -- | \    |
 -- |  \   v
 -- |   \  LLPO
 -- |    \ |
--- v     v
+-- v     vv
 -- WMP   MP⊎
 
 -- LPO <=> WLPO + MP
@@ -242,6 +243,11 @@ DN-ip q f = DN-map
 dne⇒ip : ∀ {a b c} → DNE (a ⊔ b ⊔ c) → IP a b c
 dne⇒ip dne q f = dne (DN-ip q f)
 
+-- Properties of EM⁻¹
+em⇒em⁻¹ : ∀ {a} → EM a → EM⁻¹ a
+em⇒em⁻¹ em _ = em
+
+-- DNE⁻¹ <=> EM⁻¹
 dne⁻¹⇒em⁻¹ : ∀ {a} → Extensionality a lzero → DNE⁻¹ a → EM⁻¹ a
 dne⁻¹⇒em⁻¹ ext dne⁻¹ isP = dne⁻¹ isP′ DN-EM-i where
   isP′ : ∀ x y → x ≡ y
