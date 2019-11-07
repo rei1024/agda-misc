@@ -101,6 +101,7 @@ dne⇒em dne = dne DN-EM-i
 em⇒dne : ∀ {a} → EM a → DNE a
 em⇒dne em = A⊎B→¬B→A em
 
+-- Peirce => DNE, EM => Peirce
 peirce⇒dne : ∀ {a b} → Peirce a b → DNE a
 peirce⇒dne peirce ¬¬A =
   peirce {B = Lift _ ⊥} λ A→B → ⊥-elim (¬¬A λ x → lower $ A→B x)
@@ -110,6 +111,7 @@ em⇒peirce em f with em
 ... | inj₁ x  = x
 ... | inj₂ ¬A = f λ x → ⊥-elim (¬A x)
 
+-- DEM₁ => EM, DNE => DEM₁
 dem₁⇒em : ∀ {a} → DEM₁ a a → EM a
 dem₁⇒em dem₁ = dem₁ (uncurry (flip _$_))
 
@@ -119,12 +121,14 @@ dne⇒dem₁ dne g = dne (g ∘ ¬[A⊎B]→¬A×¬B)
 dne⇒dem₁′ : ∀ {a b} → DNE (a ⊔ b) → DEM₁ a b
 dne⇒dem₁′ dne g = dne (g ∘ ¬[A⊎B]→¬A×¬B)
 
+-- DNE <=> DEM₂
 dne⇒dem₂ : ∀ {a} → DNE a → DEM₂ a a
 dne⇒dem₂ dne f = Prod.map dne dne $ ¬[A⊎B]→¬A×¬B f
 
 dem₂⇒dne : ∀ {a} → DEM₂ a lzero → DNE a
 dem₂⇒dne dem₂ ¬¬A = uncurry id (dem₂ Sum.[ (λ f → ¬¬A (f ∘′ const)) , _$ tt ])
 
+-- DNE => DEM₃
 dne⇒dem₃ : ∀ {a} → DNE a → DEM₃ a a
 dne⇒dem₃ dne ¬[A×B] = dne λ ¬[¬A⊎¬B] → ¬[A×B] $ dem₂ ¬[¬A⊎¬B]
   where dem₂ = dne⇒dem₂ dne
@@ -182,9 +186,11 @@ lc⇒dem₃ lc ¬[A×B] with lc
 lc⇒wem : ∀ {a} → LC a a → WEM a
 lc⇒wem lc = dem₃⇒wem $ lc⇒dem₃ lc
 
+-- Properties of DNS
 dne⇒dns : ∀ {a} → DNE a → DNS a a
 dne⇒dns dne f = dne λ x → x λ y → y λ z → dne (f z)
 
+-- DNS <=> ¬ ¬ EM
 dns⇒¬¬em : ∀ {a} → DNS (lsuc a) a → ¬ ¬ EM a
 dns⇒¬¬em dns = DN-map (λ x {A} → x A) $ dns λ x → DN-EM-i
 
@@ -206,6 +212,7 @@ dne⇒¬[A×¬B]→A→B dne = dne λ x → x λ y z → ⊥-elim (y (z , (λ w 
 ¬[A×¬B]→A→B⇒dne : ∀ {a} → ({A B : Set a} → ¬ (A × ¬ B) → A → B) → DNE a
 ¬[A×¬B]→A→B⇒dne f ¬¬A = f (uncurry id) ¬¬A
 
+-- EM <=> [A→B]→¬A⊎B
 em⇒[A→B]→¬A⊎B : ∀ {a} → EM a → {A B : Set a} → (A → B) → ¬ A ⊎ B
 em⇒[A→B]→¬A⊎B em f with em
 ... | inj₁ y  = inj₂ y
@@ -226,6 +233,7 @@ dne⇒¬[A→B]→A×¬B dne f =
 ¬[A→B]→A×¬B⇒dne {a} f ¬¬A with f {B = Lift a ⊥} λ A→L⊥ → ¬¬A λ x → lower $ A→L⊥ x
 ... | x , _ = x
 
+-- WEM <=> DN-distrib-⊎
 wem⇒DN-distrib-⊎ : ∀ {a} → WEM a → {A B : Set a} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
 wem⇒DN-distrib-⊎ wem ¬¬[A⊎B] with wem | wem
 ... | inj₁ ¬A  | inj₁ ¬B  = ⊥-elim $ ¬¬[A⊎B] (¬A×¬B→¬[A⊎B] (¬A , ¬B))
