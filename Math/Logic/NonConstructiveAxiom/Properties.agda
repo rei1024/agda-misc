@@ -499,34 +499,36 @@ lpo⇒lpo-Bool {a} {p} lpo P =
   Sum.map lift-injective′ (contraposition lift-cong′) $ lpo (toBool-Lift p P)
 
 lpo-Bool⇒lpo : ∀ {a} p {A : Set a} → LPO-Bool A → LPO A p
-lpo-Bool⇒lpo p lpo-Bool P? = Sum.map (∃eq⇒∃P P?) (contraposition (∃P⇒∃eq P?)) $
-  lpo-Bool (toBool P?)
+lpo-Bool⇒lpo p lpo-Bool P? =
+  Sum.map (∃eq⇒∃P P?) (contraposition (∃P⇒∃eq P?)) $
+          lpo-Bool (toBool P?)
 
 -- LLPO <=> LLPO-Bool
 llpo⇒llpo-Bool : ∀ {a p} {A : Set a} → LLPO A p → LLPO-Bool A
 llpo⇒llpo-Bool {a} {p} llpo P Q h =
   Sum.map (contraposition lift-cong′) (contraposition lift-cong′) $
-  llpo (toBool-Lift p P) (toBool-Lift p Q)
-  (contraposition (Prod.map lift-injective′ lift-injective′) h)
+          llpo (toBool-Lift p P) (toBool-Lift p Q)
+          (contraposition (Prod.map lift-injective′ lift-injective′) h)
 
 llpo-Bool⇒llpo : ∀ {a} p {A : Set a} → LLPO-Bool A → LLPO A p
 llpo-Bool⇒llpo p llpo-Bool P? Q? ¬[∃P×∃Q] =
   Sum.map (contraposition (∃P⇒∃eq P?)) (contraposition (∃P⇒∃eq Q?)) $
-  llpo-Bool (toBool P?) (toBool Q?)
-    (contraposition (Prod.map (∃eq⇒∃P P?) (∃eq⇒∃P Q?)) ¬[∃P×∃Q])
+          llpo-Bool (toBool P?) (toBool Q?)
+            (contraposition (Prod.map (∃eq⇒∃P P?) (∃eq⇒∃P Q?)) ¬[∃P×∃Q])
 
 -- MP⊎ <=> MP⊎-Bool
 mp⊎⇒mp⊎-Bool : ∀ {a p} {A : Set a} → MP⊎ A p → MP⊎-Bool A
 mp⊎⇒mp⊎-Bool {a} {p} mp⊎ P Q ¬[¬∃Peq×¬∃Qeq] =
-  Sum.map (DN-map lift-injective′) (DN-map lift-injective′) $
-  mp⊎ (toBool-Lift p P) (toBool-Lift p Q) (contraposition (λ {(u , v) →
-    contraposition lift-cong′ u , contraposition lift-cong′ v}) ¬[¬∃Peq×¬∃Qeq])
+  Sum.map
+    (DN-map lift-injective′) (DN-map lift-injective′) $ mp⊎
+      (toBool-Lift p P) (toBool-Lift p Q) (contraposition (λ {(u , v) →
+      contraposition lift-cong′ u , contraposition lift-cong′ v}) ¬[¬∃Peq×¬∃Qeq])
 
 mp⊎-Bool⇒mp⊎ : ∀ {a} p {A : Set a} → MP⊎-Bool A → MP⊎ A p
 mp⊎-Bool⇒mp⊎ p mp⊎-Bool P? Q? ¬[¬∃P×¬Q] =
   Sum.map (DN-map (∃eq⇒∃P P?)) (DN-map (∃eq⇒∃P Q?)) $
-  mp⊎-Bool (toBool P?) (toBool Q?) (contraposition (Prod.map
-    (contraposition (∃P⇒∃eq P?)) (contraposition (∃P⇒∃eq Q?))) ¬[¬∃P×¬Q])
+          mp⊎-Bool (toBool P?) (toBool Q?) (contraposition (Prod.map
+            (contraposition (∃P⇒∃eq P?)) (contraposition (∃P⇒∃eq Q?))) ¬[¬∃P×¬Q])
 
 -- LPO-Bool <=> LPO-Bool-Alt
 private
@@ -551,15 +553,16 @@ private
   x≢true⇒x≡false {true} neq = ⊥-elim $ neq refl
 
 lpo-Bool⇒lpo-Bool-Alt : ∀ {a} {A : Set a} → LPO-Bool A → LPO-Bool-Alt A
-lpo-Bool⇒lpo-Bool-Alt lpo-Bool P = Sum.map (Prod.map₂ not-injective)
-  (λ ¬∃notPx≡true x → not[x]≢true⇒x≡true $ ¬∃P→∀¬P ¬∃notPx≡true x) $
-  lpo-Bool (not ∘ P)
+lpo-Bool⇒lpo-Bool-Alt lpo-Bool P =
+  Sum.map (Prod.map₂ not-injective)
+          (λ ¬∃notPx≡true x → not[x]≢true⇒x≡true $ ¬∃P→∀¬P ¬∃notPx≡true x) $
+            lpo-Bool (not ∘ P)
 
 lpo-Bool-Alt⇒lpo-Bool : ∀ {a} {A : Set a} → LPO-Bool-Alt A → LPO-Bool A
 lpo-Bool-Alt⇒lpo-Bool lpo-Bool-Alt P =
   Sum.map (Prod.map₂ not-injective)
-  (λ ∀x→notPx≡true → ∀¬P→¬∃P λ x → not[x]≡true→x≢true $ ∀x→notPx≡true x) $
-  lpo-Bool-Alt (not ∘ P)
+          (λ ∀x→notPx≡true → ∀¬P→¬∃P λ x → not[x]≡true→x≢true $ ∀x→notPx≡true x) $
+            lpo-Bool-Alt (not ∘ P)
 
 -- transport
 module Transport {a b p} {A : Set a} {B : Set b}
@@ -582,7 +585,8 @@ module Transport {a b p} {A : Set a} {B : Set b}
   llpo-transport : LLPO A p → LLPO B p
   llpo-transport llpo P? Q? w =
     Sum.map (contraposition ∃P→∃Pf) (contraposition ∃P→∃Pf) $
-    llpo (DecU-map f P?) (DecU-map f Q?) (contraposition (Prod.map ∃Pf→∃P ∃Pf→∃P) w)
+            llpo (DecU-map f P?) (DecU-map f Q?)
+                 (contraposition (Prod.map ∃Pf→∃P ∃Pf→∃P) w)
 
   wlpo-Alt-transport : WLPO-Alt A p → WLPO-Alt B p
   wlpo-Alt-transport wlpo-Alt P? =
@@ -599,14 +603,17 @@ module Transport {a b p} {A : Set a} {B : Set b}
   mp-transport = mr⇒mp ∘′ mr-transport ∘′ mp⇒mr
 
   wmp-transport : WMP A p → WMP B p
-  wmp-transport wmp {P = P} P? hyp = ∃Pf→∃P $ wmp (DecU-map f P?)
+  wmp-transport wmp {P = P} P? hyp =
+    ∃Pf→∃P $ wmp (DecU-map f P?)
     λ Q? → Sum.map (DN-map ∃Qg→∃Q) (DN-map λ {(x , Px , ¬Qgx) →
       g x , (subst P (sym (inv x)) Px) , ¬Qgx }) $ hyp (DecU-map g Q?)
 
   mp⊎-transport : MP⊎ A p → MP⊎ B p
-  mp⊎-transport mp⊎ P? Q? w = Sum.map (DN-map ∃Pf→∃P) (DN-map ∃Pf→∃P) $
-    mp⊎ (DecU-map f P?) (DecU-map f Q?)
-    (contraposition (Prod.map (contraposition ∃P→∃Pf) (contraposition ∃P→∃Pf)) w)
+  mp⊎-transport mp⊎ P? Q? w =
+    Sum.map (DN-map ∃Pf→∃P) (DN-map ∃Pf→∃P) $
+            mp⊎ (DecU-map f P?) (DecU-map f Q?)
+                (contraposition (Prod.map (contraposition ∃P→∃Pf)
+                                          (contraposition ∃P→∃Pf)) w)
 
 open Transport public
 
@@ -637,8 +644,9 @@ module Lemma2-2 {a} {A : Set a} (searchable : Searchable A) where
   open SearchModule searchable
   module _ {P : A → Bool} where
     ∃x→Px≡false→P[εP]≡false : (∃ λ x → P x ≡ false) → P (ε P) ≡ false
-    ∃x→Px≡false→P[εP]≡false e = x≢true⇒x≡false $ contraposition
-      (ε-correct P) (∃¬P→¬∀P (Prod.map₂ x≡false⇒x≢true e))
+    ∃x→Px≡false→P[εP]≡false e =
+      x≢true⇒x≡false $ contraposition
+        (ε-correct P) (∃¬P→¬∀P (Prod.map₂ x≡false⇒x≢true e))
 
     ∃x→Px≡false⇔P[εP]≡false : (∃ λ x → P x ≡ false) Eqv.⇔ P (ε P) ≡ false
     ∃x→Px≡false⇔P[εP]≡false =
