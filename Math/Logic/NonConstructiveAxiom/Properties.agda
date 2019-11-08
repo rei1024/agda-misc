@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
+{-# OPTIONS --without-K --safe #-}
 
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 -- https://pdfs.semanticscholar.org/deb5/23b6078032c845d8041ee6a5383fec41191c.pdf
@@ -11,19 +11,24 @@ module Math.Logic.NonConstructiveAxiom.Properties where
 open import Axiom.Extensionality.Propositional
 open import Level renaming (suc to lsuc; zero to lzero)
 open import Data.Empty
-open import Data.Unit
-open import Data.Bool
+open import Data.Unit using (⊤; tt)
+open import Data.Bool using (Bool; true; false; not)
 open import Data.Sum as Sum
 open import Data.Product as Prod
-open import Data.Fin hiding (lift)
+open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; s≤s; z≤n; _≤?_)
+import Data.Nat.Properties as ℕₚ
+import Data.Nat.Induction as ℕInd
+open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
 open import Function.Core
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
+open import Relation.Binary using (tri≈; tri<; tri>)
 open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 import Function.Equivalence as Eqv
+import Induction.WellFounded as Ind
 
 -- agda-misc
 open import Math.Logic.NonConstructiveAxiom
@@ -89,7 +94,7 @@ dec-dns-i P? ∀¬¬P ¬∀P = ¬∀P (λ x → DecU⇒stable P? x (∀¬¬P x))
 -- EM -> LPO
 -- WLPO -> WKL
 -- WKL -> LLPO
--- LLPO -> MP⊎ -- ?
+-- LLPO -> MP⊎ (for ℕ)
 -- WKL = LLPO
 
 ------------------------------------------------------------------------
@@ -377,80 +382,94 @@ mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]
 mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
 mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 
+private
+  1+n≰0 : ∀ n → ¬ (suc n ≤ 0)
+  1+n≰0 n ()
+
+  lemma : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∀ m → m ≤ n → P m)
+  lemma {P = P} P? zero    with P? 0
+  ... | inj₁ P0 = inj₁ λ m m≤n → subst P (sym $ ℕₚ.n≤0⇒n≡0 m≤n) P0
+  ... | inj₂ ¬P0 = inj₂ λ ∀m→m≤0→Pm → ¬P0 (∀m→m≤0→Pm 0 ℕₚ.≤-refl)
+  lemma P? (suc n) with P? 0
+  ... | inj₁ Psn with lemma (P? ∘ suc) n
+  lemma {P = P} P? (suc n) | inj₁ P0 | inj₁ x = inj₁ f
+    where
+    f : ∀ m → m ≤ suc n → P m
+    f zero    m≤sn      = P0
+    f (suc m) (s≤s m≤n) = x m m≤n
+  lemma {P = P} P? (suc n) | inj₁ P0 | inj₂ y = inj₂ (contraposition f y)
+    where
+    f : (∀ m → m ≤ suc n → P m) → ∀ m → m ≤ n → P (suc m)
+    f ∀m→m≤sn→Pm m m≤n = ∀m→m≤sn→Pm (suc m) (s≤s m≤n)
+  lemma P? (suc n) | inj₂ ¬P0 = inj₂ λ ∀m→m≤sucn→Pm → ¬P0 (∀m→m≤sucn→Pm 0 z≤n)
+
+  module _ {p} {P : ℕ → Set p} where
+    lemma′ : DecU P → DecU (λ n → ∀ m → m < n → P m)
+    lemma′ P? zero = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
+    lemma′ P? (suc n) with lemma P? n
+    lemma′ P? (suc n) | inj₁ x = inj₁ λ m sucm≤sucn → x m (ℕₚ.≤-pred sucm≤sucn)
+    lemma′ P? (suc n) | inj₂ y =
+      inj₂ (contraposition (λ ∀m→sucm≤sucn→Pm m m≤n → ∀m→sucm≤sucn→Pm m (s≤s m≤n)) y)
+
 {-
-llpo⇒mp∨ : ∀ {a p} {A : Set a} → LLPO A p → MP∨ A p
-llpo⇒mp∨ {p = p} {A = A} llpo {P = P} {Q = Q} P? Q? ¬¬[∃x→Px⊎Qx] =
-  Sum.swap ¬¬∃Q⊎¬¬∃P
+Markov’s principle, Church’s thesis and LindeUf’s theorem
+by Hajime lshihara
+-}
+ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
+ℕ-llpo⇒mp∨ {p} llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q⊎¬¬∃P
   where
-  R S : A → Set p
-  R x = P x × ¬ Q x
-  S x = ¬ P x × Q x
+  R S : ℕ → Set p
+  R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
+  S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
+
+  lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
+  lem = lemma′ (DecU-× (¬-DecU P?) (¬-DecU Q?))
+
   R? : DecU R
-  R? = DecU-× P? (¬-DecU Q?)
+  R? = DecU-× lem (DecU-× P? (¬-DecU Q?))
+
   S? : DecU S
-  S? = DecU-× (¬-DecU P?) Q?
+  S? = DecU-× lem (DecU-× (¬-DecU P?) Q?)
+
   ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
-  ¬[∃R×∃S] (∃R , ∃S) = {!   !}
+  ¬[∃R×∃S] ((m , ∀i→i<m→¬Pi×¬Qi , Pm , ¬Qm) ,
+            (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with ℕₚ.<-cmp m n
+  ... | tri< m<n _ _ = proj₁ (∀i→i<n→¬Pi×¬Qi m m<n) Pm
+  ... | tri≈ _ m≡n _ = ¬Pn (subst P m≡n Pm)
+  ... | tri> _ _ n<m = proj₂ (∀i→i<m→¬Pi×¬Qi n n<m) Qn
+
   ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
-  ¬∃R→¬∃Q→⊥ : ¬ ∃ R → ¬ ∃ Q → ⊥
-  ¬∃R→¬∃Q→⊥ ¬∃R ¬∃Q = ¬∃P→∀¬P ¬∃Q {!   !} {!   !}
-  -- ¬ ∃ λ x → P x × ¬ Q x
-  -- ¬ ∃ λ x → ¬ Q x
+
+  byacc₁ : (∀ x → ¬ R x) → (∀ x → ¬ Q x) → ∀ x → Ind.Acc _<_ x → ¬ P x
+  byacc₁ ∀¬R ∀¬Q x (ℕInd.acc rs) Px =
+    ∀¬R x ((λ i i<x → (λ Pi → byacc₁ ∀¬R ∀¬Q i (rs i i<x) Pi) , ∀¬Q i) , (Px , ∀¬Q x))
+
+  ∀¬R→∀¬Q→∀¬P : (∀ x → ¬ R x) → (∀ x → ¬ Q x) → ∀ x → ¬ P x
+  ∀¬R→∀¬Q→∀¬P ∀¬R ∀¬Q x Px = byacc₁ ∀¬R ∀¬Q x (ℕInd.<-wellFounded x) Px
+
+  ¬∃R→¬∃Q→¬∃P : ¬ ∃ R → ¬ ∃ Q → ¬ ∃ P
+  ¬∃R→¬∃Q→¬∃P ¬∃R ¬∃Q = ∀¬P→¬∃P $ ∀¬R→∀¬Q→∀¬P (¬∃P→∀¬P ¬∃R) (¬∃P→∀¬P ¬∃Q)
+
+  byacc₂ : (∀ x → ¬ S x) → (∀ x → ¬ P x) → ∀ x → Ind.Acc _<_ x → ¬ Q x
+  byacc₂ ∀¬S ∀¬P x (ℕInd.acc rs) Qx =
+    ∀¬S x ((λ i i<x → ∀¬P i , λ Qi → byacc₂ ∀¬S ∀¬P i (rs i i<x) Qi) , (∀¬P x , Qx))
+
+  ∀¬S→∀¬P→∀¬Q : (∀ x → ¬ S x) → (∀ x → ¬ P x) → ∀ x → ¬ Q x
+  ∀¬S→∀¬P→∀¬Q ∀¬S ∀¬P x Qx = byacc₂ ∀¬S ∀¬P x (ℕInd.<-wellFounded x) Qx
+
+  ¬∃S→¬∃P→¬∃Q : ¬ ∃ S → ¬ ∃ P → ¬ ∃ Q
+  ¬∃S→¬∃P→¬∃Q ¬∃S ¬∃P = ∀¬P→¬∃P $ ∀¬S→∀¬P→∀¬Q (¬∃P→∀¬P ¬∃S) (¬∃P→∀¬P ¬∃P)
+
+  ¬¬[∃P⊎∃Q] : ¬ ¬ (∃ P ⊎ ∃ Q)
+  ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
+
   ¬¬∃Q⊎¬¬∃P : ¬ ¬ ∃ Q ⊎ ¬ ¬ ∃ P
-  ¬¬∃Q⊎¬¬∃P = Sum.map ¬∃R→¬∃Q→⊥ {!   !} ¬∃R⊎¬∃S
--}
-
-{-
--- LLPO -> MP⊎
-llpo⇒mp⊎ : ∀ {a p} {A : Set a} → ((a b : A) → EM-i (a ≡ b)) → LLPO A (a ⊔ p) → MP⊎ A (a ⊔ p)
-llpo⇒mp⊎ {a} {p} {A} A-dec llpo {P = P} {Q = Q} P? Q? ¬[¬∃P×¬∃Q] = {!   !}
-  where
-  ¬¬∃x→Px×Qx : ¬ ¬ ∃ λ x → P x ⊎ Q x
-  ¬¬∃x→Px×Qx = ¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q]
-
-  R S : A → Set (a ⊔ p)
-  -- R x = P x × ¬ Q x
-  -- S x = ¬ P x × Q x
-
--- R S : A → Set (a ⊔ p)
--- R x = ∀ (i : A)  → i < x  → (¬ P i × ¬ Q i) × P x × ¬ Q x
--- S x = ∀ (i : A)  → i < x  → (¬ P i × ¬ Q i) × ¬ P x × Q x
-
-  -- R x = (∀ (y : A) → y ≡ x) × P x × ¬ Q x
-  -- S x = (∀ (y : A) → y ≡ x) × ¬ P x × Q x
-  R x = ((y : A) → y ≢ x → ¬ P y × ¬ Q y) × P x × ¬ Q x
-  S x = ((y : A) → y ≢ x → ¬ P y × ¬ Q y) × ¬ P x × Q x
-  ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
-  ¬[∃R×∃S] ((x , neqx , Px , ¬Qx) , y , neqy , ¬Py , Qx) =
-    ¬¬∃x→Px×Qx λ {(w , Pw⊎Qw) → Sum.[ (λ Pw →
-      Sum.[ (λ w≡y → ¬Py (subst P w≡y Pw)) , (λ w≢y → (λ t → proj₁ t Pw) $ neqy w w≢y) ] (A-dec w y) ) ,
-      (λ Qw →
-            {!   !}) ] Pw⊎Qw }
-  -- ((x , ∀z→z≡x , Px , ¬Qx) , y , ∀z→z≡y , ¬Py , Qy) =
-  -- ¬¬∃x→Px×Qx λ {(w , Pw⊎Qw) → Sum.[ (λ Pw → ¬Py {! sub  Pw  !}) , (λ Qw → {!   !}) ] Pw⊎Qw }
-  --  ((x , Px , ¬Qx) , y , ¬Py , Qy) = ¬¬∃x→Px×Qx λ {(z , Pz⊎Qz) → Sum.[ (λ Pz → {! ¬Py Pz  !}) , {!   !} ] Pz⊎Qz}
-
-  -- ¬[¬∃P×¬∃Q] ((λ ∃P → {!   !}) , (λ ∃Q → {!   !}))
-
-  R? : DecU R
-  R? x with P? x | Q? x
-  R? x | inj₁ Px | inj₁ Qx = inj₂ λ ∃x→ → {!   !}
-  R? x | inj₁ Px | inj₂ ¬Qx = inj₁ ((λ y y≢x → {!   !} , {!   !}) , (Px , ¬Qx))
-  R? x | inj₂ y | inj₁ x₁ = {!   !}
-  R? x | inj₂ y | inj₂ y₁ = {!   !}
-
-  ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
-  ¬∃R⊎¬∃S = llpo (λ x → {!   !}) {!   !} ¬[∃R×∃S]
-
-  result : ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
-  result with ¬∃R⊎¬∃S
-  result | inj₁ ¬∃R = inj₂ (contraposition (λ ¬∃Q → {!   !}) ¬∃R)
-  -- ¬∃R × ¬∃Q → ⊥
-  -- ¬∃×→Px×¬Qx × ¬∃Q
-  --  (x , Px ¬Qx) ,
-  result | inj₂ ¬∃S = {!   !}
--}
+  ¬¬∃Q⊎¬¬∃P =
+    Sum.map
+      (λ ¬∃R ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ ¬∃R→¬∃Q→¬∃P ¬∃R ¬∃Q , ¬∃Q ])
+      (λ ¬∃S ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , ¬∃S→¬∃P→¬∃Q ¬∃S ¬∃P ])
+      ¬∃R⊎¬∃S
 
 -- Bool version of axioms
 private

@@ -21,7 +21,6 @@ open import Relation.Unary as U hiding (_∈_)
 open import Relation.Nullary
 import      Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
 
-
 open import Data.List.Relation.Unary.All as All
 import      Data.List.Relation.Unary.All.Properties as Allₚ
 open import Data.List.Relation.Unary.Any as Any
@@ -140,6 +139,16 @@ module _ {a r} {A : Set a} {R : Rel A r} where
   -- AllPairs-drop⁺
 
   -- AllPairs-zipWith⁺ :
+
+module _ {c e} (S : Setoid c e) where
+  open Setoid S
+  open ListSetoidEquality S
+  Linked-resp-≋ : ∀ {r} {R : Rel Carrier r} →
+                  R Respects₂ _≈_ → (Linked R) Respects _≋_
+  Linked-resp-≋ resp [] [] = []
+  Linked-resp-≋ resp (_ ∷ []) [-] = [-]
+  Linked-resp-≋ resp (e₁ ∷ e₂ ∷ xs≋ys) (x ∷ l) =
+   (proj₂ resp e₁ $ proj₁ resp e₂ x) ∷ Linked-resp-≋ resp (e₂ ∷ xs≋ys) l
 
 module _ {a r} {A : Set a} {R : Rel A r} where
 

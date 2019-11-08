@@ -36,7 +36,7 @@ private
               (P.sym $ P.cong (length ∘′ proj₂) $ Listₚ.partition-defn P? xs)
               (Listₚ.length-filter (Uₚ.∁? P?) xs)
 
-module _ {A : Set a} {_≤_ : Rel A r} (_≤?_ : B.Decidable _≤_) where
+module Quicksort {A : Set a} {_≤_ : Rel A r} (_≤?_ : B.Decidable _≤_) where
   split : A → List A → List A × List A
   split x xs = partition (λ y → y ≤? x) xs
 

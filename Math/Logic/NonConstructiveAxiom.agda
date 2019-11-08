@@ -5,6 +5,13 @@
 -- https://www.jaist.ac.jp/~t-nemoto/WMP.pdf
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 
+-- TODO
+-- WKL: weak Koning's lemma
+-- BE: Every real number in [0,1] has binary expansion
+-- IVT: intermediate value theorem
+-- BD-N
+
+
 {-# OPTIONS --without-K --safe --exact-split #-}
 
 module Math.Logic.NonConstructiveAxiom where
@@ -127,6 +134,7 @@ LPO-Bool-Alt : ∀ {a} → Set a → Set a
 LPO-Bool-Alt A = (P : A → Bool) → LPO-Bool-Alt-i P
 
 -- The lesser limited principle of omniscience
+-- Σ⁰₁-DML
 LLPO-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
 LLPO-i P Q = DecU P → DecU Q → ¬ (∃ P × ∃ Q) → ¬ ∃ P ⊎ ¬ ∃ Q
 
