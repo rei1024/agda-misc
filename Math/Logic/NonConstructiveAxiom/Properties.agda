@@ -48,7 +48,7 @@ open import Data.Unit using (⊤; tt)
 open import Data.Bool using (Bool; true; false; not)
 open import Data.Sum as Sum
 open import Data.Product as Prod
-open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; s≤s; z≤n; _≤?_)
+open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; s≤s; z≤n; _≤?_)
 import Data.Nat.Properties as ℕₚ
 import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
@@ -56,7 +56,7 @@ import Data.Fin.Properties as Finₚ
 open import Function.Core
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Relation.Binary using (tri≈; tri<; tri>)
+open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
 open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
@@ -372,52 +372,34 @@ mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]
 mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
 mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 
-private
-  1+n≰0 : ∀ n → ¬ (suc n ≤ 0)
-  1+n≰0 n ()
-
-  lemma : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∀ m → m ≤ n → P m)
-  lemma {P = P} P? zero    with P? 0
-  ... | inj₁  P0 = inj₁ λ m m≤n → subst P (sym $ ℕₚ.n≤0⇒n≡0 m≤n) P0
-  ... | inj₂ ¬P0 = inj₂ λ ∀m→m≤0→Pm → ¬P0 (∀m→m≤0→Pm 0 ℕₚ.≤-refl)
-  lemma P? (suc n) with P? 0
-  ... | inj₁ P0 with lemma (P? ∘ suc) n
-  lemma {P = P} P? (suc n) | inj₁ P0 | inj₁ ∀m→m≤n→Psm = inj₁ f
-    where
-    f : ∀ m → m ≤ suc n → P m
-    f zero    m≤sn      = P0
-    f (suc m) (s≤s m≤n) = ∀m→m≤n→Psm m m≤n
-  lemma {P = P} P? (suc n) | inj₁ P0 | inj₂ y = inj₂ (contraposition f y)
-    where
-    f : (∀ m → m ≤ suc n → P m) → ∀ m → m ≤ n → P (suc m)
-    f ∀m→m≤sn→Pm m m≤n = ∀m→m≤sn→Pm (suc m) (s≤s m≤n)
-  lemma P? (suc n) | inj₂ ¬P0 = inj₂ λ ∀m→m≤sucn→Pm → ¬P0 (∀m→m≤sucn→Pm 0 z≤n)
-
-  module _ {p} {P : ℕ → Set p} where
-    lemma′ : DecU P → DecU (λ n → ∀ m → m < n → P m)
-    lemma′ P? zero             = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
-    lemma′ P? (suc n) with lemma P? n
-    lemma′ P? (suc n) | inj₁ x = inj₁ λ m sucm≤sucn → x m (ℕₚ.≤-pred sucm≤sucn)
-    lemma′ P? (suc n) | inj₂ y =
-      inj₂ (contraposition (λ ∀m→sucm≤sucn→Pm m m≤n → ∀m→sucm≤sucn→Pm m (s≤s m≤n)) y)
-
 {-
 Markov’s principle, Church’s thesis and LindeUf’s theorem
 by Hajime lshihara
 -}
-ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
-ℕ-llpo⇒mp∨ {p} llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q⊎¬¬∃P
+-- LLPO => MP∨
+record HasPropertiesForLLPO⇒MP∨ {a} r p (A : Set a) : Set (a ⊔ lsuc p ⊔ lsuc r) where
+  field
+    _<_       : Rel A r
+    <-cmp     : Trichotomous _≡_ _<_
+    <-all-dec : {P : A → Set p} → DecU P → DecU (λ n → ∀ i → i < n → P i)
+    <-wf      : Ind.WellFounded _<_
+
+llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
+           HasPropertiesForLLPO⇒MP∨ r p A → LLPO A (p ⊔ a ⊔ r) → MP∨ A p
+llpo⇒mp∨ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] =
+  Sum.swap ¬¬∃Q⊎¬¬∃P
   where
+  open HasPropertiesForLLPO⇒MP∨ has
   -- ex. R 5
   -- n : 0 1 2 3 4 5 6 7 8
   -- P : 0 0 0 0 0 1 ? ? ?
   -- Q : 0 0 0 0 0 0 ? ? ?
-  R S : ℕ → Set p
+  R S : A → Set (r ⊔ p ⊔ a)
   R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
   S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
 
   lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
-  lem = lemma′ (DecU-× (¬-DecU P?) (¬-DecU Q?))
+  lem = <-all-dec (DecU-× (¬-DecU P?) (¬-DecU Q?))
 
   R? : DecU R
   R? = DecU-× lem (DecU-× P? (¬-DecU Q?))
@@ -427,7 +409,7 @@ by Hajime lshihara
 
   ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
   ¬[∃R×∃S] ((m , ∀i→i<m→¬Pi×¬Qi , Pm , ¬Qm) ,
-            (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with ℕₚ.<-cmp m n
+            (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with <-cmp m n
   ... | tri< m<n _ _ = proj₁ (∀i→i<n→¬Pi×¬Qi m m<n) Pm
   ... | tri≈ _ m≡n _ = ¬Pn (subst P m≡n Pm)
   ... | tri> _ _ n<m = proj₂ (∀i→i<m→¬Pi×¬Qi n n<m) Qn
@@ -442,7 +424,7 @@ by Hajime lshihara
     ∀¬R x ((λ i i<x → (λ Pi → byacc₁ ∀¬R ∀¬Q i (rs i i<x) Pi) , ∀¬Q i) , (Px , ∀¬Q x))
 
   ∀¬R→∀¬Q→∀¬P : (∀ x → ¬ R x) → (∀ x → ¬ Q x) → ∀ x → ¬ P x
-  ∀¬R→∀¬Q→∀¬P ∀¬R ∀¬Q x Px = byacc₁ ∀¬R ∀¬Q x (ℕInd.<-wellFounded x) Px
+  ∀¬R→∀¬Q→∀¬P ∀¬R ∀¬Q x Px = byacc₁ ∀¬R ∀¬Q x (<-wf x) Px
 
   ¬∃R→¬∃Q→¬∃P : ¬ ∃ R → ¬ ∃ Q → ¬ ∃ P
   ¬∃R→¬∃Q→¬∃P ¬∃R ¬∃Q = ∀¬P→¬∃P $ ∀¬R→∀¬Q→∀¬P (¬∃P→∀¬P ¬∃R) (¬∃P→∀¬P ¬∃Q)
@@ -452,7 +434,7 @@ by Hajime lshihara
     ∀¬S x ((λ i i<x → ∀¬P i , λ Qi → byacc₂ ∀¬S ∀¬P i (rs i i<x) Qi) , (∀¬P x , Qx))
 
   ∀¬S→∀¬P→∀¬Q : (∀ x → ¬ S x) → (∀ x → ¬ P x) → ∀ x → ¬ Q x
-  ∀¬S→∀¬P→∀¬Q ∀¬S ∀¬P x Qx = byacc₂ ∀¬S ∀¬P x (ℕInd.<-wellFounded x) Qx
+  ∀¬S→∀¬P→∀¬Q ∀¬S ∀¬P x Qx = byacc₂ ∀¬S ∀¬P x (<-wf x) Qx
 
   ¬∃S→¬∃P→¬∃Q : ¬ ∃ S → ¬ ∃ P → ¬ ∃ Q
   ¬∃S→¬∃P→¬∃Q ¬∃S ¬∃P = ∀¬P→¬∃P $ ∀¬S→∀¬P→∀¬Q (¬∃P→∀¬P ¬∃S) (¬∃P→∀¬P ¬∃P)
@@ -466,6 +448,47 @@ by Hajime lshihara
       (λ ¬∃R ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ ¬∃R→¬∃Q→¬∃P ¬∃R ¬∃Q , ¬∃Q ])
       (λ ¬∃S ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , ¬∃S→¬∃P→¬∃Q ¬∃S ¬∃P ])
       ¬∃R⊎¬∃S
+
+-- lemma for `ℕ-llpo⇒mp∨`
+private
+  1+n≰0 : ∀ n → ¬ (suc n ≤ 0)
+  1+n≰0 n ()
+
+  ℕ≤-all-dec : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∀ m → m ≤ n → P m)
+  ℕ≤-all-dec {P = P} P? zero    with P? 0
+  ... | inj₁  P0 = inj₁ λ m m≤n → subst P (sym $ ℕₚ.n≤0⇒n≡0 m≤n) P0
+  ... | inj₂ ¬P0 = inj₂ λ ∀m→m≤0→Pm → ¬P0 (∀m→m≤0→Pm 0 ℕₚ.≤-refl)
+  ℕ≤-all-dec P? (suc n) with P? 0
+  ... | inj₁ P0 with ℕ≤-all-dec (P? ∘ suc) n
+  ℕ≤-all-dec {P = P} P? (suc n) | inj₁ P0 | inj₁ ∀m→m≤n→Psm = inj₁ f
+    where
+    f : ∀ m → m ≤ suc n → P m
+    f zero    m≤sn      = P0
+    f (suc m) (s≤s m≤n) = ∀m→m≤n→Psm m m≤n
+  ℕ≤-all-dec {P = P} P? (suc n) | inj₁ P0 | inj₂ y = inj₂ (contraposition f y)
+    where
+    f : (∀ m → m ≤ suc n → P m) → ∀ m → m ≤ n → P (suc m)
+    f ∀m→m≤sn→Pm m m≤n = ∀m→m≤sn→Pm (suc m) (s≤s m≤n)
+  ℕ≤-all-dec P? (suc n) | inj₂ ¬P0 = inj₂ λ ∀m→m≤sucn→Pm → ¬P0 (∀m→m≤sucn→Pm 0 z≤n)
+
+  module _ {p} {P : ℕ → Set p} where
+    ℕ<-all-dec : DecU P → DecU (λ n → ∀ m → m ℕ.< n → P m)
+    ℕ<-all-dec P? zero             = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
+    ℕ<-all-dec P? (suc n) with ℕ≤-all-dec P? n
+    ℕ<-all-dec P? (suc n) | inj₁ x = inj₁ λ m sucm≤sucn → x m (ℕₚ.≤-pred sucm≤sucn)
+    ℕ<-all-dec P? (suc n) | inj₂ y =
+      inj₂ (contraposition (λ ∀m→sucm≤sucn→Pm m m≤n → ∀m→sucm≤sucn→Pm m (s≤s m≤n)) y)
+
+ℕ-hasPropertiesForLLPO⇒MP∨ : ∀ p → HasPropertiesForLLPO⇒MP∨ lzero p ℕ
+ℕ-hasPropertiesForLLPO⇒MP∨ _ = record
+  { _<_       = ℕ._<_
+  ; <-cmp     = ℕₚ.<-cmp
+  ; <-all-dec = ℕ<-all-dec
+  ; <-wf      = ℕInd.<-wellFounded
+  }
+
+ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
+ℕ-llpo⇒mp∨ = llpo⇒mp∨ (ℕ-hasPropertiesForLLPO⇒MP∨ _)
 
 ------------------------------------------------------------------------
 -- Bool version of axioms

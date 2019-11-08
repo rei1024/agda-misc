@@ -214,7 +214,7 @@ DecU-map : ∀ {a b p} {A : Set a} {B : Set b} {P : A → Set p} →
   (f : B → A) → DecU P → DecU (λ x → P (f x))
 DecU-map f P? x = em-i-map id id (P? (f x))
 
-module _ {a p} {A : Set a} {P Q : A → Set p} where
+module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   DecU-⊎ : DecU P → DecU Q → DecU (λ x → P x ⊎ Q x)
   DecU-⊎ P? Q? x = em-i-⊎ (P? x) (Q? x)
 
