@@ -11,6 +11,8 @@
 -- IVT: intermediate value theorem
 -- BD-N
 
+-- WLPO -> WKL
+-- WKL <=> LLPO
 
 {-# OPTIONS --without-K --safe --exact-split #-}
 

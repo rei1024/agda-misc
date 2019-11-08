@@ -2,8 +2,41 @@
 
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 -- https://pdfs.semanticscholar.org/deb5/23b6078032c845d8041ee6a5383fec41191c.pdf
-
 -- http://www.math.lmu.de/~schwicht/pc16transparencies/ishihara/lecture1.pdf
+
+------------------------------------------------------------------------
+-- Equivalence between classical proposition
+
+------------------------------------------------------------------------
+-- ->  : implication
+-- <=> : equivalence
+-- ∧   : conjunction
+
+--     EM⁻¹ <=> DNE⁻¹
+--      ^
+--      |
+--  ┌- EM <=> DNE <=> Peirce <=> MI <=> DEM₁ <=> DEM₂
+--  |   |              |         |
+--  |   v              v         v
+--  |  WEM <=> DEM₃ <- LC       DNS <=> ¬ ¬ EM <=> ¬ ¬ DNE
+--   \  \       ||
+--    v  \     DN-distrib-⊎
+--   LPO  \
+--   /  \ |
+--  v    vv
+-- MP    WLPO
+-- | \    |
+-- |  \   v
+-- |   \  LLPO
+-- |    \ | (for ℕ)
+-- v     vv
+-- WMP   MP∨
+
+-- LPO <=> WLPO ∧ MP
+-- MP  <=> WMP ∧ MP∨
+
+------------------------------------------------------------------------
+
 
 module Math.Logic.NonConstructiveAxiom.Properties where
 
@@ -46,12 +79,6 @@ lower-wem a b wem with wem
 ... | inj₁ ¬Lx  = inj₁ λ x → ¬Lx (lift {ℓ = b} x)
 ... | inj₂ ¬¬Lx = inj₂ λ ¬A → ¬¬Lx λ LA → ¬A (lower LA)
 
-assume-EM-in-DN : ∀ {a b} {A : Set a} {B : Set b} → (A ⊎ ¬ A → ¬ ¬ B) → ¬ ¬ B
-assume-EM-in-DN f = DN-bind f DN-EM-i
-
-assume-DNE-in-DN : ∀ {a b} {A : Set a} {B : Set b} → ((¬ ¬ A → A) → ¬ ¬ B) → ¬ ¬ B
-assume-DNE-in-DN f = assume-EM-in-DN λ em → f (A⊎B→¬B→A em)
-
 -- LPO for finite set
 lpo-Fin : ∀ {n p} → LPO (Fin n) p
 lpo-Fin = dec⇒em-i ∘ Finₚ.any? ∘ DecU⇒decidable
@@ -61,44 +88,6 @@ dec-dns-i P? ∀¬¬P ¬∀P = ¬∀P (λ x → DecU⇒stable P? x (∀¬¬P x))
 
 ------------------------------------------------------------------------
 -- Equivalence between classical proposition
-
-------------------------------------------------------------------------
--- ->  : implication
--- <=> : equivalence
--- +   : and
-
---     EM⁻¹ <=> DNE⁻¹
---      ^
---      |
---  ┌- EM <=> DNE <=> Peirce <=> MI <=> DEM₁ <=> DEM₂
---  |   |              |         |
---  |   v              v         v
---  |  WEM <=> DEM₃ <- LC       DNS <=> ¬ ¬ EM <=> ¬ ¬ DNE
---   \  \       ||
---    v  \     DN-distrib-⊎
---   LPO  \
---   /  \ |
---  v    vv
--- MP    WLPO
--- | \    |
--- |  \   v
--- |   \  LLPO
--- |    \ |
--- v     vv
--- WMP   MP⊎
-
--- LPO <=> WLPO + MP
--- MP  <=> WMP + MP⊎
-
---
--- EM -> LPO
--- WLPO -> WKL
--- WKL -> LLPO
--- LLPO -> MP⊎ (for ℕ)
--- WKL = LLPO
-
-------------------------------------------------------------------------
-
 -- DNE <=> EM
 dne⇒em : ∀ {a} → DNE a → EM a
 dne⇒em dne = dne DN-EM-i
@@ -276,6 +265,7 @@ em⁻¹⇒dne⁻¹ em⁻¹ isP ¬¬x with em⁻¹ isP
 
 -----------------------------------------------------------------------
 -- Properties of LPO, LLPO, WLPO, MP, MP⊎, WMP
+
 -- EM => LPO
 em⇒lpo : ∀ {a p} {A : Set a} → EM (a ⊔ p) → LPO A p
 em⇒lpo em _ = em
@@ -295,7 +285,7 @@ lpo⇒wlpo lpo P? with lpo (¬-DecU P?)
 
 lpo⇒mp : ∀ {a p} {A : Set a} → LPO A p → MP A p
 lpo⇒mp lpo P? ¬∀P with lpo (¬-DecU P?)
-... | inj₁ t    = t
+... | inj₁ ∃¬P  = ∃¬P
 ... | inj₂ ¬∃¬P = ⊥-elim $ ¬∀P $ P-stable⇒¬∃¬P→∀P (DecU⇒stable P?) ¬∃¬P
 
 wlpo∧mp⇒lpo : ∀ {a p} {A : Set a} → WLPO A p → MP A p → LPO A p
@@ -388,15 +378,15 @@ private
 
   lemma : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∀ m → m ≤ n → P m)
   lemma {P = P} P? zero    with P? 0
-  ... | inj₁ P0 = inj₁ λ m m≤n → subst P (sym $ ℕₚ.n≤0⇒n≡0 m≤n) P0
+  ... | inj₁  P0 = inj₁ λ m m≤n → subst P (sym $ ℕₚ.n≤0⇒n≡0 m≤n) P0
   ... | inj₂ ¬P0 = inj₂ λ ∀m→m≤0→Pm → ¬P0 (∀m→m≤0→Pm 0 ℕₚ.≤-refl)
   lemma P? (suc n) with P? 0
-  ... | inj₁ Psn with lemma (P? ∘ suc) n
-  lemma {P = P} P? (suc n) | inj₁ P0 | inj₁ x = inj₁ f
+  ... | inj₁ P0 with lemma (P? ∘ suc) n
+  lemma {P = P} P? (suc n) | inj₁ P0 | inj₁ ∀m→m≤n→Psm = inj₁ f
     where
     f : ∀ m → m ≤ suc n → P m
     f zero    m≤sn      = P0
-    f (suc m) (s≤s m≤n) = x m m≤n
+    f (suc m) (s≤s m≤n) = ∀m→m≤n→Psm m m≤n
   lemma {P = P} P? (suc n) | inj₁ P0 | inj₂ y = inj₂ (contraposition f y)
     where
     f : (∀ m → m ≤ suc n → P m) → ∀ m → m ≤ n → P (suc m)
@@ -405,7 +395,7 @@ private
 
   module _ {p} {P : ℕ → Set p} where
     lemma′ : DecU P → DecU (λ n → ∀ m → m < n → P m)
-    lemma′ P? zero = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
+    lemma′ P? zero             = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
     lemma′ P? (suc n) with lemma P? n
     lemma′ P? (suc n) | inj₁ x = inj₁ λ m sucm≤sucn → x m (ℕₚ.≤-pred sucm≤sucn)
     lemma′ P? (suc n) | inj₂ y =
@@ -418,6 +408,10 @@ by Hajime lshihara
 ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
 ℕ-llpo⇒mp∨ {p} llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q⊎¬¬∃P
   where
+  -- ex. R 5
+  -- n : 0 1 2 3 4 5 6 7 8
+  -- P : 0 0 0 0 0 1 ? ? ?
+  -- Q : 0 0 0 0 0 0 ? ? ?
   R S : ℕ → Set p
   R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
   S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
@@ -438,9 +432,11 @@ by Hajime lshihara
   ... | tri≈ _ m≡n _ = ¬Pn (subst P m≡n Pm)
   ... | tri> _ _ n<m = proj₂ (∀i→i<m→¬Pi×¬Qi n n<m) Qn
 
+  -- use LLPO
   ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
 
+  -- Induction by _<_
   byacc₁ : (∀ x → ¬ R x) → (∀ x → ¬ Q x) → ∀ x → Ind.Acc _<_ x → ¬ P x
   byacc₁ ∀¬R ∀¬Q x (ℕInd.acc rs) Px =
     ∀¬R x ((λ i i<x → (λ Pi → byacc₁ ∀¬R ∀¬Q i (rs i i<x) Pi) , ∀¬Q i) , (Px , ∀¬Q x))
@@ -471,6 +467,7 @@ by Hajime lshihara
       (λ ¬∃S ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , ¬∃S→¬∃P→¬∃Q ¬∃S ¬∃P ])
       ¬∃R⊎¬∃S
 
+------------------------------------------------------------------------
 -- Bool version of axioms
 private
   module _ {a p} {A : Set a} {P : A → Set p} where
@@ -583,6 +580,7 @@ lpo-Bool-Alt⇒lpo-Bool lpo-Bool-Alt P =
           (λ ∀x→notPx≡true → ∀¬P→¬∃P λ x → not[x]≡true→x≢true $ ∀x→notPx≡true x) $
             lpo-Bool-Alt (not ∘ P)
 
+------------------------------------------------------------------------
 -- transport
 module Transport {a b p} {A : Set a} {B : Set b}
   (f : A → B) (g : B → A) (inv : ∀ x → f (g x) ≡ x)
@@ -641,6 +639,7 @@ module TransportByLeftInverse
   Transport {p = p} (LInv.LeftInverse.from linv Eq.⟨$⟩_)
     (LInv.LeftInverse.to linv Eq.⟨$⟩_) (LInv.LeftInverse.left-inverse-of linv)
 
+------------------------------------------------------------------------
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf
 Searchable : ∀ {a} → Set a → Set a
 Searchable A = Σ ((A → Bool) → A)
