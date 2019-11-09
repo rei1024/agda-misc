@@ -6,7 +6,6 @@
 
 ------------------------------------------------------------------------
 -- Equivalence between classical proposition
-
 ------------------------------------------------------------------------
 -- ->  : implication
 -- <=> : equivalence
@@ -32,17 +31,17 @@
 -- v     vv
 -- WMP   MP∨
 
--- LPO <=> WLPO ∧ MP
--- MP  <=> WMP ∧ MP∨
+-- WLPO ∧ MP => LPO
+-- WLPO ∧ WMP => LPO
+-- WMP ∧ MP∨ => MP
 
 -- TODO
 -- KS => PEP => WPEP
 -- WPEP ∧ MP <=> LPO
 -- WPEP ∧ MP∨ <=> WLPO
--- WMP => (LPO <=> WLPO)
 -- WPEP => (WLPO <=> LLPO)
-------------------------------------------------------------------------
 
+------------------------------------------------------------------------
 
 module Math.Logic.NonConstructiveAxiom.Properties.Base where
 
@@ -60,6 +59,7 @@ import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
 open import Function.Core
+open import Function.Bundles using (mk⇔; Equivalence; _⇔_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
@@ -292,8 +292,7 @@ lpo⇒mp lpo P? ¬∀P with lpo (¬-DecU P?)
 wlpo∧mp⇒lpo : ∀ {a p} {A : Set a} → WLPO A p → MP A p → LPO A p
 wlpo∧mp⇒lpo wlpo mp P? with wlpo (¬-DecU P?)
 ... | inj₁ ∀¬P  = inj₂ (∀¬P→¬∃P ∀¬P)
-... | inj₂ ¬∀¬P =
-  inj₁ $ P-stable⇒∃¬¬P→∃P (DecU⇒stable P?) $ mp (¬-DecU P?) ¬∀¬P
+... | inj₂ ¬∀¬P = inj₁ $ P-stable⇒∃¬¬P→∃P (DecU⇒stable P?) $ mp (¬-DecU P?) ¬∀¬P
 
 -- WLPO => LLPO
 wlpo⇒llpo : ∀ {a p} {A : Set a} → WLPO A p → LLPO A p
@@ -490,6 +489,40 @@ private
 
 ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
 ℕ-llpo⇒mp∨ = llpo⇒mp∨ (ℕ-hasPropertiesForLLPO⇒MP∨ _)
+
+-- "Constructive Reverse Mathematics" by Hannes Diener
+-- Proposition 6.4.1.
+wmp∧wlpo-Alt⇒lpo : ∀ {a p} {A : Set a} → WMP A p → WLPO-Alt A p → LPO A p
+wmp∧wlpo-Alt⇒lpo             wmp wlpo-Alt         P? with wlpo-Alt P?
+wmp∧wlpo-Alt⇒lpo             wmp wlpo-Alt         P? | inj₁ ¬∃P  = inj₂ ¬∃P
+wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? | inj₂ ¬¬∃P =
+  inj₁ (wmp P? Lem.res)
+  where
+  module Lem {Q : A → Set p} (Q? : DecU Q) where
+    R : A → Set p
+    R x = P x × ¬ Q x
+
+    R? : DecU R
+    R? = DecU-× P? (¬-DecU Q?)
+
+    ¬∃R⊎¬¬∃R : ¬ ∃ R ⊎ ¬ ¬ ∃ R
+    ¬∃R⊎¬¬∃R = wlpo-Alt R?
+
+    res : ¬ ¬ ∃ Q ⊎ (¬ ¬ ∃ λ x → P x × ¬ Q x)
+    res = Sum.map₁
+            (λ ¬∃R ¬∃Q → ¬¬∃P λ {(x , Px) → ¬∃R (x , (Px , ¬∃P→∀¬P ¬∃Q x))})
+            ¬∃R⊎¬¬∃R
+
+-- EM => KS
+em⇒ks : ∀ {a p} (A : Set a) (x : A) → EM p → KS p lzero A
+em⇒ks A x em P with em {A = P}
+em⇒ks A x em P | inj₁ xP = (λ _ → ⊤) , λ P? → mk⇔ (λ _ → x , tt) λ _ → xP
+em⇒ks A x em P | inj₂ ¬P =
+  (λ _ → ⊥) , λ P? → mk⇔ (λ xP → ⊥-elim $ ¬P xP) λ A×⊥ → ⊥-elim $ proj₂ A×⊥
+
+-- KS => PEP
+ks⇒pep : ∀ {a p q} {A : Set a} → KS (a ⊔ p) q A → PEP p q A
+ks⇒pep ks P? = ks _
 
 ------------------------------------------------------------------------
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf

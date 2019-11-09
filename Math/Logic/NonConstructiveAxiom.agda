@@ -258,7 +258,7 @@ Peseudobounded S = (s : ℕ → ℕ) → (∀ n → S (s n)) → ∃ λ N → s 
 
 -- Kripke's Schema
 KS : ∀ {a} p q → Set a → Set (lsuc a ⊔ lsuc p ⊔ lsuc q)
-KS p q A = ∀ (P : Set p) (Q : A → Set q) → DecU Q → P ⇔ (∃ λ n → Q n)
+KS p q A = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q → P ⇔ (∃ λ x → Q x)
 
 -- Principle of Finite Possiblity
 -- Principle of inverse Decision (PID)
