@@ -3,22 +3,21 @@
 module Math.FormalLanguage where
 
 -- agda-stdlib
+import Algebra.FunctionProperties as FP
+import Algebra.Structures as Structures
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Data.List as L using (List; []; _++_)
 import Data.List.Properties as Lₚ
 open import Data.Nat hiding (_⊔_; _^_)
 open import Data.Empty
 open import Data.Product using (proj₁; proj₂; _,_; _×_; ∃₂; ∃)
+open import Function using (_$_)
+import Function as F
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
 open import Relation.Unary hiding (∅; ｛_｝)
 import Relation.Unary as U
 import Relation.Unary.Properties as Uₚ
-open import Function using (_$_)
-import Function as F
-import Algebra.FunctionProperties as FP
-import Algebra.Structures as Structures
-
 
 -- Equivalence of predicate
 infix 4 _≡ᴾ_

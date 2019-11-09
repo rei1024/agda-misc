@@ -58,16 +58,16 @@ import Data.Nat.Properties as ℕₚ
 import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
-open import Function.Core
 open import Function.Bundles using (mk⇔; Equivalence; _⇔_)
-open import Relation.Nullary using (¬_; Dec; yes; no)
-open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
-open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
+open import Function.Core
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 import Function.Equivalence as Eqv
 import Induction.WellFounded as Ind
+open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Relation.Nullary.Decidable using (⌊_⌋)
+open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
+open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 
 -- agda-misc
 open import Math.Logic.NonConstructiveAxiom
@@ -151,8 +151,8 @@ wem-i∧stable⇒dec (inj₁ x) stable = no x
 wem-i∧stable⇒dec (inj₂ y) stable = yes (stable y)
 
 -- Converse of contraposition
-dne⇒contraposition-converse : ∀ {a b} → DNE a → {A : Set a} {B : Set b} →
-                              (¬ A → ¬ B) → B → A
+dne⇒contraposition-converse : ∀ {a b} → DNE a →
+                              {A : Set a} {B : Set b} → (¬ A → ¬ B) → B → A
 dne⇒contraposition-converse dne ¬A→¬B b = dne $ contraposition ¬A→¬B (DN-intro b)
 
 contraposition-converse⇒dne : ∀ {a} → ({A B : Set a} → (¬ A → ¬ B) → B → A) →
@@ -236,8 +236,9 @@ dne⇒¬[A→B]→A×¬B dne f =
 ... | x , _ = x
 
 -- WEM <=> DN-distrib-⊎
-wem⇒DN-distrib-⊎ : ∀ {a} → WEM a → {A B : Set a} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
-wem⇒DN-distrib-⊎ wem ¬¬[A⊎B] with wem | wem
+wem⇒DN-distrib-⊎ : ∀ {a b} → WEM (a ⊔ b) →
+                   {A : Set a} {B : Set b} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
+wem⇒DN-distrib-⊎ {a} {b} wem ¬¬[A⊎B] with lower-wem a b wem | lower-wem b a wem
 ... | inj₁ ¬A  | inj₁ ¬B  = ⊥-elim $ ¬¬[A⊎B] (¬A×¬B→¬[A⊎B] (¬A , ¬B))
 ... | inj₁ ¬A  | inj₂ ¬¬B = inj₂ ¬¬B
 ... | inj₂ ¬¬A | _        = inj₁ ¬¬A

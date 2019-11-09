@@ -7,8 +7,8 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Nat.GeneralisedArithmetic using (fold)
 open import Data.List
-open import Relation.Binary.PropositionalEquality
 open import Function
+open import Relation.Binary.PropositionalEquality
 
 -- agda-misc
 open import Math.Googology.Function

@@ -54,9 +54,6 @@ import Math.FormalLanguage
 -- Fibonacci number
 import Math.NumberTheory.Fibonacci.Generic
 
--- DEPRECATED
-import Math.NumberTheory.Fibonacci.Generic.Propositional
-
 import Math.NumberTheory.Fibonacci.Nat
 
 import Math.NumberTheory.Fibonacci.Nat.Properties

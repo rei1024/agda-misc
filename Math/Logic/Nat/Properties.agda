@@ -16,6 +16,7 @@ module Math.Logic.Nat.Properties
   where
 
 -- agda-stdlib
+open import Axiom.UniquenessOfIdentityProofs
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Data.Empty
 open import Data.Unit using (⊤ ; tt)
@@ -27,7 +28,6 @@ open import Function.Core
 import Relation.Binary as B
 open import Relation.Nullary
 import Relation.Nullary.Decidable as NDec
-open import Axiom.UniquenessOfIdentityProofs
 
 -- agda-misc
 open import Math.Logic.Nat.Operations N zero suc ind ind-base ind-step

@@ -5,7 +5,6 @@ module Math.NumberTheory.Fibonacci.Nat where
 -- agda-stdlib
 open import Data.Nat
 open import Data.Nat.Properties
-open import Relation.Binary.PropositionalEquality
 
 -- agda-misc
 open import Math.NumberTheory.Fibonacci.Generic +-0-commutativeMonoid 0 1

@@ -16,14 +16,14 @@ import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
 open import Function.Core
-open import Relation.Nullary using (¬_; Dec; yes; no)
-open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
-open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 import Function.Equivalence as Eqv
 import Induction.WellFounded as Ind
+open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Relation.Nullary.Decidable using (⌊_⌋)
+open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
+open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 
 -- agda-misc
 open import Math.Logic.NonConstructiveAxiom

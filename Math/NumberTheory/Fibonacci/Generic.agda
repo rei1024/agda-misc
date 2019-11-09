@@ -6,7 +6,8 @@ open import Algebra
 
 module Math.NumberTheory.Fibonacci.Generic
   {c e} (CM : CommutativeMonoid c e)
-  (v0 v1 : CommutativeMonoid.Carrier CM) where
+  (v0 v1 : CommutativeMonoid.Carrier CM)
+  where
 
 -- agda-stdlib
 open import Data.Nat
