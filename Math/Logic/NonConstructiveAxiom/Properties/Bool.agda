@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K --safe --exact-split #-}
 
 module Math.Logic.NonConstructiveAxiom.Properties.Bool where
 
@@ -121,14 +121,14 @@ private
 
   not[x]≢true⇒x≡true : ∀ {x} → not x ≢ true → x ≡ true
   not[x]≢true⇒x≡true {false} neq = ⊥-elim $ neq refl
-  not[x]≢true⇒x≡true {true}  _  = refl
+  not[x]≢true⇒x≡true {true}  _   = refl
 
   not[x]≡true→x≢true : ∀ {x} → not x ≡ true → x ≢ true
   not[x]≡true→x≢true notx≡true = x≡false⇒x≢true (not-injective notx≡true)
 
   x≢true⇒x≡false : ∀ {x} → x ≢ true → x ≡ false
   x≢true⇒x≡false {false} neq = refl
-  x≢true⇒x≡false {true} neq = ⊥-elim $ neq refl
+  x≢true⇒x≡false {true } neq = ⊥-elim $ neq refl
 
 lpo-Bool⇒lpo-Bool-Alt : ∀ {a} {A : Set a} → LPO-Bool A → LPO-Bool-Alt A
 lpo-Bool⇒lpo-Bool-Alt lpo-Bool P =

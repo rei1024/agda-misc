@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K --safe --exact-split #-}
 
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 -- https://pdfs.semanticscholar.org/deb5/23b6078032c845d8041ee6a5383fec41191c.pdf
@@ -115,11 +115,8 @@ em⇒peirce em f with em
 dem₁⇒em : ∀ {a} → DEM₁ a a → EM a
 dem₁⇒em dem₁ = dem₁ (uncurry (flip _$_))
 
-dne⇒dem₁ : ∀ {a} → DNE a → DEM₁ a a
+dne⇒dem₁ : ∀ {a b} → DNE (a ⊔ b) → DEM₁ a b
 dne⇒dem₁ dne g = dne (g ∘ ¬[A⊎B]→¬A×¬B)
-
-dne⇒dem₁′ : ∀ {a b} → DNE (a ⊔ b) → DEM₁ a b
-dne⇒dem₁′ dne g = dne (g ∘ ¬[A⊎B]→¬A×¬B)
 
 -- DNE <=> DEM₂
 dne⇒dem₂ : ∀ {a} → DNE a → DEM₂ a a
@@ -130,15 +127,15 @@ dem₂⇒dne dem₂ ¬¬A = uncurry id (dem₂ Sum.[ (λ f → ¬¬A (f ∘′ c
 
 -- DNE => DEM₃
 dne⇒dem₃ : ∀ {a} → DNE a → DEM₃ a a
-dne⇒dem₃ dne ¬[A×B] = dne λ ¬[¬A⊎¬B] → ¬[A×B] $ dem₂ ¬[¬A⊎¬B]
-  where dem₂ = dne⇒dem₂ dne
+dne⇒dem₃ dne ¬[A×B] = dne (¬[A×B]→¬¬[¬A⊎¬B] ¬[A×B])
 
--- WEM <=> DEM₃
+-- Properties of WEM
 em⇒wem : ∀ {a} → EM a → WEM a
 em⇒wem em with em
-... | inj₁ x = inj₁ x
-... | inj₂ y = inj₂ y
+... | inj₁ ¬A  = inj₁ ¬A
+... | inj₂ ¬¬A = inj₂ ¬¬A
 
+-- WEM <=> DEM₃
 -- https://ncatlab.org/nlab/show/weak+excluded+middle
 wem⇒dem₃ : ∀ {a} → WEM a → DEM₃ a a
 wem⇒dem₃ wem ¬[A×B] with wem | wem
@@ -154,10 +151,12 @@ wem-i∧stable⇒dec (inj₁ x) stable = no x
 wem-i∧stable⇒dec (inj₂ y) stable = yes (stable y)
 
 -- Converse of contraposition
-dne⇒contraposition-converse : ∀ {a} → DNE a → {A B : Set a} → (¬ A → ¬ B) → B → A
+dne⇒contraposition-converse : ∀ {a b} → DNE a → {A : Set a} {B : Set b} →
+                              (¬ A → ¬ B) → B → A
 dne⇒contraposition-converse dne ¬A→¬B b = dne $ contraposition ¬A→¬B (DN-intro b)
 
-contraposition-converse⇒dne : ∀ {a} → ({A B : Set a} → (¬ A → ¬ B) → B → A) → DNE a
+contraposition-converse⇒dne : ∀ {a} → ({A B : Set a} → (¬ A → ¬ B) → B → A) →
+                              DNE a
 contraposition-converse⇒dne f = f DN-intro
 
 -- MI <=> EM
@@ -523,7 +522,10 @@ em⇒ks A x em P | inj₂ ¬P =
 -- KS => PEP
 ks⇒pep : ∀ {a p q} {A : Set a} → KS (a ⊔ p) q A → PEP p q A
 ks⇒pep ks P? = ks _
-
+{-
+wpep∧mp⇒lpo : ∀ {a p} {A : Set a} → WPEP p p A → MP A p → LPO A p
+wpep∧mp⇒lpo wpep mp P? = {! wpep P?  !}
+-}
 ------------------------------------------------------------------------
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf
 Searchable : ∀ {a} → Set a → Set a

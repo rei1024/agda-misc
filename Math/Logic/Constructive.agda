@@ -18,6 +18,7 @@ open import Math.Logic.NonConstructiveAxiom
 ---------------------------------------------------------------------------
 -- Combinators
 ---------------------------------------------------------------------------
+
 module _ {a b c} {A : Set a} {B : Set b} {C : Set c} where
   →-distrib-⊎-× : ((A ⊎ B) → C) → (A → C) × (B → C)
   →-distrib-⊎-× f = f ∘ inj₁ , f ∘ inj₂
@@ -72,6 +73,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   A×B→¬[¬A⊎¬B] : A × B → ¬ (¬ A ⊎ ¬ B)
   A×B→¬[¬A⊎¬B] = →-undistrib-×-⊎-flip
 
+  -- Double negated DEM₃
   ¬[A×B]→¬¬[¬A⊎¬B] : ¬ (A × B) → ¬ ¬ (¬ A ⊎ ¬ B)
   ¬[A×B]→¬¬[¬A⊎¬B] ¬[A×B] ¬[¬A⊎¬B] =
     ¬[¬A⊎¬B] (inj₁ λ x → ⊥-elim $ ¬[¬A⊎¬B] (inj₂ (λ y → ¬[A×B] (x , y))))
@@ -83,8 +85,7 @@ module _ {a} {A : Set a} where
   [A→¬A]→¬A : (A → ¬ A) → ¬ A
   [A→¬A]→¬A = join
 
-  -- Law of noncontradiction
-  -- LNC
+  -- Law of noncontradiction (LNC)
   ¬[A×¬A] : ¬ (A × ¬ A)
   ¬[A×¬A] = uncurry (flip _$_)
 
@@ -93,8 +94,12 @@ module _ {a b} {A : Set a} {B : Set b} where
   contraposition : (A → B) → ¬ B → ¬ A
   contraposition = flip _∘′_
 
+  -- variant of contraposition
   [A→¬¬B]→¬B→¬A : (A → ¬ ¬ B) → ¬ B → ¬ A
   [A→¬¬B]→¬B→¬A f ¬B x = (f x) ¬B
+
+  [A→¬B]→¬¬A→¬B : (A → ¬ B) → ¬ ¬ A → ¬ B
+  [A→¬B]→¬¬A→¬B A→¬B ¬¬A y = ¬¬A λ x → A→¬B x y
 
 module _ {a} {A : Set a} where
   -- introduction for double negation
@@ -288,7 +293,7 @@ module _ {a p} {A : Set a} {P : A → Set p} where
   P-stable⇒¬∃¬P→∀P : (∀ x → Stable (P x)) → ¬ ∃ (λ x → ¬ P x) → ∀ x → P x
   P-stable⇒¬∃¬P→∀P P-stable ¬∃¬P = P-stable⇒∀¬¬P→∀P P-stable (¬∃¬P→∀¬¬P ¬∃¬P)
 
-module _ {a p} {A : Set a} {P Q : A → Set p} where
+module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   ∃-undistrib-⊎ : ∃ P ⊎ ∃ Q → ∃ (λ x → P x ⊎ Q x)
   ∃-undistrib-⊎ (inj₁ (x , Px)) = x , inj₁ Px
   ∃-undistrib-⊎ (inj₂ (x , Qx)) = x , inj₂ Qx
