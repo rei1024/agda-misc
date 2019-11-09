@@ -167,7 +167,7 @@ em⇒mi : ∀ {a} → EM a → MI a a
 em⇒mi em f = Sum.swap $ Sum.map₁ f em
 
 -- EM <=> [¬A→B]→A⊎B
-em⇒[¬A→B]→A⊎B : ∀ {a} → EM a → {A B : Set a} → (¬ A → B) → A ⊎ B
+em⇒[¬A→B]→A⊎B : ∀ {a b} → EM a → {A : Set a} {B : Set b} → (¬ A → B) → A ⊎ B
 em⇒[¬A→B]→A⊎B em f = Sum.map₂ f em
 
 [¬A→B]→A⊎B⇒em : ∀ {a} → ({A B : Set a} → (¬ A → B) → A ⊎ B) → EM a
@@ -177,7 +177,7 @@ em⇒[¬A→B]→A⊎B em f = Sum.map₂ f em
 em⇒dgp : ∀ {a} → EM a → DGP a a
 em⇒dgp em = em⇒[¬A→B]→A⊎B em λ ¬[A→B] b → ⊥-elim $ ¬[A→B] (const b)
 
-dgp⇒dem₃ : ∀ {a} → DGP a a → DEM₃ a a
+dgp⇒dem₃ : ∀ {a b} → DGP a b → DEM₃ a b
 dgp⇒dem₃ dgp ¬[A×B] with dgp
 ... | inj₁ A→B = inj₁ (contraposition (λ x → x , A→B x) ¬[A×B])
 ... | inj₂ B→A = inj₂ (contraposition (λ y → B→A y , y) ¬[A×B])
@@ -186,7 +186,7 @@ dgp⇒wem : ∀ {a} → DGP a a → WEM a
 dgp⇒wem dgp = dem₃⇒wem $ dgp⇒dem₃ dgp
 
 -- Properties of DNS
-dne⇒dns : ∀ {a} → DNE a → DNS a a
+dne⇒dns : ∀ {a b} → DNE (a ⊔ b) → DNS a (a ⊔ b)
 dne⇒dns dne f = dne λ x → x λ y → y λ z → dne (f z)
 
 -- DNS <=> ¬ ¬ EM
@@ -205,14 +205,15 @@ em⇒[¬A→A]→A : ∀ {a} → EM a → {A : Set a} → (¬ A → A) → A
 em⇒[¬A→A]→A em f = Sum.[ id , f ] em
 
 -- DNE <=> ¬[A×¬B]→A→B
-dne⇒¬[A×¬B]→A→B : ∀ {a} → DNE a → {A B : Set a} → ¬ (A × ¬ B) → A → B
+dne⇒¬[A×¬B]→A→B : ∀ {a b} → DNE (a ⊔ b) →
+                  {A : Set a} {B : Set b} → ¬ (A × ¬ B) → A → B
 dne⇒¬[A×¬B]→A→B dne = dne λ x → x λ y z → ⊥-elim (y (z , (λ w → x λ u v → w)))
 
 ¬[A×¬B]→A→B⇒dne : ∀ {a} → ({A B : Set a} → ¬ (A × ¬ B) → A → B) → DNE a
 ¬[A×¬B]→A→B⇒dne f ¬¬A = f (uncurry id) ¬¬A
 
 -- EM <=> [A→B]→¬A⊎B
-em⇒[A→B]→¬A⊎B : ∀ {a} → EM a → {A B : Set a} → (A → B) → ¬ A ⊎ B
+em⇒[A→B]→¬A⊎B : ∀ {a b} → EM b → {A : Set a} {B : Set b} → (A → B) → ¬ A ⊎ B
 em⇒[A→B]→¬A⊎B em f with em
 ... | inj₁ y  = inj₂ y
 ... | inj₂ ¬B = inj₁ (contraposition f ¬B)
@@ -220,11 +221,13 @@ em⇒[A→B]→¬A⊎B em f with em
 [A→B]→¬A⊎B⇒em : ∀ {a} → ({A B : Set a} → (A → B) → ¬ A ⊎ B) → EM a
 [A→B]→¬A⊎B⇒em f = Sum.swap (f id)
 
-dne⇒¬[A→¬B]→A×B : ∀ {a} → DNE a → {A B : Set a} → ¬ (A → ¬ B) → A × B
+dne⇒¬[A→¬B]→A×B : ∀ {a b} → DNE (a ⊔ b) →
+                  {A : Set a} {B : Set b} → ¬ (A → ¬ B) → A × B
 dne⇒¬[A→¬B]→A×B dne f = dne λ ¬[A×B] → f λ x y → ¬[A×B] (x , y)
 
 -- the counterexample principle
-dne⇒¬[A→B]→A×¬B : ∀ {a} → DNE a → {A B : Set a} → ¬ (A → B) → A × ¬ B
+dne⇒¬[A→B]→A×¬B : ∀ {a b} → DNE (a ⊔ b) →
+                  {A B : Set a} {B : Set b} → ¬ (A → B) → A × ¬ B
 dne⇒¬[A→B]→A×¬B dne f =
   dne λ ¬[A×¬B] → f λ x → ⊥-elim (¬[A×¬B] (x , (λ y → f (const y))))
 
@@ -328,6 +331,7 @@ mp⇒wmp mp P? pp = P-stable⇒∃¬¬P→∃P (DecU⇒stable P?) $
   mp (¬-DecU P?) (Sum.[ ¬¬∃P→¬∀¬P , (λ ¬¬∃P×¬P _ →
     ⊥-stable $ DN-map (¬[A×¬A] ∘ proj₂) ¬¬∃P×¬P) ] (pp P?))
 
+-- MR => MP⊎
 mr⇒mp⊎ : ∀ {a p} {A : Set a} → MR A p → MP⊎ A p
 mr⇒mp⊎ mr {P = P} {Q = Q} P? Q? ¬[¬∃P×¬∃Q] with
   mr {P = λ x → P x ⊎ Q x} (DecU-⊎ P? Q?) (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
@@ -356,7 +360,8 @@ mp⊎⇒mp⊎-Alt : ∀ {a p} {A : Set a} → MP⊎ A p → MP⊎-Alt A p
 mp⊎⇒mp⊎-Alt mp⊎ P? Q? =
   Sum.map (contraposition ∀P→¬∃¬P) (contraposition ∀P→¬∃¬P) ∘′
   mp⊎ (¬-DecU P?) (¬-DecU Q?) ∘′
-  contraposition (Prod.map (P-stable⇒¬∃¬P→∀P (DecU⇒stable P?)) (P-stable⇒¬∃¬P→∀P (DecU⇒stable Q?)))
+  contraposition (Prod.map (P-stable⇒¬∃¬P→∀P (DecU⇒stable P?))
+                           (P-stable⇒¬∃¬P→∀P (DecU⇒stable Q?)))
 
 mp⊎-Alt⇒mp⊎ : ∀ {a p} {A : Set a} → MP⊎-Alt A p → MP⊎ A p
 mp⊎-Alt⇒mp⊎ mp⊎-Alt P? Q? =
@@ -530,7 +535,7 @@ wpep∧mp⇒lpo wpep mp P? = {! wpep P?  !}
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf
 Searchable : ∀ {a} → Set a → Set a
 Searchable A = Σ ((A → Bool) → A)
-  λ ε → (P : A → Bool) → P (ε P) ≡ true → (x : A) → P x ≡ true
+                 λ ε → (P : A → Bool) → P (ε P) ≡ true → (x : A) → P x ≡ true
 
 module SearchModule {a} {A : Set a} (searchable : Searchable A) where
   ε : ((A → Bool) → A)
@@ -557,7 +562,7 @@ module Lemma2-2 {a} {A : Set a} (searchable : Searchable A) where
         x≡false⇒x≢true {false} refl ()
         x≢true⇒x≡false : ∀ {x} → x ≢ true → x ≡ false
         x≢true⇒x≡false {false} neq = refl
-        x≢true⇒x≡false {true} neq = ⊥-elim $ neq refl
+        x≢true⇒x≡false {true } neq = ⊥-elim $ neq refl
 
     ∃x→Px≡false⇔P[εP]≡false : (∃ λ x → P x ≡ false) Eqv.⇔ P (ε P) ≡ false
     ∃x→Px≡false⇔P[εP]≡false =
