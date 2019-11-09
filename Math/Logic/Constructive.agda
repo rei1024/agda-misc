@@ -156,6 +156,12 @@ module _ {a b c} {A : Set a} {B : Set b} {C : Set c} where
     DN-map Sum.[ (Sum.map const const ∘ f) , (λ ¬A → inj₁ λ x → ⊥-elim (¬A x)) ]
           DN-EM-i
 
+DN-ip : ∀ {p q r} {P : Set p} {Q : Set q} {R : Q → Set r} →
+        Q → (P → Σ Q R) → ¬ ¬ (Σ Q λ x → (P → R x))
+DN-ip q f =
+  DN-map Sum.[ (λ x → Prod.map₂ const (f x)) ,
+               (λ ¬P → q , λ P → ⊥-elim $ ¬P P) ] DN-EM-i
+
 -- Properties of EM-i
 module _ {a} {A : Set a} where
   em-i⇒dec : EM-i A → Dec A

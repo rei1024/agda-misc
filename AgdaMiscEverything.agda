@@ -30,6 +30,12 @@ import Math.Logic.Constructive
 
 import Math.Logic.NonConstructiveAxiom.Properties
 
+import Math.Logic.NonConstructiveAxiom.Properties.Base
+
+import Math.Logic.NonConstructiveAxiom.Properties.Bool
+
+import Math.Logic.NonConstructiveAxiom.Properties.Transport
+
 -- Natural number
 import Math.Logic.Nat.Operations
 

@@ -10,6 +10,7 @@
 -- BE: Every real number in [0,1] has binary expansion
 -- IVT: intermediate value theorem
 -- BD-N
+-- LLPOₙ
 
 -- WLPO -> WKL
 -- WKL <=> LLPO
@@ -20,12 +21,16 @@ module Math.Logic.NonConstructiveAxiom where
 
 -- agda-stdlib
 open import Level renaming (suc to lsuc; zero to lzero)
-open import Data.Bool
+open import Data.Bool using (Bool; true; false)
 open import Data.Sum as Sum
 open import Data.Product as Prod
+open import Data.List using (List; []; _∷_; length)
+open import Data.Nat using (ℕ; _≤_; _<_)
+open import Data.List.Relation.Binary.Prefix.Heterogeneous using (Prefix)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary.PropositionalEquality
+open import Function
 
 Stable : ∀ {a} → Set a → Set a
 Stable A = ¬ ¬ A → A
@@ -84,12 +89,13 @@ WEM-i A = ¬ A ⊎ ¬ ¬ A
 WEM : ∀ a → Set (lsuc a)
 WEM a = {A : Set a} → WEM-i A
 
--- Gödel-Dummett logic (LC)
-LC-i : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
-LC-i A B = (A → B) ⊎ (B → A)
+-- Gödel-Dummett logic
+-- Dirk Gently's Principle (DGP)
+DGP-i : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
+DGP-i A B = (A → B) ⊎ (B → A)
 
-LC : ∀ a b → Set (lsuc (a ⊔ b))
-LC a b = {A : Set a} {B : Set b} → LC-i A B
+DGP : ∀ a b → Set (lsuc (a ⊔ b))
+DGP a b = {A : Set a} {B : Set b} → DGP-i A B
 
 -- Double-negation shift
 -- if domain of P is finite this can be proved.
@@ -167,6 +173,7 @@ WLPO-Alt : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 WLPO-Alt A p = {P : A → Set p} → WLPO-Alt-i P
 
 -- Markov's principle
+-- LPE
 -- https://ncatlab.org/nlab/show/Markov%27s+principle
 MP-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
 MP-i P = DecU P → ¬ (∀ x → P x) → ∃ λ x → ¬ P x
@@ -227,6 +234,52 @@ MP∨-i P Q = DecU P → DecU Q →
 
 MP∨ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
+
+-- WKL
+takeT : ℕ → (ℕ → Bool) → List Bool
+takeT ℕ.zero    α = []
+takeT (ℕ.suc n) α = α 0 ∷ takeT n (λ m → α (ℕ.suc m))
+
+IsDecTree : (List Bool → Set) → Set
+IsDecTree T = ∀ u v → Prefix _≡_ v u → T u → T v
+
+IsInfiniteTree : (List Bool → Set) → Set
+IsInfiniteTree T = ∀ n → ∃ λ u → T u × n ≤ length u
+
+AdmitsInfinitePath : (List Bool → Set) → Set
+AdmitsInfinitePath T = Σ (ℕ → Bool) λ α → ∀ n → T (takeT n α)
+
+WKL : Set₁
+WKL = ∀ T → IsDecTree T → IsInfiniteTree T → AdmitsInfinitePath T
+
+-- BD-N
+Peseudobounded : (ℕ → Set) → Set
+Peseudobounded S = (s : ℕ → ℕ) → (∀ n → S (s n)) → ∃ λ N → s N < N
+
+-- Kripke's Schema
+KS : ∀ {a} p q → Set a → Set (lsuc a ⊔ lsuc p ⊔ lsuc q)
+KS p q A = ∀ (P : Set p) (Q : A → Set q) → DecU Q → P ⇔ (∃ λ n → Q n)
+
+-- Principle of Finite Possiblity
+-- Principle of inverse Decision (PID)
+PEP : ∀ {a} p q → Set a → Set (lsuc a ⊔ lsuc p ⊔ lsuc q)
+PEP p q A = {P : A → Set p} → DecU P →
+            Σ (A → Set q) λ Q → DecU Q → (∀ x → P x) ⇔ (∃ λ x → Q x)
+
+PEP-Bool-ℕ : Set₁
+PEP-Bool-ℕ =
+  (α : ℕ → Bool) →
+  Σ (ℕ → Bool) (λ β → (∀ n → α n ≡ false) ⇔ ∃ λ n → β n ≡ true)
+
+-- WPEP
+WPEP : ∀ {a} p q → Set a → Set (lsuc a ⊔ lsuc p ⊔ lsuc q)
+WPEP p q A = {P : A → Set p} → DecU P →
+             Σ (A → Set q) λ Q → DecU Q → (∀ x → P x) ⇔ (¬ (∀ x → Q x))
+
+WPEP-Bool-ℕ : Set₁
+WPEP-Bool-ℕ =
+  (α : ℕ → Bool) →
+  Σ (ℕ → Bool) λ β → (∀ n → α n ≡ false) ⇔ (¬ (∀ n → β n ≡ false))
 
 -- https://plato.stanford.edu/entries/axiom-choice/choice-and-type-theory.html
 ACLT : ∀ {a b} → Set a → Set b → ∀ p → Set (a ⊔ b ⊔ lsuc p)
