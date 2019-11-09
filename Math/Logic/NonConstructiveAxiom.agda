@@ -32,6 +32,23 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary.PropositionalEquality
 open import Function
 
+_<=>_ : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
+A <=> B = (A → B) × (B → A)
+
+module _ {a b} {A : Set a} {B : Set b} where
+  mk<=> : (A → B) → (B → A) → A <=> B
+  mk<=> = _,_
+
+  fwd : A <=> B → A → B
+  fwd = proj₁
+
+  bwd : A <=> B → B → A
+  bwd = proj₂
+
+_∘<=>_ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
+        B <=> C → A <=> B → A <=> C
+(f , g) ∘<=> (h , i) = f ∘ h , i ∘ g
+
 Stable : ∀ {a} → Set a → Set a
 Stable A = ¬ ¬ A → A
 
@@ -257,29 +274,29 @@ Peseudobounded : (ℕ → Set) → Set
 Peseudobounded S = (s : ℕ → ℕ) → (∀ n → S (s n)) → ∃ λ N → s N < N
 
 -- Kripke's Schema
-KS : ∀ {a} p q → Set a → Set (lsuc a ⊔ lsuc p ⊔ lsuc q)
-KS p q A = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q → P ⇔ (∃ λ x → Q x)
+KS : ∀ {a} p q → Set a → Set (a ⊔ lsuc p ⊔ lsuc q)
+KS p q A = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q × (P <=> ∃ Q)
 
 -- Principle of Finite Possiblity
 -- Principle of inverse Decision (PID)
-PEP : ∀ {a} p q → Set a → Set (lsuc a ⊔ lsuc p ⊔ lsuc q)
+PEP : ∀ {a} p q → Set a → Set (a ⊔ lsuc p ⊔ lsuc q)
 PEP p q A = {P : A → Set p} → DecU P →
-            Σ (A → Set q) λ Q → DecU Q → (∀ x → P x) ⇔ (∃ λ x → Q x)
+            Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (∃ λ x → Q x))
 
-PEP-Bool-ℕ : Set₁
+PEP-Bool-ℕ : Set
 PEP-Bool-ℕ =
   (α : ℕ → Bool) →
-  Σ (ℕ → Bool) (λ β → (∀ n → α n ≡ false) ⇔ ∃ λ n → β n ≡ true)
+  Σ (ℕ → Bool) (λ β → (∀ n → α n ≡ false) <=> ∃ λ n → β n ≡ true)
 
 -- WPEP
-WPEP : ∀ {a} p q → Set a → Set (lsuc a ⊔ lsuc p ⊔ lsuc q)
+WPEP : ∀ {a} p q → Set a → Set (a ⊔ lsuc p ⊔ lsuc q)
 WPEP p q A = {P : A → Set p} → DecU P →
-             Σ (A → Set q) λ Q → DecU Q → (∀ x → P x) ⇔ (¬ (∀ x → Q x))
+             Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (¬ (∀ x → Q x)))
 
-WPEP-Bool-ℕ : Set₁
+WPEP-Bool-ℕ : Set
 WPEP-Bool-ℕ =
   (α : ℕ → Bool) →
-  Σ (ℕ → Bool) λ β → (∀ n → α n ≡ false) ⇔ (¬ (∀ n → β n ≡ false))
+  Σ (ℕ → Bool) λ β → (∀ n → α n ≡ false) <=> (¬ (∀ n → β n ≡ false))
 
 -- https://plato.stanford.edu/entries/axiom-choice/choice-and-type-theory.html
 ACLT : ∀ {a b} → Set a → Set b → ∀ p → Set (a ⊔ b ⊔ lsuc p)

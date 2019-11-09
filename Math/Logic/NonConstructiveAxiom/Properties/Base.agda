@@ -34,13 +34,14 @@
 -- WLPO ∧ MP => LPO
 -- WLPO ∧ WMP => LPO
 -- WMP ∧ MP∨ => MP
-
--- TODO
--- KS => PEP => WPEP
 -- WPEP ∧ MP <=> LPO
 -- WPEP ∧ MP∨ <=> WLPO
--- WPEP => (WLPO <=> LLPO)
+-- KS => PEP
 
+-- TODO
+-- PEP => WPEP
+-- WPEP => (WLPO <=> LLPO)
+-- LLPO + WPEP <=> WLPO
 ------------------------------------------------------------------------
 
 module Math.Logic.NonConstructiveAxiom.Properties.Base where
@@ -382,7 +383,9 @@ Markov’s principle, Church’s thesis and LindeUf’s theorem
 by Hajime lshihara
 -}
 -- LLPO => MP∨
-record HasPropertiesForLLPO⇒MP∨ {a} r p (A : Set a) : Set (a ⊔ lsuc r ⊔ lsuc p) where
+record HasPropertiesForLLPO⇒MP∨
+  {a} r p (A : Set a) : Set (a ⊔ lsuc r ⊔ lsuc p)
+  where
   field
     _<_       : Rel A r
     <-cmp     : Trichotomous _≡_ _<_
@@ -497,6 +500,7 @@ private
 
 -- "Constructive Reverse Mathematics" by Hannes Diener
 -- Proposition 6.4.1.
+-- WMP ∧ WLPO-Alt => LPO
 wmp∧wlpo-Alt⇒lpo : ∀ {a p} {A : Set a} → WMP A p → WLPO-Alt A p → LPO A p
 wmp∧wlpo-Alt⇒lpo             wmp wlpo-Alt         P? with wlpo-Alt P?
 wmp∧wlpo-Alt⇒lpo             wmp wlpo-Alt         P? | inj₁ ¬∃P  = inj₂ ¬∃P
@@ -521,17 +525,47 @@ wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? | inj₂ ¬¬∃P =
 -- EM => KS
 em⇒ks : ∀ {a p} (A : Set a) (x : A) → EM p → KS p lzero A
 em⇒ks A x em P with em {A = P}
-em⇒ks A x em P | inj₁ xP = (λ _ → ⊤) , λ P? → mk⇔ (λ _ → x , tt) λ _ → xP
+em⇒ks A x em P | inj₁ xP =
+  (λ _ → ⊤) , (λ _ → inj₁ tt) , ((λ _ → x , tt) , (λ _ → xP))
 em⇒ks A x em P | inj₂ ¬P =
-  (λ _ → ⊥) , λ P? → mk⇔ (λ xP → ⊥-elim $ ¬P xP) λ A×⊥ → ⊥-elim $ proj₂ A×⊥
+  (λ _ → ⊥) , (λ _ → inj₂ id) ,
+  ((λ xP → ⊥-elim $ ¬P xP) , (λ A×⊥ → ⊥-elim $ proj₂ A×⊥))
 
 -- KS => PEP
 ks⇒pep : ∀ {a p q} {A : Set a} → KS (a ⊔ p) q A → PEP p q A
 ks⇒pep ks P? = ks _
-{-
+
+-- Proposition 6.2.3
+wpep∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPEP p p A → MP⊎-Alt A p → WLPO A p
+wpep∧mp⊎-Alt⇒wlpo {a} {p} {A} wpep mp⊎-Alt {P = P} P? with wpep P?
+... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P = Sum.map₁ ¬∀Q→∀P (Sum.swap ¬∀P⊎¬∀Q)
+  where
+  f : ¬ ((∀ x → P x) × (∀ x → Q x))
+  f (∀P , ∀Q) = ∀P→¬∀Q ∀P ∀Q
+  ¬∀P⊎¬∀Q : ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
+  ¬∀P⊎¬∀Q = mp⊎-Alt P? Q? f
+
+wlpo⇒wpep : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPEP p p A
+wlpo⇒wpep {a} {p} xA wlpo {P = P} P? with wlpo P?
+... | inj₁ ∀P  = (λ x → Lift p ⊥) , (λ _ → inj₂ lower) , (f , g)
+  where
+  f : (∀ x → P x) → (∀ x → Lift p ⊥) → ⊥
+  f ∀P ∀⊥ = lower $ ∀⊥ xA
+  g : ((∀ x → Lift p ⊥) → ⊥) → ∀ x → P x
+  g ¬∀x→L⊥ x = ∀P x
+... | inj₂ ¬∀P = (λ _ → Lift p ⊤) , ((λ _ → inj₁ (lift tt)) , (f , g))
+  where
+  f : (∀ x → P x) → (∀ x → Lift p ⊤) → ⊥
+  f ∀P _ = ¬∀P ∀P
+  g : ¬ (∀ x → Lift p ⊤) → ∀ x → P x
+  g ¬∀x→L⊤ _ = ⊥-elim $ ¬∀x→L⊤ λ _ → lift tt
+
+-- WPEP ∧ MP <=> LPO
 wpep∧mp⇒lpo : ∀ {a p} {A : Set a} → WPEP p p A → MP A p → LPO A p
-wpep∧mp⇒lpo wpep mp P? = {! wpep P?  !}
--}
+wpep∧mp⇒lpo wpep mp =
+  wlpo∧mp⇒lpo (wpep∧mp⊎-Alt⇒wlpo wpep (mp⊎⇒mp⊎-Alt (mr⇒mp⊎ (mp⇒mr mp))))
+              mp
+
 ------------------------------------------------------------------------
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf
 Searchable : ∀ {a} → Set a → Set a
