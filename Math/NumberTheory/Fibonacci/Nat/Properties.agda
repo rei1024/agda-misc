@@ -10,7 +10,7 @@ open import Data.Nat.Properties
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Relation.Binary.PropositionalEquality
-open import Function.Core
+open import Function.Base
 
 -- agda-misc
 open import Math.NumberTheory.Fibonacci.Nat

@@ -21,7 +21,7 @@ open import Relation.Unary as U
 import      Relation.Unary.Properties as Uₚ
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
-open import Function.Core
+open import Function.Base
 open import Induction.WellFounded
 
 -- agda-misc

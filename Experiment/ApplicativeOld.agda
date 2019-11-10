@@ -1,7 +1,7 @@
 {-# OPTIONS --without-K --safe #-}
 module Experiment.Applicative where
 
-open import Function.Core
+open import Function.Base
 open import Relation.Binary.PropositionalEquality
 
 record Functor (F : Set → Set) : Set₁ where

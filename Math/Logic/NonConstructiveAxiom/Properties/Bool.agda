@@ -15,7 +15,7 @@ import Data.Nat.Properties as ℕₚ
 import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
-open import Function.Core
+open import Function.Base
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 import Function.Equivalence as Eqv

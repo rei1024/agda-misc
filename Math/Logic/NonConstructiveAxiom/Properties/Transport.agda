@@ -7,7 +7,7 @@ open import Level renaming (suc to lsuc; zero to lzero)
 open import Data.Sum as Sum
 open import Data.Product as Prod
 open import Relation.Binary.PropositionalEquality
-open import Function.Core
+open import Function.Base
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 

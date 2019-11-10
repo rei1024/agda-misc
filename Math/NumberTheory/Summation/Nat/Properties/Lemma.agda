@@ -7,7 +7,7 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Nat.Solver
 open import Relation.Binary.PropositionalEquality
-open import Function.Core
+open import Function.Base
 
 lemma₁ : ∀ n → n * (1 + n) * (1 + 2 * n) + 6 * ((1 + n) ^ 2) ≡
                (1 + n) * (2 + n) * (1 + 2 * (1 + n))

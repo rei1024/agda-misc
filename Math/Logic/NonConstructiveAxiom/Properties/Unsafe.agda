@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --exact-split #-}
 
 module Math.Logic.NonConstructiveAxiom.Properties.Unsafe where
 

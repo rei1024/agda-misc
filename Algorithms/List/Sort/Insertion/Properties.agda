@@ -31,7 +31,7 @@ import      Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
 import      Data.List.Relation.Binary.Permutation.Setoid.Properties
   as PermutationSetoidProperties
 
-open import Function.Core using (_∘_; _$_; flip)
+open import Function.Base using (_∘_; _$_; flip)
 
 import      Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
 open import Relation.Binary.PropositionalEquality using (_≡_)

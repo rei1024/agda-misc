@@ -9,7 +9,7 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Nat.Solver
 open import Relation.Binary.PropositionalEquality
-open import Function.Core
+open import Function.Base
 
 -- agda-misc
 open import Math.NumberTheory.Summation.Generic

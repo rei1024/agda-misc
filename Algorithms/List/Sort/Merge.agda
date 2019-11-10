@@ -17,7 +17,7 @@ open import Relation.Unary as U
 open import Relation.Nullary
 import      Relation.Unary.Properties as Uₚ
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
-open import Function.Core
+open import Function.Base
 open import Induction.WellFounded
 
 private

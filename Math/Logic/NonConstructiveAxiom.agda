@@ -32,6 +32,7 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary.PropositionalEquality
 open import Function
 
+infix 2 _<=>_
 _<=>_ : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
 A <=> B = (A → B) × (B → A)
 

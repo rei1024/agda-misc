@@ -6,20 +6,11 @@ open import Level
 
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.List
+import Data.List.Properties as Listₚ
 open import Data.Bool hiding (_≤_; _≤?_; _<_)
 import      Data.Nat as ℕ
-open import Data.Product hiding (swap)
-
-import Data.List.Properties as Listₚ
 import Data.Nat.Properties as ℕₚ
-
-open import Relation.Binary as B
-open import Relation.Binary.PropositionalEquality using (_≡_)
-import      Relation.Binary.PropositionalEquality as ≡ hiding ([_])
-import      Relation.Binary.Reasoning.Setoid as SetoidReasoning
-open import Relation.Unary as U hiding (_∈_)
-open import Relation.Nullary
-import      Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
+open import Data.Product hiding (swap)
 
 open import Data.List.Relation.Unary.All as All
 import      Data.List.Relation.Unary.All.Properties as Allₚ
@@ -34,8 +25,15 @@ import Data.List.Relation.Binary.Permutation.Setoid.Properties
   as PermutationSetoidProperties
 open import Data.List.Membership.Propositional
 
-open import Function.Core using (_∘_; _$_; flip)
+open import Function.Base using (_∘_; _$_; flip)
 
+open import Relation.Binary as B
+open import Relation.Binary.PropositionalEquality using (_≡_)
+import      Relation.Binary.PropositionalEquality as ≡ hiding ([_])
+import      Relation.Binary.Reasoning.Setoid as SetoidReasoning
+open import Relation.Unary as U hiding (_∈_)
+open import Relation.Nullary
+import      Relation.Binary.Properties.DecTotalOrder as DecTotalOrderProperties
 
 -- stdlib
 foldr-preservesʳ : ∀ {a b p} {A : Set a} {B : Set b} {P : B → Set p} {f : A → B → B}
@@ -86,7 +84,8 @@ module _ {a r} {A : Set a} {R : Rel A r} where
   AllPairs-++⁻-AllAll []       rxs        = []
   AllPairs-++⁻-AllAll (x ∷ xs) (rx ∷ rxs) = Allₚ.++⁻ʳ _ rx ∷ AllPairs-++⁻-AllAll xs rxs
 
-  AllPairs-++⁻ : ∀ xs {ys} → AllPairs R (xs ++ ys) → AllPairs R xs × AllPairs R ys × All (λ x → All (R x) ys) xs
+  AllPairs-++⁻ : ∀ xs {ys} → AllPairs R (xs ++ ys) →
+                 AllPairs R xs × AllPairs R ys × All (λ x → All (R x) ys) xs
   AllPairs-++⁻ xs rxs = AllPairs-++⁻ˡ xs rxs , AllPairs-++⁻ʳ xs rxs , AllPairs-++⁻-AllAll xs rxs
 
   AllPairs-∷ʳ⁺ : ∀ {x xs} → AllPairs R xs → All (flip R x) xs → AllPairs R (xs ∷ʳ x)

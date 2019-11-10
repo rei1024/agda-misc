@@ -26,7 +26,7 @@ open import Level renaming (zero to lzero; suc to lsuc)
 open import Data.Empty
 open import Data.Product
 open import Data.Bool using (Bool; true; false)
-open import Function.Core
+open import Function.Base
 
 private
   variable

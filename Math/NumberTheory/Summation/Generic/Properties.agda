@@ -11,7 +11,7 @@ import Data.Nat.Properties as ℕₚ
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
-open import Function.Core
+open import Function.Base
 
 -- agda-misc
 open import Math.NumberTheory.Summation.Generic

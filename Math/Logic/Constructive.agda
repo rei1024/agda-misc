@@ -6,7 +6,7 @@ module Math.Logic.Constructive where
 open import Data.Empty
 open import Data.Sum as Sum
 open import Data.Product as Prod
-open import Function.Core
+open import Function.Base
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 import Relation.Unary as U
@@ -257,6 +257,9 @@ module _ {a p} {A : Set a} {P : A → Set p} where
 
   ¬¬∀P→¬∃¬P : ¬ ¬ (∀ x → P x) → ¬ ∃ λ x → ¬ (P x)
   ¬¬∀P→¬∃¬P ¬¬∀P = contraposition ∃¬P→¬∀P ¬¬∀P
+
+  ¬¬∃P<=>¬∀¬P : ¬ ¬ ∃ P <=> ¬ (∀ x → ¬ P x)
+  ¬¬∃P<=>¬∀¬P = mk<=> ¬¬∃P→¬∀¬P ¬∀¬P→¬¬∃P
 
   ∀¬¬P→¬∃¬P : (∀ x → ¬ ¬ P x) → ¬ ∃ λ x → ¬ (P x)
   ∀¬¬P→¬∃¬P = uncurry

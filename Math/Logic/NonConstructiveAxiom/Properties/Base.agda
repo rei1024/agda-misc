@@ -60,7 +60,7 @@ import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
 open import Function.Bundles using (mk⇔; Equivalence; _⇔_)
-open import Function.Core
+open import Function.Base
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 import Function.Equivalence as Eqv
@@ -534,6 +534,8 @@ em⇒ks A x em P | inj₂ ¬P =
 -- KS => PEP
 ks⇒pep : ∀ {a p q} {A : Set a} → KS (a ⊔ p) q A → PEP p q A
 ks⇒pep ks P? = ks _
+
+-- TODO PEP => WPEP
 
 -- Proposition 6.2.3
 wpep∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPEP p p A → MP⊎-Alt A p → WLPO A p
