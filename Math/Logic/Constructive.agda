@@ -295,11 +295,27 @@ module _ {a p} {A : Set a} {P : A → Set p} where
   P-stable⇒¬¬∀P→∀P : (∀ x → Stable (P x)) → ¬ ¬ (∀ x → P x) → ∀ x → P x
   P-stable⇒¬¬∀P→∀P P-stable = P-stable⇒∀¬¬P→∀P P-stable ∘′ ¬¬∀P→∀¬¬P
 
-  P-stable⇒¬∀P→¬¬∃¬P : (∀ x → Stable (P x)) → ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ (P x))
-  P-stable⇒¬∀P→¬¬∃¬P P-stable = contraposition (P-stable⇒∀¬¬P→∀P P-stable ∘′ ¬∃¬P→∀¬¬P)
-
   P-stable⇒¬∃¬P→∀P : (∀ x → Stable (P x)) → ¬ ∃ (λ x → ¬ P x) → ∀ x → P x
   P-stable⇒¬∃¬P→∀P P-stable ¬∃¬P = P-stable⇒∀¬¬P→∀P P-stable (¬∃¬P→∀¬¬P ¬∃¬P)
+
+  P-stable⇒¬∀P→¬¬∃¬P : (∀ x → Stable (P x)) → ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ (P x))
+  P-stable⇒¬∀P→¬¬∃¬P P-stable ¬∀P = contraposition (P-stable⇒¬∃¬P→∀P P-stable) ¬∀P
+
+  -- decidable predicate
+  P?⇒∃¬¬P→∃P : DecU P → ∃ (λ x → ¬ ¬ P x) → ∃ P
+  P?⇒∃¬¬P→∃P P? = P-stable⇒∃¬¬P→∃P (DecU⇒stable P?)
+
+  P?⇒∀¬¬P→∀P : DecU P → (∀ x → ¬ ¬ P x) → ∀ x → P x
+  P?⇒∀¬¬P→∀P P? = P-stable⇒∀¬¬P→∀P (DecU⇒stable P?)
+
+  P?⇒¬¬∀P→∀P : DecU P → ¬ ¬ (∀ x → P x) → ∀ x → P x
+  P?⇒¬¬∀P→∀P P? = P-stable⇒¬¬∀P→∀P (DecU⇒stable P?)
+
+  P?⇒¬∃¬P→∀P : DecU P → ¬ ∃ (λ x → ¬ P x) → ∀ x → P x
+  P?⇒¬∃¬P→∀P P? = P-stable⇒¬∃¬P→∀P (DecU⇒stable P?)
+
+  P?⇒¬∀P→¬¬∃¬P : DecU P → ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ P x)
+  P?⇒¬∀P→¬¬∃¬P P? = P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?)
 
 module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   ∃-undistrib-⊎ : ∃ P ⊎ ∃ Q → ∃ (λ x → P x ⊎ Q x)

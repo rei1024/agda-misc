@@ -285,17 +285,17 @@ lpo⇒llpo lpo P? Q? ¬[∃P×∃Q] with lpo P? | lpo Q?
 lpo⇒wlpo : ∀ {a p} {A : Set a} → LPO A p → WLPO A p
 lpo⇒wlpo lpo P? with lpo (¬-DecU P?)
 ... | inj₁ ∃¬P  = inj₂ (∃¬P→¬∀P ∃¬P)
-... | inj₂ ¬∃¬P = inj₁ (P-stable⇒¬∃¬P→∀P (DecU⇒stable P?) ¬∃¬P)
+... | inj₂ ¬∃¬P = inj₁ (P?⇒¬∃¬P→∀P P? ¬∃¬P)
 
 lpo⇒mp : ∀ {a p} {A : Set a} → LPO A p → MP A p
 lpo⇒mp lpo P? ¬∀P with lpo (¬-DecU P?)
 ... | inj₁ ∃¬P  = ∃¬P
-... | inj₂ ¬∃¬P = ⊥-elim $ ¬∀P $ P-stable⇒¬∃¬P→∀P (DecU⇒stable P?) ¬∃¬P
+... | inj₂ ¬∃¬P = ⊥-elim $ ¬∀P $ P?⇒¬∃¬P→∀P P? ¬∃¬P
 
 wlpo∧mp⇒lpo : ∀ {a p} {A : Set a} → WLPO A p → MP A p → LPO A p
 wlpo∧mp⇒lpo wlpo mp P? with wlpo (¬-DecU P?)
 ... | inj₁ ∀¬P  = inj₂ (∀¬P→¬∃P ∀¬P)
-... | inj₂ ¬∀¬P = inj₁ $ P-stable⇒∃¬¬P→∃P (DecU⇒stable P?) $ mp (¬-DecU P?) ¬∀¬P
+... | inj₂ ¬∀¬P = inj₁ $ P?⇒∃¬¬P→∃P P? $ mp (¬-DecU P?) ¬∀¬P
 
 -- WLPO => LLPO
 wlpo⇒llpo : ∀ {a p} {A : Set a} → WLPO A p → LLPO A p
@@ -308,7 +308,7 @@ wlpo⇒llpo wlpo P? Q? ¬[∃P×∃Q] with wlpo (¬-DecU P?) | wlpo (¬-DecU Q?)
 wem⇒wlpo : ∀ {a p} {A : Set a} → WEM (a ⊔ p) → WLPO A p
 wem⇒wlpo wem P? with wem
 ... | inj₁ ¬∀P  = inj₂ ¬∀P
-... | inj₂ ¬¬∀P = inj₁ (P-stable⇒¬¬∀P→∀P (DecU⇒stable P?) ¬¬∀P)
+... | inj₂ ¬¬∀P = inj₁ (P?⇒¬¬∀P→∀P P? ¬¬∀P)
 
 -- WLPO <=> WLPO-Alt
 wlpo⇒wlpo-Alt : ∀ {a p} {A : Set a} → WLPO A p → WLPO-Alt A p
@@ -316,21 +316,22 @@ wlpo⇒wlpo-Alt wlpo P? = Sum.map ∀¬P→¬∃P ¬∀¬P→¬¬∃P (wlpo (¬-
 
 wlpo-Alt⇒wlpo : ∀ {a p} {A : Set a} → WLPO-Alt A p → WLPO A p
 wlpo-Alt⇒wlpo wlpo-Alt P? =
-  Sum.map (P-stable⇒¬∃¬P→∀P (DecU⇒stable P?)) ¬¬∃¬P→¬∀P (wlpo-Alt (¬-DecU P?))
+  Sum.map (P?⇒¬∃¬P→∀P P?) ¬¬∃¬P→¬∀P (wlpo-Alt (¬-DecU P?))
 
 -- MP <=> MR
 mp⇒mr : ∀ {a p} {A : Set a} → MP A p → MR A p
-mp⇒mr mp P? ¬¬∃P =
-  P-stable⇒∃¬¬P→∃P (DecU⇒stable P?) $ mp (¬-DecU P?) (¬¬∃P→¬∀¬P ¬¬∃P)
+mp⇒mr mp P? ¬¬∃P = P?⇒∃¬¬P→∃P P? $ mp (¬-DecU P?) (¬¬∃P→¬∀¬P ¬¬∃P)
 
 mr⇒mp : ∀ {a p} {A : Set a} → MR A p → MP A p
-mr⇒mp mr P? ¬∀P = mr (¬-DecU P?) (P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?) ¬∀P)
+mr⇒mp mr P? ¬∀P = mr (¬-DecU P?) (P?⇒¬∀P→¬¬∃¬P P? ¬∀P)
 
 -- (WMP ∧ MP⊎) <=> MP
-mp⇒wmp : ∀ {a p} {A : Set a} → MP A p → WMP A p
-mp⇒wmp mp P? pp = P-stable⇒∃¬¬P→∃P (DecU⇒stable P?) $
-  mp (¬-DecU P?) (Sum.[ ¬¬∃P→¬∀¬P , (λ ¬¬∃P×¬P _ →
-    ⊥-stable $ DN-map (¬[A×¬A] ∘ proj₂) ¬¬∃P×¬P) ] (pp P?))
+mr⇒wmp : ∀ {a p} {A : Set a} → MR A p → WMP A p
+mr⇒wmp mr {P = P} P? pp =
+  mr P? $ Sum.[ id , (λ ¬¬∃x→Px×¬Px _ → f ¬¬∃x→Px×¬Px) ] (pp P?)
+  where
+  f : ¬ ¬ ∃ (λ x → P x × ¬ P x) → ⊥
+  f ¬¬∃x→Px×¬Px = ⊥-stable $ DN-map (¬[A×¬A] ∘ proj₂) ¬¬∃x→Px×¬Px
 
 -- MR => MP⊎
 mr⇒mp⊎ : ∀ {a p} {A : Set a} → MR A p → MP⊎ A p
@@ -361,8 +362,7 @@ mp⊎⇒mp⊎-Alt : ∀ {a p} {A : Set a} → MP⊎ A p → MP⊎-Alt A p
 mp⊎⇒mp⊎-Alt mp⊎ P? Q? =
   Sum.map (contraposition ∀P→¬∃¬P) (contraposition ∀P→¬∃¬P) ∘′
   mp⊎ (¬-DecU P?) (¬-DecU Q?) ∘′
-  contraposition (Prod.map (P-stable⇒¬∃¬P→∀P (DecU⇒stable P?))
-                           (P-stable⇒¬∃¬P→∀P (DecU⇒stable Q?)))
+  contraposition (Prod.map (P?⇒¬∃¬P→∀P P?) (P?⇒¬∃¬P→∀P Q?))
 
 mp⊎-Alt⇒mp⊎ : ∀ {a p} {A : Set a} → MP⊎-Alt A p → MP⊎ A p
 mp⊎-Alt⇒mp⊎ mp⊎-Alt P? Q? =
@@ -571,10 +571,11 @@ wpep∧mp⇒lpo wpep mp =
 wpep∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPEP p p A → LLPO A p → WLPO A p
 wpep∧llpo⇒wlpo wpep llpo P? with wpep P?
 wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P with
-  llpo (¬-DecU P?) (¬-DecU Q?) λ {(∃¬P , ∃¬Q) → ∀P→¬∃¬P (¬∀Q→∀P (∃¬P→¬∀P ∃¬Q)) ∃¬P}
+  llpo (¬-DecU P?) (¬-DecU Q?)
+       λ {(∃¬P , ∃¬Q) → ∀P→¬∃¬P (¬∀Q→∀P (∃¬P→¬∀P ∃¬Q)) ∃¬P}
 wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₁ ¬∃¬P =
-  inj₁ (P-stable⇒¬∃¬P→∀P (DecU⇒stable P?) ¬∃¬P)
-wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q  =
+  inj₁ (P?⇒¬∃¬P→∀P P? ¬∃¬P)
+wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q =
   inj₂ λ ∀P → ∀P→¬∀Q ∀P (P-stable⇒¬∃¬P→∀P (DecU⇒stable Q?) ¬∃¬Q)
 
 ------------------------------------------------------------------------

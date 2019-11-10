@@ -209,7 +209,8 @@ MR A p = {P : A → Set p} → MR-i P
 -- Weak Markov's principle
 -- https://ncatlab.org/nlab/show/Markov%27s+principle
 WMP-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ lsuc p)
-WMP-i {p = p} {A = A} P = DecU P →
+WMP-i {p = p} {A = A} P =
+  DecU P →
   ({Q : A → Set p} → DecU Q → ¬ ¬ ∃ Q ⊎ (¬ ¬ ∃ λ x → P x × ¬ Q x)) →
   ∃ P
 
