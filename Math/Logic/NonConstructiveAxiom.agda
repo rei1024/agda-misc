@@ -276,13 +276,13 @@ Peseudobounded : (ℕ → Set) → Set
 Peseudobounded S = (s : ℕ → ℕ) → (∀ n → S (s n)) → ∃ λ N → s N < N
 
 -- Kripke's Schema
-KS : ∀ {a} p q → Set a → Set (a ⊔ lsuc p ⊔ lsuc q)
-KS p q A = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q × (P <=> ∃ Q)
+KS : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
+KS A p q = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q × (P <=> ∃ Q)
 
 -- Principle of Finite Possiblity
 -- Principle of inverse Decision (PID)
-PEP : ∀ {a} p q → Set a → Set (a ⊔ lsuc p ⊔ lsuc q)
-PEP p q A = {P : A → Set p} → DecU P →
+PEP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
+PEP A p q = {P : A → Set p} → DecU P →
             Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (∃ λ x → Q x))
 
 PEP-Bool-ℕ : Set
@@ -291,8 +291,8 @@ PEP-Bool-ℕ =
   Σ (ℕ → Bool) (λ β → (∀ n → α n ≡ false) <=> ∃ λ n → β n ≡ true)
 
 -- WPEP
-WPEP : ∀ {a} p q → Set a → Set (a ⊔ lsuc p ⊔ lsuc q)
-WPEP p q A = {P : A → Set p} → DecU P →
+WPEP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
+WPEP A p q = {P : A → Set p} → DecU P →
              Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (¬ (∀ x → Q x)))
 
 WPEP-Bool-ℕ : Set

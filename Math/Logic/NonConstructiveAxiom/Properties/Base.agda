@@ -522,7 +522,7 @@ wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? | inj₂ ¬¬∃P =
             ¬∃R⊎¬¬∃R
 
 -- EM => KS
-em⇒ks : ∀ {a p} (A : Set a) (x : A) → EM p → KS p lzero A
+em⇒ks : ∀ {a p} (A : Set a) (x : A) → EM p → KS A p lzero
 em⇒ks A x em P with em {A = P}
 em⇒ks A x em P | inj₁ xP =
   (λ _ → ⊤) , (λ _ → inj₁ tt) , ((λ _ → x , tt) , (λ _ → xP))
@@ -531,13 +531,13 @@ em⇒ks A x em P | inj₂ ¬P =
   ((λ xP → ⊥-elim $ ¬P xP) , (λ A×⊥ → ⊥-elim $ proj₂ A×⊥))
 
 -- KS => PEP
-ks⇒pep : ∀ {a p q} {A : Set a} → KS (a ⊔ p) q A → PEP p q A
+ks⇒pep : ∀ {a p q} {A : Set a} → KS A (a ⊔ p) q → PEP A p q
 ks⇒pep ks P? = ks _
 
 -- TODO PEP => WPEP
 
 -- Proposition 6.2.3
-wpep∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPEP p p A → MP⊎-Alt A p → WLPO A p
+wpep∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPEP A p p → MP⊎-Alt A p → WLPO A p
 wpep∧mp⊎-Alt⇒wlpo {a} {p} {A} wpep mp⊎-Alt {P = P} P? with wpep P?
 ... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P = Sum.map₁ ¬∀Q→∀P (Sum.swap ¬∀P⊎¬∀Q)
   where
@@ -546,7 +546,7 @@ wpep∧mp⊎-Alt⇒wlpo {a} {p} {A} wpep mp⊎-Alt {P = P} P? with wpep P?
   ¬∀P⊎¬∀Q : ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
   ¬∀P⊎¬∀Q = mp⊎-Alt P? Q? f
 
-wlpo⇒wpep : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPEP p p A
+wlpo⇒wpep : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPEP A p p
 wlpo⇒wpep {a} {p} xA wlpo {P = P} P? with wlpo P?
 ... | inj₁ ∀P  = (λ x → Lift p ⊥) , (λ _ → inj₂ lower) , (f , g)
   where
@@ -562,13 +562,13 @@ wlpo⇒wpep {a} {p} xA wlpo {P = P} P? with wlpo P?
   g ¬∀x→L⊤ _ = ⊥-elim $ ¬∀x→L⊤ λ _ → lift tt
 
 -- WPEP ∧ MP <=> LPO
-wpep∧mp⇒lpo : ∀ {a p} {A : Set a} → WPEP p p A → MP A p → LPO A p
+wpep∧mp⇒lpo : ∀ {a p} {A : Set a} → WPEP A p p → MP A p → LPO A p
 wpep∧mp⇒lpo wpep mp =
   wlpo∧mp⇒lpo (wpep∧mp⊎-Alt⇒wlpo wpep (mp⊎⇒mp⊎-Alt (mr⇒mp⊎ (mp⇒mr mp))))
               mp
 
 -- WPEP ∧ LLPO => WLPO
-wpep∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPEP p p A → LLPO A p → WLPO A p
+wpep∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPEP A p p → LLPO A p → WLPO A p
 wpep∧llpo⇒wlpo wpep llpo P? with wpep P?
 wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P with
   llpo (¬-DecU P?) (¬-DecU Q?)
