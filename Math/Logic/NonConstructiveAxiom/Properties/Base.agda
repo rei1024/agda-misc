@@ -11,37 +11,37 @@
 -- <=> : equivalence
 -- ∧   : conjunction
 
---     EM⁻¹ <=> DNE⁻¹
---      ^
---      |
---  ┌- EM <=> DNE <=> Peirce <=> MI <=> DEM₁ <=> DEM₂
---  |   |              |         |
---  |   v              v         v
---  |  WEM <=> DEM₃ <- DGP      DNS <=> ¬ ¬ EM <=> ¬ ¬ DNE
---   \  \       ||
---    v  \     DN-distrib-⊎
---   LPO  \
---   /  \ |
---  v    vv
--- MP    WLPO
--- | \    |
--- |  \   v
--- |   \  LLPO
--- |    \ | (for ℕ)
--- v     vv
--- WMP   MP∨
+--         EM⁻¹ <=> DNE⁻¹
+--          ^
+--          |
+--      ┌---EM <=> DNE <=> Peirce <=> MI <=> DEM₁ <=> DEM₂
+--      |    |               |        |
+--      |    v               v        v
+-- KS <-|   WEM <=> DEM₃ <- DGP      DNS <=> ¬ ¬ EM <=> ¬ ¬ DNE
+--  |   |     |       ||
+--  v   v    |   DN-distrib-⊎
+-- PEP LPO   |
+--     /  \  |
+--    v    v v
+--   MP    WLPO -> WPEP
+--   | \    |
+--   |  \   v
+--   |   \  LLPO
+--   |    \ | (for ℕ)
+--   v     vv
+--   WMP   MP∨
 
 -- WLPO ∧ MP => LPO
 -- WLPO ∧ WMP => LPO
 -- WMP ∧ MP∨ => MP
 -- WPEP ∧ MP <=> LPO
 -- WPEP ∧ MP∨ <=> WLPO
+-- WPEP ∧ LLPO => WLPO
 -- KS => PEP
 
 -- TODO
 -- PEP => WPEP
--- WPEP => (WLPO <=> LLPO)
--- LLPO + WPEP <=> WLPO
+
 ------------------------------------------------------------------------
 
 module Math.Logic.NonConstructiveAxiom.Properties.Base where
@@ -49,7 +49,7 @@ module Math.Logic.NonConstructiveAxiom.Properties.Base where
 -- agda-stdlib
 open import Axiom.Extensionality.Propositional
 open import Level renaming (suc to lsuc; zero to lzero)
-open import Data.Empty
+open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
 open import Data.Bool using (Bool; true; false; not)
 open import Data.Sum as Sum
@@ -59,7 +59,6 @@ import Data.Nat.Properties as ℕₚ
 import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
-open import Function.Bundles using (mk⇔; Equivalence; _⇔_)
 open import Function.Base
 import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
@@ -567,6 +566,16 @@ wpep∧mp⇒lpo : ∀ {a p} {A : Set a} → WPEP p p A → MP A p → LPO A p
 wpep∧mp⇒lpo wpep mp =
   wlpo∧mp⇒lpo (wpep∧mp⊎-Alt⇒wlpo wpep (mp⊎⇒mp⊎-Alt (mr⇒mp⊎ (mp⇒mr mp))))
               mp
+
+-- WPEP ∧ LLPO => WLPO
+wpep∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPEP p p A → LLPO A p → WLPO A p
+wpep∧llpo⇒wlpo wpep llpo P? with wpep P?
+wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P with
+  llpo (¬-DecU P?) (¬-DecU Q?) λ {(∃¬P , ∃¬Q) → ∀P→¬∃¬P (¬∀Q→∀P (∃¬P→¬∀P ∃¬Q)) ∃¬P}
+wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₁ ¬∃¬P =
+  inj₁ (P-stable⇒¬∃¬P→∀P (DecU⇒stable P?) ¬∃¬P)
+wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q  =
+  inj₂ λ ∀P → ∀P→¬∀Q ∀P (P-stable⇒¬∃¬P→∀P (DecU⇒stable Q?) ¬∃¬Q)
 
 ------------------------------------------------------------------------
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf

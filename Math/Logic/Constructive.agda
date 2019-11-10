@@ -78,6 +78,11 @@ module _ {a b} {A : Set a} {B : Set b} where
   ¬[A×B]→¬¬[¬A⊎¬B] ¬[A×B] ¬[¬A⊎¬B] =
     ¬[¬A⊎¬B] (inj₁ λ x → ⊥-elim $ ¬[¬A⊎¬B] (inj₂ (λ y → ¬[A×B] (x , y))))
 
+  em-i⇒¬[A×B]→¬A⊎¬B : EM-i A → EM-i B → ¬ (A × B) → ¬ A ⊎ ¬ B
+  em-i⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₁ y)  ¬[A×B] = ⊥-elim $ ¬[A×B] (x , y)
+  em-i⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₂ ¬y) ¬[A×B] = inj₂ ¬y
+  em-i⇒¬[A×B]→¬A⊎¬B (inj₂ ¬x) emB       ¬[A×B] = inj₁ ¬x
+
   join : (A → A → B) → A → B
   join f x = f x x
 
