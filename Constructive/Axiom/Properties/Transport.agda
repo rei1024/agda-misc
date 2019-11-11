@@ -2,7 +2,7 @@
 
 {-# OPTIONS --without-K --safe --exact-split #-}
 
-module Math.Logic.NonConstructiveAxiom.Properties.Transport where
+module Constructive.Axiom.Properties.Transport where
 
 -- agda-stdlib
 open import Level renaming (suc to lsuc; zero to lzero)
@@ -14,9 +14,10 @@ import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 
 -- agda-misc
-open import Math.Logic.NonConstructiveAxiom
-open import Math.Logic.Constructive
-open import Math.Logic.NonConstructiveAxiom.Properties.Base
+open import Constructive.Common
+open import Constructive.Combinators
+open import Constructive.Axiom
+open import Constructive.Axiom.Properties.Base
 
 module Transport
   {a b p} {A : Set a} {B : Set b}

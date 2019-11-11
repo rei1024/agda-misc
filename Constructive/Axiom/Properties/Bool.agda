@@ -2,7 +2,7 @@
 
 {-# OPTIONS --without-K --safe --exact-split #-}
 
-module Math.Logic.NonConstructiveAxiom.Properties.Bool where
+module Constructive.Axiom.Properties.Bool where
 
 -- agda-stdlib
 open import Level renaming (suc to lsuc; zero to lzero)
@@ -19,8 +19,9 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; subst; sym; cong)
 
 -- agda-misc
-open import Math.Logic.NonConstructiveAxiom
-open import Math.Logic.Constructive
+open import Constructive.Axiom
+open import Constructive.Combinators
+open import Constructive.Common
 
 ------------------------------------------------------------------------
 -- Bool version of axioms

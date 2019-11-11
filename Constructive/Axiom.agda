@@ -19,7 +19,7 @@
 
 {-# OPTIONS --without-K --safe --exact-split #-}
 
-module Math.Logic.NonConstructiveAxiom where
+module Constructive.Axiom where
 
 -- agda-stdlib
 open import Level renaming (suc to lsuc; zero to lzero)
@@ -34,29 +34,8 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary.PropositionalEquality
 open import Function
 
-infix 2 _<=>_
-_<=>_ : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
-A <=> B = (A → B) × (B → A)
-
-module _ {a b} {A : Set a} {B : Set b} where
-  mk<=> : (A → B) → (B → A) → A <=> B
-  mk<=> = _,_
-
-  fwd : A <=> B → A → B
-  fwd = proj₁
-
-  bwd : A <=> B → B → A
-  bwd = proj₂
-
-_∘<=>_ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
-        B <=> C → A <=> B → A <=> C
-(f , g) ∘<=> (h , i) = f ∘ h , i ∘ g
-
-Stable : ∀ {a} → Set a → Set a
-Stable A = ¬ ¬ A → A
-
-Dec⊎ : ∀ {a} → Set a → Set a
-Dec⊎ A = A ⊎ ¬ A
+-- agda-misc
+open import Constructive.Common
 
 -- Axioms
 -- Excluded middle
@@ -121,7 +100,6 @@ DGP a b = {A : Set a} {B : Set b} → DGP-i A B
 -- Double-negation shift
 -- if domain of P is finite this can be proved.
 -- https://ncatlab.org/nlab/show/double-negation+shift
-
 DNS-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
 DNS-i P = (∀ x → ¬ ¬ P x) → ¬ ¬ (∀ x → P x)
 
@@ -132,10 +110,6 @@ DNS a p = {A : Set a} {P : A → Set p} → DNS-i P
 IP : ∀ p q r → Set (lsuc (p ⊔ q ⊔ r))
 IP p q r = ∀ {P : Set p} {Q : Set q} {R : Q → Set r} →
            Q → (P → Σ Q R) → (Σ Q λ x → (P → R x))
-
--- Unary decidable predicate
-DecU : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
-DecU P = ∀ x → P x ⊎ ¬ P x
 
 private
   toPred : ∀ {a} {A : Set a} → (A → Bool) → (A → Set)

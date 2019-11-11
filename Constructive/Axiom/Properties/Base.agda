@@ -45,7 +45,7 @@
 
 ------------------------------------------------------------------------
 
-module Math.Logic.NonConstructiveAxiom.Properties.Base where
+module Constructive.Axiom.Properties.Base where
 
 -- agda-stdlib
 open import Axiom.Extensionality.Propositional
@@ -71,8 +71,9 @@ open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
 open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 
 -- agda-misc
-open import Math.Logic.NonConstructiveAxiom
-open import Math.Logic.Constructive
+open import Constructive.Axiom
+open import Constructive.Combinators
+open import Constructive.Common
 
 -- Properties
 aclt : ∀ {a b p} {A : Set a} {B : Set b} → ACLT A B p

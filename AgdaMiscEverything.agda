@@ -21,21 +21,26 @@ import Algorithms.List.Sort.Quick
 import Algorithms.List.Sort.Quick.Properties
 
 ------------------------------------------------------------------------
+-- Constructive mathematics
+
+import Constructive.Axiom
+
+import Constructive.Axiom.Properties
+
+import Constructive.Axiom.Properties.Base
+
+import Constructive.Axiom.Properties.Bool
+
+import Constructive.Axiom.Properties.Transport
+
+import Constructive.Combinators
+
+import Constructive.Common
+
+------------------------------------------------------------------------
 -- Logic
 
--- Constructive mathematics
-import Math.Logic.NonConstructiveAxiom
-
-import Math.Logic.Constructive
-
-import Math.Logic.NonConstructiveAxiom.Properties
-
-import Math.Logic.NonConstructiveAxiom.Properties.Base
-
-import Math.Logic.NonConstructiveAxiom.Properties.Bool
-
-import Math.Logic.NonConstructiveAxiom.Properties.Transport
-
+-- TODO move to `TypeTheory`
 -- Natural number
 import Math.Logic.Nat.Operations
 

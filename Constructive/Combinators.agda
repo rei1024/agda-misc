@@ -1,8 +1,7 @@
+-- Combinators for logical reasoning
 {-# OPTIONS --without-K --safe --exact-split #-}
 
--- Combinators for logical reasoning
-
-module Math.Logic.Constructive where
+module Constructive.Combinators where
 
 -- agda-stdlib
 open import Data.Empty
@@ -15,7 +14,7 @@ import Relation.Unary as U
 open import Relation.Binary.PropositionalEquality
 
 -- agda-misc
-open import Math.Logic.NonConstructiveAxiom
+open import Constructive.Common
 
 ---------------------------------------------------------------------------
 -- Combinators
