@@ -1,3 +1,5 @@
+-- Functions used in googology
+
 {-# OPTIONS --without-K --safe --exact-split #-}
 
 module Math.Googology.Function where

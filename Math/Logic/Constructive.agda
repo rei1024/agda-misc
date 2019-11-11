@@ -1,5 +1,7 @@
 {-# OPTIONS --without-K --safe --exact-split #-}
 
+-- Combinators for logical reasoning
+
 module Math.Logic.Constructive where
 
 -- agda-stdlib
@@ -237,7 +239,7 @@ module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   DecU-× : DecU P → DecU Q → DecU (λ x → P x × Q x)
   DecU-× P? Q? x = em-i-× (P? x) (Q? x)
 
--- Quantifications
+-- Quantifier
 module _ {a p} {A : Set a} {P : A → Set p} where
   ∃P→¬∀¬P : ∃ P → ¬ (∀ x → ¬ (P x))
   ∃P→¬∀¬P = flip uncurry
@@ -285,37 +287,38 @@ module _ {a p} {A : Set a} {P : A → Set p} where
   ∀P→∀¬¬P : (∀ x → P x) → ∀ x → ¬ ¬ P x
   ∀P→∀¬¬P ∀P x = DN-intro (∀P x)
 
-module _ {a p} {A : Set a} {P : A → Set p} where
-  P-stable⇒∃¬¬P→∃P : (∀ x → Stable (P x)) → ∃ (λ x → ¬ ¬ P x) → ∃ P
-  P-stable⇒∃¬¬P→∃P P-stable (x , ¬¬Px) = x , P-stable x ¬¬Px
+-- Quantifier rearrangement for stable predicate
+module _ {a p} {A : Set a} {P : A → Set p} (P-stable : ∀ x → Stable (P x)) where
+  P-stable⇒∃¬¬P→∃P : ∃ (λ x → ¬ ¬ P x) → ∃ P
+  P-stable⇒∃¬¬P→∃P (x , ¬¬Px) = x , P-stable x ¬¬Px
 
-  P-stable⇒∀¬¬P→∀P : (∀ x → Stable (P x)) → (∀ x → ¬ ¬ P x) → ∀ x → P x
-  P-stable⇒∀¬¬P→∀P P-stable ∀¬¬P x = P-stable x (∀¬¬P x)
+  P-stable⇒∀¬¬P→∀P : (∀ x → ¬ ¬ P x) → ∀ x → P x
+  P-stable⇒∀¬¬P→∀P ∀¬¬P x = P-stable x (∀¬¬P x)
 
-  P-stable⇒¬¬∀P→∀P : (∀ x → Stable (P x)) → ¬ ¬ (∀ x → P x) → ∀ x → P x
-  P-stable⇒¬¬∀P→∀P P-stable = P-stable⇒∀¬¬P→∀P P-stable ∘′ ¬¬∀P→∀¬¬P
+  P-stable⇒¬¬∀P→∀P : ¬ ¬ (∀ x → P x) → ∀ x → P x
+  P-stable⇒¬¬∀P→∀P = P-stable⇒∀¬¬P→∀P ∘′ ¬¬∀P→∀¬¬P
 
-  P-stable⇒¬∃¬P→∀P : (∀ x → Stable (P x)) → ¬ ∃ (λ x → ¬ P x) → ∀ x → P x
-  P-stable⇒¬∃¬P→∀P P-stable ¬∃¬P = P-stable⇒∀¬¬P→∀P P-stable (¬∃¬P→∀¬¬P ¬∃¬P)
+  P-stable⇒¬∃¬P→∀P : ¬ ∃ (λ x → ¬ P x) → ∀ x → P x
+  P-stable⇒¬∃¬P→∀P ¬∃¬P = P-stable⇒∀¬¬P→∀P (¬∃¬P→∀¬¬P ¬∃¬P)
 
-  P-stable⇒¬∀P→¬¬∃¬P : (∀ x → Stable (P x)) → ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ (P x))
-  P-stable⇒¬∀P→¬¬∃¬P P-stable ¬∀P = contraposition (P-stable⇒¬∃¬P→∀P P-stable) ¬∀P
+  P-stable⇒¬∀P→¬¬∃¬P : ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ (P x))
+  P-stable⇒¬∀P→¬¬∃¬P ¬∀P = contraposition P-stable⇒¬∃¬P→∀P ¬∀P
 
-  -- decidable predicate
-  P?⇒∃¬¬P→∃P : DecU P → ∃ (λ x → ¬ ¬ P x) → ∃ P
-  P?⇒∃¬¬P→∃P P? = P-stable⇒∃¬¬P→∃P (DecU⇒stable P?)
+module _ {a p} {A : Set a} {P : A → Set p} (P? : DecU P) where
+  P?⇒∃¬¬P→∃P : ∃ (λ x → ¬ ¬ P x) → ∃ P
+  P?⇒∃¬¬P→∃P = P-stable⇒∃¬¬P→∃P (DecU⇒stable P?)
 
-  P?⇒∀¬¬P→∀P : DecU P → (∀ x → ¬ ¬ P x) → ∀ x → P x
-  P?⇒∀¬¬P→∀P P? = P-stable⇒∀¬¬P→∀P (DecU⇒stable P?)
+  P?⇒∀¬¬P→∀P : (∀ x → ¬ ¬ P x) → ∀ x → P x
+  P?⇒∀¬¬P→∀P = P-stable⇒∀¬¬P→∀P (DecU⇒stable P?)
 
-  P?⇒¬¬∀P→∀P : DecU P → ¬ ¬ (∀ x → P x) → ∀ x → P x
-  P?⇒¬¬∀P→∀P P? = P-stable⇒¬¬∀P→∀P (DecU⇒stable P?)
+  P?⇒¬¬∀P→∀P : ¬ ¬ (∀ x → P x) → ∀ x → P x
+  P?⇒¬¬∀P→∀P = P-stable⇒¬¬∀P→∀P (DecU⇒stable P?)
 
-  P?⇒¬∃¬P→∀P : DecU P → ¬ ∃ (λ x → ¬ P x) → ∀ x → P x
-  P?⇒¬∃¬P→∀P P? = P-stable⇒¬∃¬P→∀P (DecU⇒stable P?)
+  P?⇒¬∃¬P→∀P : ¬ ∃ (λ x → ¬ P x) → ∀ x → P x
+  P?⇒¬∃¬P→∀P = P-stable⇒¬∃¬P→∀P (DecU⇒stable P?)
 
-  P?⇒¬∀P→¬¬∃¬P : DecU P → ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ P x)
-  P?⇒¬∀P→¬¬∃¬P P? = P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?)
+  P?⇒¬∀P→¬¬∃¬P : ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ P x)
+  P?⇒¬∀P→¬¬∃¬P = P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?)
 
 module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   ∃-undistrib-⊎ : ∃ P ⊎ ∃ Q → ∃ (λ x → P x ⊎ Q x)

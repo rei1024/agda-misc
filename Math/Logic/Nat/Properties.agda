@@ -1,3 +1,5 @@
+-- Properties of natural number
+
 {-# OPTIONS --without-K --safe #-}
 
 -- agad-stdlib

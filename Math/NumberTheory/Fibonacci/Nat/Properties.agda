@@ -1,3 +1,5 @@
+-- Properties of Fibonacci nunmbers
+
 {-# OPTIONS --without-K --safe #-}
 
 module Math.NumberTheory.Fibonacci.Nat.Properties where

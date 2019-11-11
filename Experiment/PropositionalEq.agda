@@ -1,3 +1,5 @@
+-- Path induction
+
 {-# OPTIONS --without-K --safe #-}
 
 module Experiment.PropositionalEq where

@@ -20,10 +20,10 @@
 -- KS <-|   WEM <=> DEM₃ <- DGP      DNS <=> ¬ ¬ EM <=> ¬ ¬ DNE
 --  |   |     |       ||
 --  v   v    |   DN-distrib-⊎
--- PEP LPO   |
+-- PFP LPO   |
 --     /  \  |
 --    v    v v
---   MP    WLPO -> WPEP
+--   MP    WLPO -> PFP -> WPFP
 --   | \    |
 --   |  \   v
 --   |   \  LLPO
@@ -34,13 +34,15 @@
 -- WLPO ∧ MP => LPO
 -- WLPO ∧ WMP => LPO
 -- WMP ∧ MP∨ => MP
--- WPEP ∧ MP <=> LPO
--- WPEP ∧ MP∨ <=> WLPO
--- WPEP ∧ LLPO => WLPO
--- KS => PEP
+-- WPFP ∧ MP <=> LPO
+-- WPFP ∧ MP∨ <=> WLPO
+-- WPFP ∧ LLPO => WLPO
+-- KS => PFP
+-- WLPO => PFP
+-- PFP => WPFP
 
 -- TODO
--- PEP => WPEP
+-- WLPO => MP∨
 
 ------------------------------------------------------------------------
 
@@ -530,15 +532,40 @@ em⇒ks A x em P | inj₂ ¬P =
   (λ _ → ⊥) , (λ _ → inj₂ id) ,
   ((λ xP → ⊥-elim $ ¬P xP) , (λ A×⊥ → ⊥-elim $ proj₂ A×⊥))
 
--- KS => PEP
-ks⇒pep : ∀ {a p q} {A : Set a} → KS A (a ⊔ p) q → PEP A p q
-ks⇒pep ks P? = ks _
+-- KS => PFP
+ks⇒pfp : ∀ {a p q} {A : Set a} → KS A (a ⊔ p) q → PFP A p q
+ks⇒pfp ks P? = ks _
 
--- TODO PEP => WPEP
+-- PFP => WPFP
+pfp⇒wpfp : ∀ {a p} {A : Set a} → PFP A p p → WPFP A p p
+pfp⇒wpfp pfp {P = P} P? with pfp P?
+... | Q , Q? , ∀P→∃Q , ∃Q→∀P = (λ x → ¬ Q x) , (¬-DecU Q? , (f , g))
+  where
+  f : (∀ x → P x) → ¬ (∀ x → ¬ Q x)
+  f ∀P = ∃P→¬∀¬P (∀P→∃Q ∀P)
+  g : (¬ (∀ x → ¬ Q x)) → ∀ x → P x
+  g ¬∀¬Q = P?⇒¬¬∀P→∀P P? (DN-map ∃Q→∀P (¬∀¬P→¬¬∃P ¬∀¬Q))
+
+-- WLPO => PFP
+wlpo⇒pfp : ∀ {a p} {A : Set a} → A → WLPO A p → PFP A p p
+wlpo⇒pfp {p = p} xA wlpo {P = P} P? with wlpo P?
+... | inj₁ ∀P  = (λ _ → Lift p ⊤) , (λ _ → inj₁ (lift tt)) , (f , g)
+  where
+  f : (∀ x → P x) → ∃ λ x → Lift p ⊤
+  f _ = xA , lift tt
+  g : (∃ λ x → Lift p ⊤) → (∀ x → P x)
+  g _ = ∀P
+... | inj₂ ¬∀P = (λ _ → Lift p ⊥) , (λ _ → inj₂ lower) , f , g
+  where
+  f : (∀ x → P x) → ∃ (λ x → Lift p ⊥)
+  f ∀P = ⊥-elim $ ¬∀P ∀P
+  g : ∃ (λ x → Lift p ⊥) → ∀ x → P x
+  g (x , L⊥) = ⊥-elim $ lower L⊥
 
 -- Proposition 6.2.3
-wpep∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPEP A p p → MP⊎-Alt A p → WLPO A p
-wpep∧mp⊎-Alt⇒wlpo {a} {p} {A} wpep mp⊎-Alt {P = P} P? with wpep P?
+-- This can be proved by `wpfp∧llpo⇒wlpo` but it requires `HasPropertiesForLLPO⇒MP∨`
+wpfp∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → MP⊎-Alt A p → WLPO A p
+wpfp∧mp⊎-Alt⇒wlpo {a} {p} {A} wpfp mp⊎-Alt {P = P} P? with wpfp P?
 ... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P = Sum.map₁ ¬∀Q→∀P (Sum.swap ¬∀P⊎¬∀Q)
   where
   f : ¬ ((∀ x → P x) × (∀ x → Q x))
@@ -546,37 +573,26 @@ wpep∧mp⊎-Alt⇒wlpo {a} {p} {A} wpep mp⊎-Alt {P = P} P? with wpep P?
   ¬∀P⊎¬∀Q : ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
   ¬∀P⊎¬∀Q = mp⊎-Alt P? Q? f
 
-wlpo⇒wpep : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPEP A p p
-wlpo⇒wpep {a} {p} xA wlpo {P = P} P? with wlpo P?
-... | inj₁ ∀P  = (λ x → Lift p ⊥) , (λ _ → inj₂ lower) , (f , g)
-  where
-  f : (∀ x → P x) → (∀ x → Lift p ⊥) → ⊥
-  f ∀P ∀⊥ = lower $ ∀⊥ xA
-  g : ((∀ x → Lift p ⊥) → ⊥) → ∀ x → P x
-  g ¬∀x→L⊥ x = ∀P x
-... | inj₂ ¬∀P = (λ _ → Lift p ⊤) , ((λ _ → inj₁ (lift tt)) , (f , g))
-  where
-  f : (∀ x → P x) → (∀ x → Lift p ⊤) → ⊥
-  f ∀P _ = ¬∀P ∀P
-  g : ¬ (∀ x → Lift p ⊤) → ∀ x → P x
-  g ¬∀x→L⊤ _ = ⊥-elim $ ¬∀x→L⊤ λ _ → lift tt
+-- WLPO => WPFP
+wlpo⇒wpfp : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPFP A p p
+wlpo⇒wpfp xA wlpo = pfp⇒wpfp (wlpo⇒pfp xA wlpo)
 
--- WPEP ∧ MP <=> LPO
-wpep∧mp⇒lpo : ∀ {a p} {A : Set a} → WPEP A p p → MP A p → LPO A p
-wpep∧mp⇒lpo wpep mp =
-  wlpo∧mp⇒lpo (wpep∧mp⊎-Alt⇒wlpo wpep (mp⊎⇒mp⊎-Alt (mr⇒mp⊎ (mp⇒mr mp))))
+-- WPFP ∧ MP <=> LPO
+wpfp∧mp⇒lpo : ∀ {a p} {A : Set a} → WPFP A p p → MP A p → LPO A p
+wpfp∧mp⇒lpo wpfp mp =
+  wlpo∧mp⇒lpo (wpfp∧mp⊎-Alt⇒wlpo wpfp (mp⊎⇒mp⊎-Alt (mr⇒mp⊎ (mp⇒mr mp))))
               mp
 
--- WPEP ∧ LLPO => WLPO
-wpep∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPEP A p p → LLPO A p → WLPO A p
-wpep∧llpo⇒wlpo wpep llpo P? with wpep P?
-wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P with
+-- WPFP ∧ LLPO => WLPO
+wpfp∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → LLPO A p → WLPO A p
+wpfp∧llpo⇒wlpo wpfp llpo P? with wpfp P?
+wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P with
   llpo (¬-DecU P?) (¬-DecU Q?)
        λ {(∃¬P , ∃¬Q) → ∀P→¬∃¬P (¬∀Q→∀P (∃¬P→¬∀P ∃¬Q)) ∃¬P}
-wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₁ ¬∃¬P =
+wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₁ ¬∃¬P =
   inj₁ (P?⇒¬∃¬P→∀P P? ¬∃¬P)
-wpep∧llpo⇒wlpo wpep llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q =
-  inj₂ λ ∀P → ∀P→¬∀Q ∀P (P-stable⇒¬∃¬P→∀P (DecU⇒stable Q?) ¬∃¬Q)
+wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q =
+  inj₂ λ ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q)
 
 ------------------------------------------------------------------------
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf

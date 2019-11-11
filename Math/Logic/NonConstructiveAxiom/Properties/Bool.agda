@@ -1,29 +1,22 @@
+-- convert between `X` and `X-Bool`
+
 {-# OPTIONS --without-K --safe --exact-split #-}
 
 module Math.Logic.NonConstructiveAxiom.Properties.Bool where
 
 -- agda-stdlib
-open import Axiom.Extensionality.Propositional
 open import Level renaming (suc to lsuc; zero to lzero)
 open import Data.Empty
 open import Data.Unit using (⊤; tt)
 open import Data.Bool using (Bool; true; false; not)
 open import Data.Sum as Sum
 open import Data.Product as Prod
-open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; s≤s; z≤n; _≤?_)
-import Data.Nat.Properties as ℕₚ
-import Data.Nat.Induction as ℕInd
-open import Data.Fin using (Fin)
-import Data.Fin.Properties as Finₚ
 open import Function.Base
 import Function.LeftInverse as LInv -- TODO use new packages
-import Function.Equality as Eq
-import Function.Equivalence as Eqv
-import Induction.WellFounded as Ind
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
-open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; _≢_; refl; subst; sym; cong)
 
 -- agda-misc
 open import Math.Logic.NonConstructiveAxiom

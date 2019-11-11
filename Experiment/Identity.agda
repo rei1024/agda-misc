@@ -1,3 +1,5 @@
+-- Martin-Löf identity type
+
 {-# OPTIONS --without-K --safe #-}
 module Experiment.Identity where
 

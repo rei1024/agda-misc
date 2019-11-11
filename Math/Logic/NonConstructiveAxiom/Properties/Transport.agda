@@ -1,3 +1,5 @@
+-- Transport properties
+
 {-# OPTIONS --without-K --safe --exact-split #-}
 
 module Math.Logic.NonConstructiveAxiom.Properties.Transport where
@@ -16,9 +18,8 @@ open import Math.Logic.NonConstructiveAxiom
 open import Math.Logic.Constructive
 open import Math.Logic.NonConstructiveAxiom.Properties.Base
 
-------------------------------------------------------------------------
--- transport
-module Transport {a b p} {A : Set a} {B : Set b}
+module Transport
+  {a b p} {A : Set a} {B : Set b}
   (f : A → B) (g : B → A) (inv : ∀ x → f (g x) ≡ x)
   where
   private

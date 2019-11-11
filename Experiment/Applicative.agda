@@ -1,3 +1,5 @@
+-- Applicative with law
+
 {-# OPTIONS --without-K --safe #-}
 module Experiment.Applicative where
 

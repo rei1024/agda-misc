@@ -5,7 +5,7 @@ module Math.Logic.Nat.Instance where
 -- agda-stdlib
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Data.Nat using (ℕ; zero; suc)
-open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.PropositionalEquality using (refl)
 
 -- agda-misc
 import Math.Logic.Nat.Operations as NatOperations

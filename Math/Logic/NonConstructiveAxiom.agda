@@ -1,3 +1,5 @@
+-- Omniscience principles
+
 -- https://ncatlab.org/nlab/show/principle+of+omniscience
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 -- https://arxiv.org/pdf/1804.05495.pdf
@@ -25,8 +27,8 @@ open import Data.Bool using (Bool; true; false)
 open import Data.Sum as Sum
 open import Data.Product as Prod
 open import Data.List using (List; []; _∷_; length)
-open import Data.Nat using (ℕ; _≤_; _<_)
 open import Data.List.Relation.Binary.Prefix.Heterogeneous using (Prefix)
+open import Data.Nat using (ℕ; _≤_; _<_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary.PropositionalEquality
@@ -281,22 +283,22 @@ KS A p q = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q × (P <=> ∃ Q)
 
 -- Principle of Finite Possiblity
 -- Principle of inverse Decision (PID)
-PEP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
-PEP A p q = {P : A → Set p} → DecU P →
+PFP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
+PFP A p q = {P : A → Set p} → DecU P →
             Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (∃ λ x → Q x))
 
-PEP-Bool-ℕ : Set
-PEP-Bool-ℕ =
+PFP-Bool-ℕ : Set
+PFP-Bool-ℕ =
   (α : ℕ → Bool) →
   Σ (ℕ → Bool) (λ β → (∀ n → α n ≡ false) <=> ∃ λ n → β n ≡ true)
 
--- WPEP
-WPEP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
-WPEP A p q = {P : A → Set p} → DecU P →
+-- WPFP
+WPFP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
+WPFP A p q = {P : A → Set p} → DecU P →
              Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (¬ (∀ x → Q x)))
 
-WPEP-Bool-ℕ : Set
-WPEP-Bool-ℕ =
+WPFP-Bool-ℕ : Set
+WPFP-Bool-ℕ =
   (α : ℕ → Bool) →
   Σ (ℕ → Bool) λ β → (∀ n → α n ≡ false) <=> (¬ (∀ n → β n ≡ false))
 
