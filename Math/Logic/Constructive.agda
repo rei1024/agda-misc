@@ -321,6 +321,10 @@ module _ {a p} {A : Set a} {P : A → Set p} (P? : DecU P) where
   P?⇒¬∀P→¬¬∃¬P = P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?)
 
 module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
+  P?⇒[∃Q→∀P]→¬∀¬Q→∀P : DecU P → (∃ Q → ∀ x → P x) → ¬ (∀ x → ¬ Q x) → ∀ x → P x
+  P?⇒[∃Q→∀P]→¬∀¬Q→∀P P? ∃Q→∀P ¬∀¬Q = P?⇒¬¬∀P→∀P P? (DN-map ∃Q→∀P (¬∀¬P→¬¬∃P ¬∀¬Q))
+
+module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   ∃-undistrib-⊎ : ∃ P ⊎ ∃ Q → ∃ (λ x → P x ⊎ Q x)
   ∃-undistrib-⊎ (inj₁ (x , Px)) = x , inj₁ Px
   ∃-undistrib-⊎ (inj₂ (x , Qx)) = x , inj₂ Qx
