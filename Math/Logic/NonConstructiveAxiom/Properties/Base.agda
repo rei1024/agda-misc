@@ -11,35 +11,34 @@
 -- <=> : equivalence
 -- ∧   : conjunction
 
---         EM⁻¹ <=> DNE⁻¹
---          ^
---          |
---      ┌---EM <=> DNE <=> Peirce <=> MI <=> DEM₁ <=> DEM₂
---      |    |               |        |
---      |    v               v        v
--- KS <-|   WEM <=> DEM₃ <- DGP      DNS <=> ¬ ¬ EM <=> ¬ ¬ DNE
---  |   |     |       ||
---  v   v    |   DN-distrib-⊎
--- PFP LPO   |
---     /  \  |
---    v    v v
---   MP    WLPO -> PFP -> WPFP
---   | \    |
---   |  \   v
---   |   \  LLPO
---   |    \ | (for ℕ)
---   v     vv
---   WMP   MP∨
+{-
+         EM <=> DNE <=> Peirce <=> MI <=> DEM₁ <=> DEM₂-----┐
+          |      |        |                         |       v
+          |      |        v                         v     EM⁻¹ <=> DNE⁻¹
+          |      |       DGP          ¬ ¬ EM  <=>  DNS
+          |      |        |
+          |      |        v
+          |      |       WEM <=> DEM₃ <=> DN-distrib-⊎
+          v      v
+         LPO     KS
+         /  \      \
+        /    \      \
+       v      v      v
+       MP    WLPO -> PFP -> WPFP
+       | \    |
+       |  \   v
+       |   \  LLPO
+       |    | |
+       v    v v
+      WMP   MP∨
+-}
 
--- WLPO ∧ MP => LPO
--- WLPO ∧ WMP => LPO
--- WMP ∧ MP∨ => MP
--- WPFP ∧ MP <=> LPO
--- WPFP ∧ MP∨ <=> WLPO
--- WPFP ∧ LLPO => WLPO
--- KS => PFP
--- WLPO => PFP
--- PFP => WPFP
+-- WLPO ∧ MP -> LPO
+-- WLPO ∧ WMP -> LPO
+-- WMP ∧ MP∨ -> MP
+-- WPFP ∧ MP -> LPO
+-- WPFP ∧ MP∨ -> WLPO
+-- WPFP ∧ LLPO -> WLPO
 
 -- TODO
 -- WLPO => MP∨
@@ -92,10 +91,12 @@ lpo-Fin : ∀ {n p} → LPO (Fin n) p
 lpo-Fin = dec⇒em-i ∘ Finₚ.any? ∘ DecU⇒decidable
 
 dec-dns-i : ∀ {a p} {A : Set a} {P : A → Set p} → DecU P → DNS-i P
-dec-dns-i P? ∀¬¬P ¬∀P = ¬∀P (λ x → DecU⇒stable P? x (∀¬¬P x))
+dec-dns-i P? ∀¬¬P = DN-intro (P?⇒∀¬¬P→∀P P? ∀¬¬P)
 
 ------------------------------------------------------------------------
 -- Equivalence between classical proposition
+------------------------------------------------------------------------
+
 -- DNE <=> EM
 dne⇒em : ∀ {a} → DNE a → EM a
 dne⇒em dne = dne DN-EM-i
@@ -270,7 +271,8 @@ em⁻¹⇒dne⁻¹ em⁻¹ isP ¬¬x with em⁻¹ isP
 ... | inj₂ ¬x = ⊥-elim $ ¬¬x ¬x
 
 -----------------------------------------------------------------------
--- Properties of LPO, LLPO, WLPO, MP, MP⊎, WMP
+-- Properties of LPO, LLPO, WLPO, MP, MP⊎, WMP, KS, PFP, WPFP
+-----------------------------------------------------------------------
 
 -- EM => LPO
 em⇒lpo : ∀ {a p} {A : Set a} → EM (a ⊔ p) → LPO A p
@@ -527,17 +529,17 @@ wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? | inj₂ ¬¬∃P =
             ¬∃R⊎¬¬∃R
 
 -- EM => KS
-em⇒ks : ∀ {a p} (A : Set a) (x : A) → EM p → KS A p lzero
-em⇒ks A x em P with em {A = P}
-em⇒ks A x em P | inj₁ xP =
-  (λ _ → ⊤) , (λ _ → inj₁ tt) , ((λ _ → x , tt) , (λ _ → xP))
-em⇒ks A x em P | inj₂ ¬P =
-  (λ _ → ⊥) , (λ _ → inj₂ id) ,
-  ((λ xP → ⊥-elim $ ¬P xP) , (λ A×⊥ → ⊥-elim $ proj₂ A×⊥))
+em⇒ks : ∀ {a p} q {A : Set a} (x : A) → EM p → KS A p q
+em⇒ks q x em P with em {A = P}
+em⇒ks q x em P | inj₁ xP =
+  (λ _ → Lift q ⊤) , (λ _ → inj₁ (lift tt)) , ((λ _ → x , lift tt) , (λ _ → xP))
+em⇒ks q x em P | inj₂ ¬P =
+  (λ _ → Lift q ⊥) , (λ _ → inj₂ lower) ,
+  ((λ xP → ⊥-elim $ ¬P xP) , (λ A×L⊥ → ⊥-elim $ lower $ proj₂ A×L⊥))
 
 -- KS => PFP
 ks⇒pfp : ∀ {a p q} {A : Set a} → KS A (a ⊔ p) q → PFP A p q
-ks⇒pfp ks P? = ks _
+ks⇒pfp ks {P = P} P? = ks (∀ x → P x)
 
 -- PFP => WPFP
 pfp⇒wpfp : ∀ {a p} {A : Set a} → PFP A p p → WPFP A p p
@@ -566,6 +568,7 @@ wlpo⇒pfp {p = p} xA wlpo {P = P} P? with wlpo P?
   g (x , L⊥) = ⊥-elim $ lower L⊥
 
 -- Proposition 6.2.3
+-- WPFP ∧ MP⊎-Alt => WLPO
 -- This can be proved by `wpfp∧llpo⇒wlpo` but it requires `HasPropertiesForLLPO⇒MP∨`
 wpfp∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → MP⊎-Alt A p → WLPO A p
 wpfp∧mp⊎-Alt⇒wlpo {a} {p} {A} wpfp mp⊎-Alt {P = P} P? with wpfp P?
@@ -598,7 +601,13 @@ wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj�
   inj₂ λ ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q)
 
 ------------------------------------------------------------------------
+-- Searchable set
+
+------------------------------------------------------------------------
+
+-- http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.127.3062&rep=rep1&type=pdf
 -- http://www.cs.bham.ac.uk/~mhe/papers/omniscient-2011-07-06.pdf
+
 Searchable : ∀ {a} → Set a → Set a
 Searchable A = Σ ((A → Bool) → A)
                  λ ε → (P : A → Bool) → P (ε P) ≡ true → (x : A) → P x ≡ true
@@ -644,7 +653,6 @@ module Lemma2-2 {a} {A : Set a} (searchable : Searchable A) where
 
 open Lemma2-2
 
--- http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.127.3062&rep=rep1&type=pdf
 Exhaustible : ∀ {a} → Set a → Set a
 Exhaustible A = Σ ((A → Bool) → Bool) λ ∀K →
   (P : A → Bool) → ∀K P ≡ true → ∀ x → P x ≡ true
