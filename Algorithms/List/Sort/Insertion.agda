@@ -1,6 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
-
 -- Insertion sort
+
+{-# OPTIONS --without-K --safe #-}
 
 module Algorithms.List.Sort.Insertion where
 

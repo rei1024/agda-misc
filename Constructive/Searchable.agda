@@ -45,8 +45,8 @@ module Lemma2-2 {a} {A : Set a} (searchable : Searchable A) where
   module _ {P : A → Bool} where
     ∃x→Px≡false→P[εP]≡false : (∃ λ x → P x ≡ false) → P (ε P) ≡ false
     ∃x→Px≡false→P[εP]≡false e =
-      x≢true⇒x≡false $ contraposition
-        (ε-correct P) (∃¬P→¬∀P (Prod.map₂ x≡false⇒x≢true e))
+      x≢true⇒x≡false $ contraposition (ε-correct P)
+                                      (∃¬P→¬∀P (Prod.map₂ x≡false⇒x≢true e))
         where
         x≡false⇒x≢true : ∀ {x} → x ≡ false → x ≢ true
         x≡false⇒x≢true {false} refl ()

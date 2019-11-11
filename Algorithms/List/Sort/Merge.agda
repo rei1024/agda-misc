@@ -1,6 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
-
 -- Mergesort
+
+{-# OPTIONS --without-K --safe #-}
 
 module Algorithms.List.Sort.Merge where
 

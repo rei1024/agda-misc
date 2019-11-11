@@ -9,6 +9,7 @@ open import Function.Base
 open import Relation.Nullary
 
 infix 2 _<=>_
+
 -- Logical equivalence
 _<=>_ : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
 A <=> B = (A → B) × (B → A)
@@ -24,7 +25,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   bwd = proj₂
 
 _∘<=>_ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
-        B <=> C → A <=> B → A <=> C
+         B <=> C → A <=> B → A <=> C
 (f , g) ∘<=> (h , i) = f ∘ h , i ∘ g
 
 Stable : ∀ {a} → Set a → Set a

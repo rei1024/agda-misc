@@ -1,4 +1,5 @@
 -- https://github.com/idris-lang/Idris-dev/blob/4e704011fb805fcb861cc9a1bd68a2e727cefdde/libs/contrib/Data/Nat/Fib.idr
+
 {-# OPTIONS --without-K --safe #-}
 
 -- agda-stdlib

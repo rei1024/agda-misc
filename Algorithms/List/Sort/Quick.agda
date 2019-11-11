@@ -1,6 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
-
 -- Quicksort
+
+{-# OPTIONS --without-K --safe #-}
 
 module Algorithms.List.Sort.Quick where
 

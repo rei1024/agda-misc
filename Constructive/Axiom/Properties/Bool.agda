@@ -1,4 +1,4 @@
--- convert between `X` and `X-Bool`
+-- Convert between `X` and `X-Bool`
 
 {-# OPTIONS --without-K --safe --exact-split #-}
 
@@ -25,6 +25,7 @@ open import Constructive.Common
 
 ------------------------------------------------------------------------
 -- Bool version of axioms
+
 private
   module _ {a p} {A : Set a} {P : A → Set p} where
     toBool : DecU P → (A → Bool)

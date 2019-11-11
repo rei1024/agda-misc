@@ -1,11 +1,11 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
+------------------------------------------------------------------------
+-- Equivalence between omniscience principles
+------------------------------------------------------------------------
 
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 -- https://pdfs.semanticscholar.org/deb5/23b6078032c845d8041ee6a5383fec41191c.pdf
 -- http://www.math.lmu.de/~schwicht/pc16transparencies/ishihara/lecture1.pdf
 
-------------------------------------------------------------------------
--- Equivalence between classical proposition
 ------------------------------------------------------------------------
 -- ->  : implication
 -- <=> : equivalence
@@ -44,6 +44,8 @@
 -- WLPO => MP∨
 
 ------------------------------------------------------------------------
+
+{-# OPTIONS --without-K --safe --exact-split #-}
 
 module Constructive.Axiom.Properties.Base where
 
@@ -150,6 +152,18 @@ wem⇒dem₃ wem ¬[A×B] with wem | wem
 dem₃⇒wem : ∀ {a} → DEM₃ a a → WEM a
 dem₃⇒wem dem₃ = dem₃ ¬[A×¬A]
 
+-- WEM <=> DN-distrib-⊎
+wem⇒DN-distrib-⊎ : ∀ {a b} → WEM (a ⊔ b) →
+                   {A : Set a} {B : Set b} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
+wem⇒DN-distrib-⊎ {a} {b} wem ¬¬[A⊎B] with lower-wem a b wem | lower-wem b a wem
+... | inj₁ ¬A  | inj₁ ¬B  = ⊥-elim $ ¬¬[A⊎B] (¬A×¬B→¬[A⊎B] (¬A , ¬B))
+... | inj₁ ¬A  | inj₂ ¬¬B = inj₂ ¬¬B
+... | inj₂ ¬¬A | _        = inj₁ ¬¬A
+
+DN-distrib-⊎⇒wem : ∀ {a} → ({A B : Set a} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B) → WEM a
+DN-distrib-⊎⇒wem DN-distrib-⊎ = Sum.swap $ Sum.map₂ TN-to-N $ DN-distrib-⊎ DN-Dec⊎
+
+-- WEM-i ∧ Stable => Dec
 wem-i∧stable⇒dec : ∀ {a} {A : Set a} → WEM-i A → Stable A → Dec A
 wem-i∧stable⇒dec (inj₁ x) stable = no x
 wem-i∧stable⇒dec (inj₂ y) stable = yes (stable y)
@@ -177,7 +191,7 @@ em⇒[¬A→B]→A⊎B em f = Sum.map₂ f em
 [¬A→B]→A⊎B⇒em : ∀ {a} → ({A B : Set a} → (¬ A → B) → A ⊎ B) → EM a
 [¬A→B]→A⊎B⇒em f = f id
 
--- DGP
+-- EM => DGP => WEM
 em⇒dgp : ∀ {a} → EM a → DGP a a
 em⇒dgp em = em⇒[¬A→B]→A⊎B em λ ¬[A→B] b → ⊥-elim $ ¬[A→B] (const b)
 
@@ -190,6 +204,7 @@ dgp⇒wem : ∀ {a} → DGP a a → WEM a
 dgp⇒wem dgp = dem₃⇒wem $ dgp⇒dem₃ dgp
 
 -- Properties of DNS
+-- DNE => DNS
 dne⇒dns : ∀ {a b} → DNE (a ⊔ b) → DNS a (a ⊔ b)
 dne⇒dns dne f = dne λ x → x λ y → y λ z → dne (f z)
 
@@ -239,21 +254,10 @@ dne⇒¬[A→B]→A×¬B dne f =
 ¬[A→B]→A×¬B⇒dne {a} f ¬¬A with f {B = Lift a ⊥} λ A→L⊥ → ¬¬A λ x → lower $ A→L⊥ x
 ... | x , _ = x
 
--- WEM <=> DN-distrib-⊎
-wem⇒DN-distrib-⊎ : ∀ {a b} → WEM (a ⊔ b) →
-                   {A : Set a} {B : Set b} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
-wem⇒DN-distrib-⊎ {a} {b} wem ¬¬[A⊎B] with lower-wem a b wem | lower-wem b a wem
-... | inj₁ ¬A  | inj₁ ¬B  = ⊥-elim $ ¬¬[A⊎B] (¬A×¬B→¬[A⊎B] (¬A , ¬B))
-... | inj₁ ¬A  | inj₂ ¬¬B = inj₂ ¬¬B
-... | inj₂ ¬¬A | _        = inj₁ ¬¬A
-
-DN-distrib-⊎⇒wem : ∀ {a} → ({A B : Set a} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B) → WEM a
-DN-distrib-⊎⇒wem DN-distrib-⊎ = Sum.swap $ Sum.map₂ TN-to-N $ DN-distrib-⊎ DN-Dec⊎
-
 dne⇒ip : ∀ {a b c} → DNE (a ⊔ b ⊔ c) → IP a b c
 dne⇒ip dne q f = dne (DN-ip q f)
 
--- Properties of EM⁻¹
+-- Properties of DNE⁻¹ and EM⁻¹
 em⇒em⁻¹ : ∀ {a} → EM a → EM⁻¹ a
 em⇒em⁻¹ em _ = em
 
@@ -344,6 +348,7 @@ mr⇒mp⊎ mr {P = P} {Q = Q} P? Q? ¬[¬∃P×¬∃Q] with
   mr {P = λ x → P x ⊎ Q x} (DecU-⊎ P? Q?) (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 ... | x , Px⊎Qx = Sum.map (DN-intro ∘′ (x ,_)) (DN-intro ∘′ (x ,_)) Px⊎Qx
 
+-- WMP ∧ MP∨ => MR
 -- Markov’s principle, Church’s thesis and LindeUf’s theorem by Hajime lshihara
 -- α = P, β = Q, γ = R
 wmp∧mp∨⇒mr : ∀ {a p} {A : Set a} → WMP A p → MP∨ A p → MR A p
@@ -488,10 +493,10 @@ private
 
   module _ {p} {P : ℕ → Set p} where
     ℕ<-all-dec : DecU P → DecU (λ n → ∀ m → m ℕ.< n → P m)
-    ℕ<-all-dec P? zero             = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
+    ℕ<-all-dec P? zero = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
     ℕ<-all-dec P? (suc n) with ℕ≤-all-dec P? n
-    ℕ<-all-dec P? (suc n) | inj₁ x = inj₁ λ m sucm≤sucn → x m (ℕₚ.≤-pred sucm≤sucn)
-    ℕ<-all-dec P? (suc n) | inj₂ y =
+    ... | inj₁ x = inj₁ λ m sucm≤sucn → x m (ℕₚ.≤-pred sucm≤sucn)
+    ... | inj₂ y =
       inj₂ (contraposition (λ ∀m→sucm≤sucn→Pm m m≤n → ∀m→sucm≤sucn→Pm m (s≤s m≤n)) y)
 
 ℕ-hasPropertiesForLLPO⇒MP∨ : ∀ p → HasPropertiesForLLPO⇒MP∨ lzero p ℕ
@@ -525,9 +530,10 @@ wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? | inj₂ ¬¬∃P =
     ¬∃R⊎¬¬∃R = wlpo-Alt R?
 
     res : ¬ ¬ ∃ Q ⊎ (¬ ¬ ∃ λ x → P x × ¬ Q x)
-    res = Sum.map₁
-            (λ ¬∃R ¬∃Q → ¬¬∃P λ {(x , Px) → ¬∃R (x , (Px , ¬∃P→∀¬P ¬∃Q x))})
-            ¬∃R⊎¬¬∃R
+    res = Sum.map₁ (λ ¬∃R ¬∃Q → ¬¬∃P (f ¬∃R ¬∃Q)) ¬∃R⊎¬¬∃R
+      where
+      f : ¬ ∃ R → ¬ ∃ Q → ¬ ∃ P
+      f ¬∃R ¬∃Q (x , Px) = ¬∃R (x , (Px , ¬∃P→∀¬P ¬∃Q x))
 
 -- EM => KS
 em⇒ks : ∀ {a p} q {A : Set a} (x : A) → EM p → KS A p q

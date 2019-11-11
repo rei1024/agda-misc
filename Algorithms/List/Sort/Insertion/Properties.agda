@@ -1,6 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
-
 -- Properties of insertion sort
+
+{-# OPTIONS --without-K --safe #-}
 
 open import Relation.Binary as B
 
