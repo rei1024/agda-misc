@@ -37,6 +37,8 @@ import Constructive.Combinators
 
 import Constructive.Common
 
+import Constructive.Searchable
+
 ------------------------------------------------------------------------
 -- Logic
 
