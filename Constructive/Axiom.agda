@@ -231,6 +231,14 @@ MP∨-i P Q = DecU P → DecU Q →
 MP∨ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 
+-- DGP-Σ-i
+-- Equivalent to LLPO
+DGP-Σ-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
+DGP-Σ-i P Q = DecU P → DecU Q → ∃ P <=> ∃ Q
+
+DGP-Σ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+DGP-Σ A p = ∀ {P Q : A → Set p} → DGP-Σ-i P Q
+
 -- WKL
 takeT : ℕ → (ℕ → Bool) → List Bool
 takeT ℕ.zero    α = []
@@ -267,7 +275,7 @@ PFP-Bool-ℕ =
   (α : ℕ → Bool) →
   Σ (ℕ → Bool) (λ β → (∀ n → α n ≡ false) <=> ∃ λ n → β n ≡ true)
 
--- WPFP
+-- Weak Principle of Finite Possiblity
 WPFP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
 WPFP A p q = {P : A → Set p} → DecU P →
              Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (¬ (∀ x → Q x)))

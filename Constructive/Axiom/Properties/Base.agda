@@ -5,6 +5,7 @@
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
 -- https://pdfs.semanticscholar.org/deb5/23b6078032c845d8041ee6a5383fec41191c.pdf
 -- http://www.math.lmu.de/~schwicht/pc16transparencies/ishihara/lecture1.pdf
+-- https://ncatlab.org/nlab/show/weak+excluded+middle
 
 ------------------------------------------------------------------------
 -- ->  : implication
@@ -42,7 +43,7 @@
 
 -- TODO
 -- WLPO => MP∨
-
+-- DGS-Σ <=> LLPO
 ------------------------------------------------------------------------
 
 {-# OPTIONS --without-K --safe --exact-split #-}
@@ -142,7 +143,6 @@ em⇒wem em with em
 ... | inj₂ ¬¬A = inj₂ ¬¬A
 
 -- WEM <=> DEM₃
--- https://ncatlab.org/nlab/show/weak+excluded+middle
 wem⇒dem₃ : ∀ {a} → WEM a → DEM₃ a a
 wem⇒dem₃ wem ¬[A×B] with wem | wem
 ... | inj₁ ¬A  | _        = inj₁ ¬A
@@ -349,8 +349,7 @@ mr⇒mp⊎ mr {P = P} {Q = Q} P? Q? ¬[¬∃P×¬∃Q] with
 ... | x , Px⊎Qx = Sum.map (DN-intro ∘′ (x ,_)) (DN-intro ∘′ (x ,_)) Px⊎Qx
 
 -- WMP ∧ MP∨ => MR
--- Markov’s principle, Church’s thesis and LindeUf’s theorem by Hajime lshihara
--- α = P, β = Q, γ = R
+-- α = P, β = Q, γ = R in [2]
 wmp∧mp∨⇒mr : ∀ {a p} {A : Set a} → WMP A p → MP∨ A p → MR A p
 wmp∧mp∨⇒mr {a} {p} {A} wmp mp∨ {P = P} P? ¬¬∃P = wmp P? Lem.¬¬∃Q⊎¬¬∃R
   where
@@ -390,10 +389,7 @@ mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]
 mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
 mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 
-{-
-Markov’s principle, Church’s thesis and LindeUf’s theorem
-by Hajime lshihara
--}
+-- proved by [2]
 -- LLPO => MP∨
 record HasPropertiesForLLPO⇒MP∨
   {a} r p (A : Set a) : Set (a ⊔ lsuc r ⊔ lsuc p)
@@ -510,8 +506,7 @@ private
 ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
 ℕ-llpo⇒mp∨ = llpo⇒mp∨ (ℕ-hasPropertiesForLLPO⇒MP∨ _)
 
--- "Constructive Reverse Mathematics" by Hannes Diener
--- Proposition 6.4.1.
+-- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO
 wmp∧wlpo-Alt⇒lpo : ∀ {a p} {A : Set a} → WMP A p → WLPO-Alt A p → LPO A p
 wmp∧wlpo-Alt⇒lpo             wmp wlpo-Alt         P? with wlpo-Alt P?
@@ -574,7 +569,7 @@ wlpo⇒pfp {p = p} xA wlpo {P = P} P? with wlpo P?
   g : ∃ (λ x → Lift p ⊥) → ∀ x → P x
   g (x , L⊥) = ⊥-elim $ lower L⊥
 
--- Proposition 6.2.3
+-- Proposition 6.2.3 [1]
 -- WPFP ∧ MP⊎-Alt => WLPO
 -- This can be proved by `wpfp∧llpo⇒wlpo` but it requires `HasPropertiesForLLPO⇒MP∨`
 wpfp∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → MP⊎-Alt A p → WLPO A p
@@ -606,3 +601,14 @@ wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj�
   inj₁ (P?⇒¬∃¬P→∀P P? ¬∃¬P)
 wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q =
   inj₂ λ ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q)
+
+-- Proposition 8.6.1. [1]
+-- DGP-i ∃P ∃Q <=> LLPO
+-- dgp-Σ⇒llpo : ∀ {a p} {A : Set a} → DGP-Σ A p → LLPO A p
+{-
+llpo⇒dgp-Σ : ∀ {a p} {A : Set a} → LLPO A p → DGP-Σ A p
+llpo⇒dgp-Σ llpo {P = P} {Q = Q} P? Q? = {!   !}
+-}
+
+-- [1] Hannes Diener "Constructive Reverse Mathematics"
+-- [2] Hajime lshihara "Markov’s principle, Church’s thesis and LindeUf’s theorem"
