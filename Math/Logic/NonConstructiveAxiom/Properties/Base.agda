@@ -327,7 +327,7 @@ mp⇒mr mp P? ¬¬∃P = P?⇒∃¬¬P→∃P P? $ mp (¬-DecU P?) (¬¬∃P→�
 mr⇒mp : ∀ {a p} {A : Set a} → MR A p → MP A p
 mr⇒mp mr P? ¬∀P = mr (¬-DecU P?) (P?⇒¬∀P→¬¬∃¬P P? ¬∀P)
 
--- (WMP ∧ MP⊎) <=> MP
+-- (WMP ∧ MP∨) <=> MP
 mr⇒wmp : ∀ {a p} {A : Set a} → MR A p → WMP A p
 mr⇒wmp mr {P = P} P? pp =
   mr P? $ Sum.[ id , (λ ¬¬∃x→Px×¬Px _ → f ¬¬∃x→Px×¬Px) ] (pp P?)
@@ -343,21 +343,24 @@ mr⇒mp⊎ mr {P = P} {Q = Q} P? Q? ¬[¬∃P×¬∃Q] with
 
 -- Markov’s principle, Church’s thesis and LindeUf’s theorem by Hajime lshihara
 -- α = P, β = Q, γ = R
-wmp∧mp⊎⇒mr : ∀ {a p} {A : Set a} → WMP A p → MP⊎ A p → MR A p
-wmp∧mp⊎⇒mr {a} {p} {A} wmp mp⊎ {P = P} P? ¬¬∃P = wmp P? Lem.¬¬∃Q⊎¬¬∃R
+wmp∧mp∨⇒mr : ∀ {a p} {A : Set a} → WMP A p → MP∨ A p → MR A p
+wmp∧mp∨⇒mr {a} {p} {A} wmp mp∨ {P = P} P? ¬¬∃P = wmp P? Lem.¬¬∃Q⊎¬¬∃R
   where
   module Lem {Q : A → Set p} (Q? : DecU Q) where
     R : A → Set p
     R x = P x × ¬ Q x
 
     ¬¬∃x→Qx⊎Rx : ¬ ¬ ∃ λ x → Q x ⊎ R x
-    ¬¬∃x→Qx⊎Rx = DN-map (λ {(x , Px) → x , Sum.map₂ (Px ,_) (Q? x) }) ¬¬∃P
+    ¬¬∃x→Qx⊎Rx = DN-map f ¬¬∃P
+      where
+      f : ∃ P → ∃ (λ x → Q x ⊎ (P x × ¬ Q x))
+      f (x , Px) = x , Sum.map₂ (Px ,_) (Q? x)
 
     R? : DecU R
     R? = DecU-× P? (¬-DecU Q?)
 
     ¬¬∃Q⊎¬¬∃R : ¬ ¬ ∃ Q ⊎ ¬ ¬ ∃ R
-    ¬¬∃Q⊎¬¬∃R = mp⊎ Q? R? ([¬¬∃x→Px⊎Qx]→¬[¬∃P×¬∃Q] ¬¬∃x→Qx⊎Rx)
+    ¬¬∃Q⊎¬¬∃R = mp∨ Q? R? ¬¬∃x→Qx⊎Rx
 
 -- MP⊎ <=> MP⊎-Alt
 mp⊎⇒mp⊎-Alt : ∀ {a p} {A : Set a} → MP⊎ A p → MP⊎-Alt A p
