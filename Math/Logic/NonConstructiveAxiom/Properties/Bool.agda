@@ -27,7 +27,7 @@ open import Math.Logic.Constructive
 private
   module _ {a p} {A : Set a} {P : A → Set p} where
     toBool : DecU P → (A → Bool)
-    toBool P? x = ⌊ em-i⇒dec (P? x) ⌋
+    toBool P? x = ⌊ dec⊎⇒dec (P? x) ⌋
 
   toBool-Lift : ∀ {a} p {A : Set a} (P : A → Bool) →
     DecU (λ x → lift {ℓ = p} (P x) ≡ lift true)

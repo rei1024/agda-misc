@@ -88,7 +88,7 @@ lower-wem a b wem with wem
 
 -- LPO for finite set
 lpo-Fin : ∀ {n p} → LPO (Fin n) p
-lpo-Fin = dec⇒em-i ∘ Finₚ.any? ∘ DecU⇒decidable
+lpo-Fin = dec⇒dec⊎ ∘ Finₚ.any? ∘ DecU⇒decidable
 
 dec-dns-i : ∀ {a p} {A : Set a} {P : A → Set p} → DecU P → DNS-i P
 dec-dns-i P? ∀¬¬P = DN-intro (P?⇒∀¬¬P→∀P P? ∀¬¬P)
@@ -99,7 +99,7 @@ dec-dns-i P? ∀¬¬P = DN-intro (P?⇒∀¬¬P→∀P P? ∀¬¬P)
 
 -- DNE <=> EM
 dne⇒em : ∀ {a} → DNE a → EM a
-dne⇒em dne = dne DN-EM-i
+dne⇒em dne = dne DN-Dec⊎
 
 em⇒dne : ∀ {a} → EM a → DNE a
 em⇒dne em = A⊎B→¬B→A em
@@ -194,7 +194,7 @@ dne⇒dns dne f = dne λ x → x λ y → y λ z → dne (f z)
 
 -- DNS <=> ¬ ¬ EM
 dns⇒¬¬em : ∀ {a} → DNS (lsuc a) a → ¬ ¬ EM a
-dns⇒¬¬em dns = DN-map (λ x {A} → x A) $ dns λ x → DN-EM-i
+dns⇒¬¬em dns = DN-map (λ x {A} → x A) $ dns λ x → DN-Dec⊎
 
 ¬¬em⇒dns : ∀ {a} → ¬ ¬ EM a → DNS a a
 ¬¬em⇒dns ¬¬em =
@@ -247,7 +247,7 @@ wem⇒DN-distrib-⊎ {a} {b} wem ¬¬[A⊎B] with lower-wem a b wem | lower-wem 
 ... | inj₂ ¬¬A | _        = inj₁ ¬¬A
 
 DN-distrib-⊎⇒wem : ∀ {a} → ({A B : Set a} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B) → WEM a
-DN-distrib-⊎⇒wem DN-distrib-⊎ = Sum.swap $ Sum.map₂ TN-to-N $ DN-distrib-⊎ DN-EM-i
+DN-distrib-⊎⇒wem DN-distrib-⊎ = Sum.swap $ Sum.map₂ TN-to-N $ DN-distrib-⊎ DN-Dec⊎
 
 dne⇒ip : ∀ {a b c} → DNE (a ⊔ b ⊔ c) → IP a b c
 dne⇒ip dne q f = dne (DN-ip q f)
@@ -258,7 +258,7 @@ em⇒em⁻¹ em _ = em
 
 -- DNE⁻¹ <=> EM⁻¹
 dne⁻¹⇒em⁻¹ : ∀ {a} → Extensionality a lzero → DNE⁻¹ a → EM⁻¹ a
-dne⁻¹⇒em⁻¹ ext dne⁻¹ isP = dne⁻¹ isP′ DN-EM-i where
+dne⁻¹⇒em⁻¹ ext dne⁻¹ isP = dne⁻¹ isP′ DN-Dec⊎ where
   isP′ : ∀ x y → x ≡ y
   isP′ (inj₁  x) (inj₁  y) = cong inj₁ (isP x y)
   isP′ (inj₁  x) (inj₂ ¬y) = ⊥-elim $ ¬y x

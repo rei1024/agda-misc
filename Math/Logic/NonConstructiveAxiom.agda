@@ -55,13 +55,14 @@ _∘<=>_ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
 Stable : ∀ {a} → Set a → Set a
 Stable A = ¬ ¬ A → A
 
+Dec⊎ : ∀ {a} → Set a → Set a
+Dec⊎ A = A ⊎ ¬ A
+
 -- Axioms
 -- Excluded middle
-EM-i : ∀ {a} → Set a → Set a
-EM-i A = A ⊎ ¬ A
 
 EM : ∀ a → Set (lsuc a)
-EM a = ∀ {A : Set a} → EM-i A
+EM a = ∀ {A : Set a} → Dec⊎ A
 
 -- Double negation elimination
 DNE : ∀ a → Set (lsuc a)
@@ -315,7 +316,7 @@ isSet : ∀ {a} → Set a → Set a
 isSet A = {x y : A} (p q : x ≡ y) → p ≡ q
 
 EM⁻¹ : ∀ a → Set (lsuc a)
-EM⁻¹ a = {A : Set a} → isProp A → EM-i A
+EM⁻¹ a = {A : Set a} → isProp A → Dec⊎ A
 
 DNE⁻¹ : ∀ a → Set (lsuc a)
 DNE⁻¹ a = {A : Set a} → isProp A → Stable A

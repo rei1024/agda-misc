@@ -80,10 +80,10 @@ module _ {a b} {A : Set a} {B : Set b} where
   ¬[A×B]→¬¬[¬A⊎¬B] ¬[A×B] ¬[¬A⊎¬B] =
     ¬[¬A⊎¬B] (inj₁ λ x → ⊥-elim $ ¬[¬A⊎¬B] (inj₂ (λ y → ¬[A×B] (x , y))))
 
-  em-i⇒¬[A×B]→¬A⊎¬B : EM-i A → EM-i B → ¬ (A × B) → ¬ A ⊎ ¬ B
-  em-i⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₁ y)  ¬[A×B] = ⊥-elim $ ¬[A×B] (x , y)
-  em-i⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₂ ¬y) ¬[A×B] = inj₂ ¬y
-  em-i⇒¬[A×B]→¬A⊎¬B (inj₂ ¬x) emB       ¬[A×B] = inj₁ ¬x
+  dec⊎⇒¬[A×B]→¬A⊎¬B : Dec⊎ A → Dec⊎ B → ¬ (A × B) → ¬ A ⊎ ¬ B
+  dec⊎⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₁ y)  ¬[A×B] = ⊥-elim $ ¬[A×B] (x , y)
+  dec⊎⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₂ ¬y) ¬[A×B] = inj₂ ¬y
+  dec⊎⇒¬[A×B]→¬A⊎¬B (inj₂ ¬x) emB       ¬[A×B] = inj₁ ¬x
 
   join : (A → A → B) → A → B
   join f x = f x x
@@ -118,8 +118,8 @@ module _ {a} {A : Set a} where
   TN-to-N = contraposition DN-intro
 
   -- Double negation of excluded middle
-  DN-EM-i : ¬ ¬ EM-i A
-  DN-EM-i = λ f → (f ∘ inj₂) (f ∘ inj₁)
+  DN-Dec⊎ : ¬ ¬ Dec⊎ A
+  DN-Dec⊎ = λ f → (f ∘ inj₂) (f ∘ inj₁)
 
 -- eliminator for ⊥
 ⊥-stable : ¬ ¬ ⊥ → ⊥
@@ -166,41 +166,41 @@ module _ {a b c} {A : Set a} {B : Set b} {C : Set c} where
   ip-⊎-DN : (A → (B ⊎ C)) → ¬ ¬ ((A → B) ⊎ (A → C))
   ip-⊎-DN f =
     DN-map Sum.[ (Sum.map const const ∘ f) , (λ ¬A → inj₁ λ x → ⊥-elim (¬A x)) ]
-          DN-EM-i
+          DN-Dec⊎
 
 DN-ip : ∀ {p q r} {P : Set p} {Q : Set q} {R : Q → Set r} →
         Q → (P → Σ Q R) → ¬ ¬ (Σ Q λ x → (P → R x))
 DN-ip q f =
   DN-map Sum.[ (λ x → Prod.map₂ const (f x)) ,
-               (λ ¬P → q , λ P → ⊥-elim $ ¬P P) ] DN-EM-i
+               (λ ¬P → q , λ P → ⊥-elim $ ¬P P) ] DN-Dec⊎
 
--- Properties of EM-i
+-- Properties of Dec⊎
 module _ {a} {A : Set a} where
-  em-i⇒dec : EM-i A → Dec A
-  em-i⇒dec (inj₁ x) = yes x
-  em-i⇒dec (inj₂ y) = no y
+  dec⊎⇒dec : Dec⊎ A → Dec A
+  dec⊎⇒dec (inj₁ x) = yes x
+  dec⊎⇒dec (inj₂ y) = no y
 
-  dec⇒em-i : Dec A → EM-i A
-  dec⇒em-i (yes p) = inj₁ p
-  dec⇒em-i (no ¬p) = inj₂ ¬p
+  dec⇒dec⊎ : Dec A → Dec⊎ A
+  dec⇒dec⊎ (yes p) = inj₁ p
+  dec⇒dec⊎ (no ¬p) = inj₂ ¬p
 
-  ¬-em-i : EM-i A → EM-i (¬ A)
-  ¬-em-i (inj₁ x) = inj₂ (DN-intro x)
-  ¬-em-i (inj₂ y) = inj₁ y
+  ¬-dec⊎ : Dec⊎ A → Dec⊎ (¬ A)
+  ¬-dec⊎ (inj₁ x) = inj₂ (DN-intro x)
+  ¬-dec⊎ (inj₂ y) = inj₁ y
 
 module _ {a b} {A : Set a} {B : Set b} where
-  em-i-map : (A → B) → (B → A) → EM-i A → EM-i B
-  em-i-map f g em-i = Sum.map f (contraposition g) em-i
+  dec⊎-map : (A → B) → (B → A) → Dec⊎ A → Dec⊎ B
+  dec⊎-map f g dec⊎ = Sum.map f (contraposition g) dec⊎
 
-  em-i-⊎ : EM-i A → EM-i B → EM-i (A ⊎ B)
-  em-i-⊎ (inj₁ x)  _         = inj₁ (inj₁ x)
-  em-i-⊎ (inj₂ ¬x) (inj₁ y)  = inj₁ (inj₂ y)
-  em-i-⊎ (inj₂ ¬x) (inj₂ ¬y) = inj₂ (¬A×¬B→¬[A⊎B] (¬x , ¬y))
+  dec⊎-⊎ : Dec⊎ A → Dec⊎ B → Dec⊎ (A ⊎ B)
+  dec⊎-⊎ (inj₁ x)  _         = inj₁ (inj₁ x)
+  dec⊎-⊎ (inj₂ ¬x) (inj₁ y)  = inj₁ (inj₂ y)
+  dec⊎-⊎ (inj₂ ¬x) (inj₂ ¬y) = inj₂ (¬A×¬B→¬[A⊎B] (¬x , ¬y))
 
-  em-i-× : EM-i A → EM-i B → EM-i (A × B)
-  em-i-× (inj₁ x) (inj₁ y)  = inj₁ (x , y)
-  em-i-× (inj₁ x) (inj₂ ¬y) = inj₂ (¬y ∘ proj₂)
-  em-i-× (inj₂ ¬x) _        = inj₂ (¬x ∘ proj₁)
+  dec⊎-× : Dec⊎ A → Dec⊎ B → Dec⊎ (A × B)
+  dec⊎-× (inj₁ x) (inj₁ y)  = inj₁ (x , y)
+  dec⊎-× (inj₁ x) (inj₂ ¬y) = inj₂ (¬y ∘ proj₂)
+  dec⊎-× (inj₂ ¬x) _        = inj₂ (¬x ∘ proj₁)
 
 -- Properties of Stable
 module _ {a} {A : Set a} where
@@ -211,33 +211,33 @@ module _ {a} {A : Set a} where
   ¬-stable : Stable (¬ A)
   ¬-stable = TN-to-N
 
-  em-i⇒stable : EM-i A → Stable A
-  em-i⇒stable em-i = dec⇒stable (em-i⇒dec em-i)
+  dec⊎⇒stable : Dec⊎ A → Stable A
+  dec⊎⇒stable dec⊎ = dec⇒stable (dec⊎⇒dec dec⊎)
 
 module _ {a p} {A : Set a} {P : A → Set p} where
   DecU⇒stable : DecU P → ∀ x → Stable (P x)
-  DecU⇒stable P? x = em-i⇒stable (P? x)
+  DecU⇒stable P? x = dec⊎⇒stable (P? x)
 
   -- Properties of DecU
   ¬-DecU : DecU P → DecU (λ x → ¬ (P x))
-  ¬-DecU P? x = ¬-em-i (P? x)
+  ¬-DecU P? x = ¬-dec⊎ (P? x)
 
   DecU⇒decidable : DecU P → U.Decidable P
-  DecU⇒decidable P? x = em-i⇒dec (P? x)
+  DecU⇒decidable P? x = dec⊎⇒dec (P? x)
 
   decidable⇒DecU : U.Decidable P → DecU P
-  decidable⇒DecU P? x = dec⇒em-i (P? x)
+  decidable⇒DecU P? x = dec⇒dec⊎ (P? x)
 
 DecU-map : ∀ {a b p} {A : Set a} {B : Set b} {P : A → Set p} →
   (f : B → A) → DecU P → DecU (λ x → P (f x))
-DecU-map f P? x = em-i-map id id (P? (f x))
+DecU-map f P? x = dec⊎-map id id (P? (f x))
 
 module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   DecU-⊎ : DecU P → DecU Q → DecU (λ x → P x ⊎ Q x)
-  DecU-⊎ P? Q? x = em-i-⊎ (P? x) (Q? x)
+  DecU-⊎ P? Q? x = dec⊎-⊎ (P? x) (Q? x)
 
   DecU-× : DecU P → DecU Q → DecU (λ x → P x × Q x)
-  DecU-× P? Q? x = em-i-× (P? x) (Q? x)
+  DecU-× P? Q? x = dec⊎-× (P? x) (Q? x)
 
 -- Quantifier
 module _ {a p} {A : Set a} {P : A → Set p} where
