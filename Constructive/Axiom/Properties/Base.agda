@@ -70,7 +70,8 @@ import Function.Equivalence as Eqv
 import Induction.WellFounded as Ind
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Relation.Binary using (tri≈; tri<; tri>; Rel; Trichotomous)
+open import Relation.Binary
+  using (tri≈; tri<; tri>; Rel; Trichotomous; Transitive)
 open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 
 -- agda-misc
@@ -389,23 +390,31 @@ mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]
 mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
 mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 
--- proved by [2]
--- LLPO => MP∨
-record HasPropertiesForLLPO⇒MP∨
+record HasProperties
   {a} r p (A : Set a) : Set (a ⊔ lsuc r ⊔ lsuc p)
   where
   field
     _<_       : Rel A r
     <-cmp     : Trichotomous _≡_ _<_
-    <-all-dec : {P : A → Set p} → DecU P → DecU (λ n → ∀ i → i < n → P i)
+    <-any-dec : {P : A → Set p} → DecU P → DecU (λ n → ∃ λ m → (m < n) × P m)
     <-wf      : Ind.WellFounded _<_
+    <-trans   : Transitive _<_
 
-llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
-           HasPropertiesForLLPO⇒MP∨ r p A → LLPO A (p ⊔ a ⊔ r) → MP∨ A p
-llpo⇒mp∨ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] =
-  Sum.swap ¬¬∃Q⊎¬¬∃P
+  <-all-dec : {P : A → Set p} → DecU P → DecU (λ n → ∀ i → i < n → P i)
+  <-all-dec P? n with <-any-dec (¬-DecU P?) n
+  ... | inj₁ (m , m<n , ¬Pm) = inj₂ λ ∀i→i<n→Pi → ¬Pm (∀i→i<n→Pi m m<n)
+  ... | inj₂ ¬∃m→m<n×¬Pm     =
+     inj₁ λ i i<n → DecU⇒stable P? i λ ¬Pi → ¬∃m→m<n×¬Pm (i , (i<n , ¬Pi))
+
+-- Proposition 8.6.1. [1]
+-- DGP-i ∃P ∃Q <=> LLPO
+-- dgp-Σ⇒llpo : ∀ {a p} {A : Set a} → DGP-Σ A p → LLPO A p
+llpo⇒dgp-Σ : ∀ {r p a} {A : Set a} → HasProperties r p A →
+             LLPO A (p ⊔ a ⊔ r) → DGP-Σ A p
+llpo⇒dgp-Σ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
+  Sum.map ¬∃R→∃P→∃Q ¬∃S→∃Q→∃P ¬∃R⊎¬∃S
   where
-  open HasPropertiesForLLPO⇒MP∨ has
+  open HasProperties has
   -- ex. R 5
   -- n : 0 1 2 3 4 5 6 7 8
   -- P : 0 0 0 0 0 1 ? ? ?
@@ -434,77 +443,94 @@ llpo⇒mp∨ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx]
   ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
 
-  -- Induction by _<_
-  byacc₁ : (∀ x → ¬ R x) → (∀ x → ¬ Q x) → ∀ x → Ind.Acc _<_ x → ¬ P x
-  byacc₁ ∀¬R ∀¬Q x (Ind.acc rs) Px =
-    ∀¬R x ((λ i i<x → (λ Pi → byacc₁ ∀¬R ∀¬Q i (rs i i<x) Pi) , ∀¬Q i) , (Px , ∀¬Q x))
+  f : (∀ x → ¬ R x) → ∀ x → Ind.Acc _<_ x → P x → ¬ Q x → (∀ y → ¬ (y < x × Q y)) → ⊥
+  f ∀¬R x (Ind.acc rs) Px ¬Qx ∀y→¬[y<x×Qy] = ∀¬R x
+    ((λ i i<x → (λ Pi → f ∀¬R i (rs i i<x) Pi (λ Qi → ∀y→¬[y<x×Qy] i (i<x , Qi))
+    λ {y (y<i , Qy) → ∀y→¬[y<x×Qy] y (<-trans y<i i<x , Qy)}) ,
+    λ Qi → ∀y→¬[y<x×Qy] i (i<x , Qi)) , Px , ¬Qx)
 
-  ∀¬R→∀¬Q→∀¬P : (∀ x → ¬ R x) → (∀ x → ¬ Q x) → ∀ x → ¬ P x
-  ∀¬R→∀¬Q→∀¬P ∀¬R ∀¬Q x Px = byacc₁ ∀¬R ∀¬Q x (<-wf x) Px
+  g : (∀ x → ¬ S x) → ∀ x → Ind.Acc _<_ x → Q x → ¬ P x → (∀ y → ¬ (y < x × P y)) → ⊥
+  g ∀¬R x (Ind.acc rs) Qx ¬Px ∀y→¬[y<x×Py] = ∀¬R x
+    ((λ i i<x → (λ Pi → ∀y→¬[y<x×Py] i (i<x , Pi)) ,
+    λ Qi → g ∀¬R i (rs i i<x) Qi (λ Pi → ∀y→¬[y<x×Py] i (i<x , Pi))
+    λ {y (y<i , Py) → ∀y→¬[y<x×Py] y (<-trans y<i i<x , Py) }) , (¬Px , Qx))
 
-  ¬∃R→¬∃Q→¬∃P : ¬ ∃ R → ¬ ∃ Q → ¬ ∃ P
-  ¬∃R→¬∃Q→¬∃P ¬∃R ¬∃Q = ∀¬P→¬∃P $ ∀¬R→∀¬Q→∀¬P (¬∃P→∀¬P ¬∃R) (¬∃P→∀¬P ¬∃Q)
+  ¬∃R→∃P→∃Q : ¬ ∃ R → ∃ P → ∃ Q
+  ¬∃R→∃P→∃Q ¬∃R (x , Px) with <-any-dec Q? x
+  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₁ (y , y<x , Qy) = y , Qy
+  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₂ ¬∃y→y<x×Qy with Q? x
+  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₂ ¬∃y→y<x×Qy | inj₁ Qx  = x , Qx
+  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₂ ¬∃y→y<x×Qy | inj₂ ¬Qx =
+   ⊥-elim $ f (¬∃P→∀¬P ¬∃R) x (<-wf x) Px ¬Qx (¬∃P→∀¬P ¬∃y→y<x×Qy)
 
-  byacc₂ : (∀ x → ¬ S x) → (∀ x → ¬ P x) → ∀ x → Ind.Acc _<_ x → ¬ Q x
-  byacc₂ ∀¬S ∀¬P x (Ind.acc rs) Qx =
-    ∀¬S x ((λ i i<x → ∀¬P i , λ Qi → byacc₂ ∀¬S ∀¬P i (rs i i<x) Qi) , (∀¬P x , Qx))
+  ¬∃S→∃Q→∃P : ¬ ∃ S → ∃ Q → ∃ P
+  ¬∃S→∃Q→∃P ¬∃S (x , Qx) with P? x
+  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₁ Px = x , Px
+  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₂ ¬Px with <-any-dec P? x
+  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₂ ¬Px | inj₁ (y , y<x , Py) = y , Py
+  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₂ ¬Px | inj₂ ¬∃y→y<x×Py     =
+    ⊥-elim $ g (¬∃P→∀¬P ¬∃S) x (<-wf x) Qx ¬Px (¬∃P→∀¬P ¬∃y→y<x×Py)
 
-  ∀¬S→∀¬P→∀¬Q : (∀ x → ¬ S x) → (∀ x → ¬ P x) → ∀ x → ¬ Q x
-  ∀¬S→∀¬P→∀¬Q ∀¬S ∀¬P x Qx = byacc₂ ∀¬S ∀¬P x (<-wf x) Qx
+-- LLPO => MP∨
+llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
+           HasProperties r p A → LLPO A (p ⊔ a ⊔ r) → MP∨ A p
+llpo⇒mp∨ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] =
+  Sum.swap ¬¬∃Q⊎¬¬∃P
+  where
+    dgp-Σ : (∃ P → ∃ Q) ⊎ (∃ Q → ∃ P)
+    dgp-Σ = llpo⇒dgp-Σ has llpo P? Q?
 
-  ¬∃S→¬∃P→¬∃Q : ¬ ∃ S → ¬ ∃ P → ¬ ∃ Q
-  ¬∃S→¬∃P→¬∃Q ¬∃S ¬∃P = ∀¬P→¬∃P $ ∀¬S→∀¬P→∀¬Q (¬∃P→∀¬P ¬∃S) (¬∃P→∀¬P ¬∃P)
+    ¬¬[∃P⊎∃Q] : ¬ ¬ (∃ P ⊎ ∃ Q)
+    ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
 
-  ¬¬[∃P⊎∃Q] : ¬ ¬ (∃ P ⊎ ∃ Q)
-  ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
-
-  ¬¬∃Q⊎¬¬∃P : ¬ ¬ ∃ Q ⊎ ¬ ¬ ∃ P
-  ¬¬∃Q⊎¬¬∃P =
-    Sum.map
-      (λ ¬∃R ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ ¬∃R→¬∃Q→¬∃P ¬∃R ¬∃Q , ¬∃Q ])
-      (λ ¬∃S ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , ¬∃S→¬∃P→¬∃Q ¬∃S ¬∃P ])
-      ¬∃R⊎¬∃S
+    ¬¬∃Q⊎¬¬∃P : ¬ ¬ ∃ Q ⊎ ¬ ¬ ∃ P
+    ¬¬∃Q⊎¬¬∃P =
+      Sum.map (λ ∃P→∃Q ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ (λ ∃P → ¬∃Q (∃P→∃Q ∃P)) , ¬∃Q ])
+              (λ ∃Q→∃P ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , (λ ∃Q → ¬∃P (∃Q→∃P ∃Q)) ])
+              dgp-Σ
 
 -- lemma for `ℕ-llpo⇒mp∨`
 private
   1+n≰0 : ∀ n → ¬ (suc n ≤ 0)
   1+n≰0 n ()
 
-  ℕ≤-all-dec : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∀ m → m ≤ n → P m)
-  ℕ≤-all-dec {P = P} P? zero    with P? 0
-  ... | inj₁  P0 = inj₁ λ m m≤n → subst P (sym $ ℕₚ.n≤0⇒n≡0 m≤n) P0
-  ... | inj₂ ¬P0 = inj₂ λ ∀m→m≤0→Pm → ¬P0 (∀m→m≤0→Pm 0 ℕₚ.≤-refl)
-  ℕ≤-all-dec P? (suc n) with P? 0
-  ... | inj₁ P0 with ℕ≤-all-dec (P? ∘ suc) n
-  ℕ≤-all-dec {P = P} P? (suc n) | inj₁ P0 | inj₁ ∀m→m≤n→Psm = inj₁ f
+  ℕ≤-any-dec : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∃ λ m → m ≤ n × P m)
+  ℕ≤-any-dec {P = P} P? zero with P? 0
+  ... | inj₁  P0 = inj₁ (0 , ℕₚ.≤-refl , P0)
+  ... | inj₂ ¬P0 = inj₂ λ {(m , m≤0 , Pm) → ¬P0 (subst P (ℕₚ.n≤0⇒n≡0 m≤0) Pm)}
+  ℕ≤-any-dec P? (suc n) with P? 0
+  ... | inj₁  P0 = inj₁ (0 , (z≤n , P0))
+  ... | inj₂ ¬P0 with ℕ≤-any-dec (P? ∘ suc) n
+  ℕ≤-any-dec {P = P} P? (suc n) | inj₂ ¬P0 | inj₁ (m , m≤n , Psm) =
+    inj₁ (suc m , s≤s m≤n , Psm)
+  ℕ≤-any-dec {P = P} P? (suc n) | inj₂ ¬P0 | inj₂ ¬∃m→m≤n×Psm =
+    inj₂ f
     where
-    f : ∀ m → m ≤ suc n → P m
-    f zero    m≤sn      = P0
-    f (suc m) (s≤s m≤n) = ∀m→m≤n→Psm m m≤n
-  ℕ≤-all-dec {P = P} P? (suc n) | inj₁ P0 | inj₂ y = inj₂ (contraposition f y)
+    f : (∃ λ m → m ≤ suc n × P m) → ⊥
+    f (zero  , m≤sn  , Pm)  = ¬P0 Pm
+    f (suc m , sm≤sn , Psm) = ¬∃m→m≤n×Psm (m , (ℕₚ.≤-pred sm≤sn , Psm))
+
+  ℕ<-any-dec : ∀ {p} {P : ℕ → Set p} → DecU P →
+               DecU (λ n → ∃ λ m → m ℕ.< n × P m)
+  ℕ<-any-dec P? zero     = inj₂ λ {(m , m<0 , _) → 1+n≰0 m m<0}
+  ℕ<-any-dec {P = P} P? (suc n) with ℕ≤-any-dec P? n
+  ... | inj₁ (m , m≤n , Pm) = inj₁ (m , s≤s m≤n , Pm)
+  ... | inj₂ ¬∃m→m≤n×Pm     = inj₂ (contraposition f ¬∃m→m≤n×Pm)
     where
-    f : (∀ m → m ≤ suc n → P m) → ∀ m → m ≤ n → P (suc m)
-    f ∀m→m≤sn→Pm m m≤n = ∀m→m≤sn→Pm (suc m) (s≤s m≤n)
-  ℕ≤-all-dec P? (suc n) | inj₂ ¬P0 = inj₂ λ ∀m→m≤sucn→Pm → ¬P0 (∀m→m≤sucn→Pm 0 z≤n)
+    f : (∃ λ m → suc m ≤ suc n × P m) → ∃ λ m → m ≤ n × P m
+    f (m , sm≤sn , Pm) = m , (ℕₚ.≤-pred sm≤sn , Pm)
 
-  module _ {p} {P : ℕ → Set p} where
-    ℕ<-all-dec : DecU P → DecU (λ n → ∀ m → m ℕ.< n → P m)
-    ℕ<-all-dec P? zero = inj₁ λ m m<0 → ⊥-elim $ 1+n≰0 m m<0
-    ℕ<-all-dec P? (suc n) with ℕ≤-all-dec P? n
-    ... | inj₁ x = inj₁ λ m sucm≤sucn → x m (ℕₚ.≤-pred sucm≤sucn)
-    ... | inj₂ y =
-      inj₂ (contraposition (λ ∀m→sucm≤sucn→Pm m m≤n → ∀m→sucm≤sucn→Pm m (s≤s m≤n)) y)
-
-ℕ-hasPropertiesForLLPO⇒MP∨ : ∀ p → HasPropertiesForLLPO⇒MP∨ lzero p ℕ
-ℕ-hasPropertiesForLLPO⇒MP∨ _ = record
+ℕ-hasProperties : ∀ p → HasProperties lzero p ℕ
+ℕ-hasProperties _ = record
   { _<_       = ℕ._<_
   ; <-cmp     = ℕₚ.<-cmp
-  ; <-all-dec = ℕ<-all-dec
+  ; <-any-dec = ℕ<-any-dec
   ; <-wf      = ℕInd.<-wellFounded
+  ; <-trans   = ℕₚ.<-trans
   }
 
 ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
-ℕ-llpo⇒mp∨ = llpo⇒mp∨ (ℕ-hasPropertiesForLLPO⇒MP∨ _)
+ℕ-llpo⇒mp∨ = llpo⇒mp∨ (ℕ-hasProperties _)
 
 -- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO
@@ -601,14 +627,6 @@ wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj�
   inj₁ (P?⇒¬∃¬P→∀P P? ¬∃¬P)
 wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q =
   inj₂ λ ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q)
-
--- Proposition 8.6.1. [1]
--- DGP-i ∃P ∃Q <=> LLPO
--- dgp-Σ⇒llpo : ∀ {a p} {A : Set a} → DGP-Σ A p → LLPO A p
-{-
-llpo⇒dgp-Σ : ∀ {a p} {A : Set a} → LLPO A p → DGP-Σ A p
-llpo⇒dgp-Σ llpo {P = P} {Q = Q} P? Q? = {!   !}
--}
 
 -- [1] Hannes Diener "Constructive Reverse Mathematics"
 -- [2] Hajime lshihara "Markov’s principle, Church’s thesis and LindeUf’s theorem"
