@@ -432,9 +432,9 @@ record HasProperties
     R S : A → Set (r ⊔ p ⊔ a)
     R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
     S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
-
-    lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
-    lem = <-all-dec (DecU-× (¬-DecU P?) (¬-DecU Q?))
+    private
+      lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
+      lem = <-all-dec (DecU-× (¬-DecU P?) (¬-DecU Q?))
 
     R? : DecU R
     R? = DecU-× lem (DecU-× P? (¬-DecU Q?))
@@ -509,7 +509,7 @@ llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
           (Σ-dgp (¬-DecU Q?) (¬-DecU P?))
 
 -- Π-DGP => LLPO
-Π-dgp⇒llpo : ∀ {p a} {A : Set a} → Π-DGP A p → LLPO A p
+Π-dgp⇒llpo : ∀ {a p} {A : Set a} → Π-DGP A p → LLPO A p
 Π-dgp⇒llpo Π-dgp P? Q? ¬[∃P×∃Q] =
   Sum.map (λ ∀¬Q→∀¬P ∃P → [∀¬P→∀¬Q]→¬¬[∃Q→∃P] ∀¬Q→∀¬P
              λ ∃P→∃Q → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
@@ -575,10 +575,8 @@ wlpo⇒Σ-Π-dgp wlpo P? Q? with wlpo Q?
 
 Σ-Π-dgp⇒wlpo : ∀ {a p} {A : Set a} → Σ-Π-DGP A p → WLPO A p
 Σ-Π-dgp⇒wlpo Σ-Π-dgp P? with Σ-Π-dgp (¬-DecU P?) P?
-... | inj₁ ∃¬P→∀P =
-  inj₁ (P?⇒¬¬∀P→∀P P? λ ¬∀P → P?⇒¬∀P→¬¬∃¬P P? ¬∀P λ ∃¬P → ¬∀P (∃¬P→∀P ∃¬P))
-... | inj₂ ∀P→∃¬P =
-  inj₂ λ ∀P → let ∃¬P = ∀P→∃¬P ∀P in proj₂ ∃¬P $ ∀P (proj₁ ∃¬P)
+... | inj₁ ∃¬P→∀P = inj₁ (P?⇒[∃¬P→∀P]→∀P P? ∃¬P→∀P)
+... | inj₂ ∀P→∃¬P = inj₂ λ ∀P → ∃¬P→¬∀P (∀P→∃¬P ∀P) ∀P
 
 -- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO
