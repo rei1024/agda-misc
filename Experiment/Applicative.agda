@@ -3,10 +3,10 @@
 {-# OPTIONS --without-K --safe #-}
 module Experiment.Applicative where
 
-open import Function.Base
-open import Relation.Binary.PropositionalEquality
 open import Data.Product as Prod
 open import Data.Unit
+open import Function.Base
+open import Relation.Binary.PropositionalEquality
 
 record Functor (F : Set → Set) : Set₁ where
   field

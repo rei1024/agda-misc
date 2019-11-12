@@ -55,9 +55,9 @@ module Constructive.Axiom.Properties.Base where
 -- agda-stdlib
 open import Axiom.Extensionality.Propositional
 open import Level renaming (suc to lsuc; zero to lzero)
+open import Data.Bool using (Bool; true; false; not)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
-open import Data.Bool using (Bool; true; false; not)
 open import Data.Sum as Sum
 open import Data.Product as Prod
 open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; s≤s; z≤n; _≤?_)
@@ -66,15 +66,15 @@ import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
 import Data.Fin.Properties as Finₚ
 open import Function.Base
-import Function.LeftInverse as LInv -- TODO use new packages
 import Function.Equality as Eq
 import Function.Equivalence as Eqv
+import Function.LeftInverse as LInv -- TODO use new packages
 import Induction.WellFounded as Ind
-open import Relation.Nullary using (¬_; Dec; yes; no)
-open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary
   using (tri≈; tri<; tri>; Rel; Trichotomous)
 open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
+open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Relation.Nullary.Decidable using (⌊_⌋)
 
 -- agda-misc
 open import Constructive.Axiom
@@ -433,6 +433,7 @@ record HasProperties
     R S : A → Set (r ⊔ p ⊔ a)
     R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
     S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
+
     private
       lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
       lem = <-all-dec (DecU-× (¬-DecU P?) (¬-DecU Q?))
@@ -444,8 +445,8 @@ record HasProperties
     S? = DecU-× lem (DecU-× (¬-DecU P?) Q?)
 
     ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
-    ¬[∃R×∃S] ((m , ∀i→i<m→¬Pi×¬Qi , Pm , ¬Qm) ,
-             (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with <-cmp m n
+    ¬[∃R×∃S] ((m , ∀i→i<m→¬Pi×¬Qi , Pm  , ¬Qm) ,
+              (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with <-cmp m n
     ... | tri< m<n _ _ = proj₁ (∀i→i<n→¬Pi×¬Qi m m<n) Pm
     ... | tri≈ _ m≡n _ = ¬Pn (subst P m≡n Pm)
     ... | tri> _ _ n<m = proj₂ (∀i→i<m→¬Pi×¬Qi n n<m) Qn
@@ -486,22 +487,21 @@ llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
   open HasProperties has
   open HasPropertiesLemma P? Q?
 
-  -- use LLPO
   ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
 
 -- Σ-DGP => MP∨
 Σ-dgp⇒mp∨ : ∀ {p a} {A : Set a} → Σ-DGP A p → MP∨ A p
-Σ-dgp⇒mp∨ Σ-dgp {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q⊎¬¬∃P
+Σ-dgp⇒mp∨ Σ-dgp {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = ¬¬∃P⊎¬¬∃Q
   where
-    ¬¬[∃P⊎∃Q] : ¬ ¬ (∃ P ⊎ ∃ Q)
-    ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
+  ¬¬[∃P⊎∃Q] : ¬ ¬ (∃ P ⊎ ∃ Q)
+  ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
 
-    ¬¬∃Q⊎¬¬∃P : ¬ ¬ ∃ Q ⊎ ¬ ¬ ∃ P
-    ¬¬∃Q⊎¬¬∃P =
-      Sum.map (λ ∃P→∃Q ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ (λ ∃P → ¬∃Q (∃P→∃Q ∃P)) , ¬∃Q ])
-              (λ ∃Q→∃P ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , (λ ∃Q → ¬∃P (∃Q→∃P ∃Q)) ])
-              (Σ-dgp P? Q?)
+  ¬¬∃P⊎¬¬∃Q : ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
+  ¬¬∃P⊎¬¬∃Q =
+    Sum.map (λ ∃Q→∃P ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , (λ ∃Q → ¬∃P (∃Q→∃P ∃Q)) ])
+            (λ ∃P→∃Q ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ (λ ∃P → ¬∃Q (∃P→∃Q ∃P)) , ¬∃Q ])
+            (Σ-dgp Q? P?)
 
 -- Σ-DGP => Π-DGP
 Σ-dgp⇒Π-dgp : ∀ {p a} {A : Set a} → Σ-DGP A p → Π-DGP A p

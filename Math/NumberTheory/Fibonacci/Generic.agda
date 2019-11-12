@@ -13,8 +13,8 @@ module Math.NumberTheory.Fibonacci.Generic
 -- agda-stdlib
 open import Data.Nat
 open import Function
-import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 import Relation.Binary.PropositionalEquality as ≡
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
 open CommutativeMonoid CM
   renaming

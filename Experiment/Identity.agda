@@ -4,10 +4,10 @@
 module Experiment.Identity where
 
 open import Level renaming (zero to lzero; suc to lsuc)
+open import Relation.Binary
 open import Relation.Binary.PropositionalEquality as P using (refl; _≡_)
   renaming (trans to ≡-trans; sym to ≡-sym; cong to ≡-cong)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
-open import Relation.Binary
 
 record JBundle a : Set (lsuc a) where
   field

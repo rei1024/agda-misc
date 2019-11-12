@@ -29,9 +29,9 @@ open import Data.Product as Prod
 open import Data.List using (List; []; _∷_; length)
 open import Data.List.Relation.Binary.Prefix.Heterogeneous using (Prefix)
 open import Data.Nat using (ℕ; _≤_; _<_)
+open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Relation.Binary.PropositionalEquality
 open import Function
 
 -- agda-misc

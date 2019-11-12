@@ -21,15 +21,15 @@ open import Data.Product hiding (swap)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 
 import      Data.List.Relation.Binary.Equality.Setoid as ListSetoidEquality
+import      Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
+import      Data.List.Relation.Binary.Permutation.Setoid.Properties
+  as PermutationSetoidProperties
 open import Data.List.Relation.Unary.All as All
 import      Data.List.Relation.Unary.All.Properties as Allₚ
 open import Data.List.Relation.Unary.Linked as Linked
 open import      Data.List.Relation.Unary.Linked.Properties as Linkedₚ
 open import Data.List.Relation.Unary.AllPairs as AllPairs
 import      Data.List.Relation.Unary.AllPairs.Properties as AllPairsₚ
-import      Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
-import      Data.List.Relation.Binary.Permutation.Setoid.Properties
-  as PermutationSetoidProperties
 
 open import Function.Base using (_∘_; _$_; flip)
 
@@ -41,17 +41,17 @@ open import Relation.Nullary
 open import Relation.Unary as U
 
 -- agda-misc
-open import Experiment.ListRelationProperties
-  using (foldr-preservesʳ; Linked-∷⁻ʳ; Linked-resp-≋)
 open import Algorithms.List.Sort.Common DTO
 open import Algorithms.List.Sort.Insertion
+open import Experiment.ListRelationProperties
+  using (foldr-preservesʳ; Linked-∷⁻ʳ; Linked-resp-≋)
 
 open DecTotalOrder DTO renaming (Carrier to A)
-open InsertionSortOperation _≤?_
 open DecTotalOrderProperties DTO
 open PermutationSetoid Eq.setoid renaming (refl to PSrefl; trans to PStrans)
 open PermutationSetoidProperties Eq.setoid
 open ListSetoidEquality Eq.setoid
+open InsertionSortOperation _≤?_
 
 private
   _≰_ : Rel A _

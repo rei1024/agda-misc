@@ -9,9 +9,9 @@ open import Data.Unit using (tt)
 open import Data.Sum
 open import Data.Nat
 open import Data.Nat.Properties
+open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
-open import Relation.Binary.PropositionalEquality
 open import Function.Base
 
 -- agda-misc

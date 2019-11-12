@@ -8,10 +8,10 @@ module Algorithms.List.Sort.Common
 
 -- agda-stdlib
 open import Data.List
+import Data.List.Relation.Binary.Equality.Setoid as ListSetoidEquality
 open import Data.List.Relation.Unary.AllPairs
 open import Data.List.Relation.Unary.Linked
 import Data.List.Relation.Unary.Linked.Properties as Linkedₚ
-import Data.List.Relation.Binary.Equality.Setoid as ListSetoidEquality
 
 -- agda-misc
 open import Experiment.ListRelationProperties using (Linked-resp-≋)

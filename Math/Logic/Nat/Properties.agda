@@ -20,12 +20,12 @@ module Math.Logic.Nat.Properties
 -- agda-stdlib
 open import Axiom.UniquenessOfIdentityProofs
 open import Level renaming (zero to lzero; suc to lsuc)
+open import Data.Bool using (Bool; true; false)
 open import Data.Empty
 open import Data.Unit using (⊤ ; tt)
 open import Data.Product
 import Data.Product.Properties as Prodₚ
 open import Data.Sum as Sum
-open import Data.Bool using (Bool; true; false)
 open import Function.Base
 import Relation.Binary as B
 open import Relation.Nullary
