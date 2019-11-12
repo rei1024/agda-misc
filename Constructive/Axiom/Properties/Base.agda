@@ -28,7 +28,7 @@
        MP    WLPO -> PFP -> WPFP
        | \    |
        |  \   v
-       |   \  LLPO
+       |   \  LLPO <=> DGP-Σ
        |    | |
        v    v v
       WMP   MP∨
@@ -71,7 +71,7 @@ import Induction.WellFounded as Ind
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Binary
-  using (tri≈; tri<; tri>; Rel; Trichotomous; Transitive)
+  using (tri≈; tri<; tri>; Rel; Trichotomous)
 open import Relation.Binary.PropositionalEquality hiding (Extensionality) -- TODO remove
 
 -- agda-misc
@@ -398,7 +398,6 @@ record HasProperties
     <-cmp     : Trichotomous _≡_ _<_
     <-any-dec : {P : A → Set p} → DecU P → DecU (λ n → ∃ λ m → (m < n) × P m)
     <-wf      : Ind.WellFounded _<_
-    <-trans   : Transitive _<_
 
   private
     ¬∃¬→∀ : ∀ {P : A → Set p} {x} →
@@ -422,8 +421,13 @@ record HasProperties
       x , (λ i i<x Pi → ¬∃y→y<x×Py (i , (i<x , Pi))) , Px
 
 -- Proposition 8.6.1. [1]
--- DGP-i ∃P ∃Q <=> LLPO
--- dgp-Σ⇒llpo : ∀ {a p} {A : Set a} → DGP-Σ A p → LLPO A p
+-- DGP-Σ <=> LLPO
+dgp-Σ⇒llpo : ∀ {a p} {A : Set a} → DGP-Σ A p → LLPO A p
+dgp-Σ⇒llpo dgp-Σ P? Q? ¬[∃P×∃Q] =
+  Sum.map (λ ∃P→∃Q ∃P → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
+          (λ ∃Q→∃P ∃Q → ¬[∃P×∃Q] (∃Q→∃P ∃Q , ∃Q))
+          (dgp-Σ P? Q?)
+
 llpo⇒dgp-Σ : ∀ {r p a} {A : Set a} → HasProperties r p A →
              LLPO A (p ⊔ a ⊔ r) → DGP-Σ A p
 llpo⇒dgp-Σ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
@@ -533,11 +537,13 @@ private
   ; <-cmp     = ℕₚ.<-cmp
   ; <-any-dec = ℕ<-any-dec
   ; <-wf      = ℕInd.<-wellFounded
-  ; <-trans   = ℕₚ.<-trans
   }
 
 ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
 ℕ-llpo⇒mp∨ = llpo⇒mp∨ (ℕ-hasProperties _)
+
+ℕ-llpo⇒dgp-Σ : ∀ {p} → LLPO ℕ p → DGP-Σ ℕ p
+ℕ-llpo⇒dgp-Σ = llpo⇒dgp-Σ (ℕ-hasProperties _)
 
 -- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO

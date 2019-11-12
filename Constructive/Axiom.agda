@@ -231,7 +231,7 @@ MP∨-i P Q = DecU P → DecU Q →
 MP∨ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 
--- DGP-Σ-i
+-- DGP-Σ
 -- Equivalent to LLPO
 DGP-Σ-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
 DGP-Σ-i P Q = DecU P → DecU Q → DGP-i (∃ P) (∃ Q)
