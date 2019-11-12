@@ -400,11 +400,26 @@ record HasProperties
     <-wf      : Ind.WellFounded _<_
     <-trans   : Transitive _<_
 
+  private
+    ¬∃¬→∀ : ∀ {P : A → Set p} {x} →
+            DecU P → ¬ (∃ λ y → y < x × ¬ P y) → ∀ y → y < x → P y
+    ¬∃¬→∀ {x} P? ¬∃y→y<x×¬Py y y<x =
+      DecU⇒stable P? y λ ¬Py → ¬∃y→y<x×¬Py (y , (y<x , ¬Py))
+
   <-all-dec : {P : A → Set p} → DecU P → DecU (λ n → ∀ i → i < n → P i)
   <-all-dec P? n with <-any-dec (¬-DecU P?) n
   ... | inj₁ (m , m<n , ¬Pm) = inj₂ λ ∀i→i<n→Pi → ¬Pm (∀i→i<n→Pi m m<n)
-  ... | inj₂ ¬∃m→m<n×¬Pm     =
-     inj₁ λ i i<n → DecU⇒stable P? i λ ¬Pi → ¬∃m→m<n×¬Pm (i , (i<n , ¬Pi))
+  ... | inj₂ ¬∃m→m<n×¬Pm     = inj₁ (¬∃¬→∀ P? ¬∃m→m<n×¬Pm)
+
+  findFirst : {P : A → Set p} →
+              DecU P → ∃ P → ∃ λ x → (∀ y → y < x → ¬ P y) × P x
+  findFirst {P} P? (x , Px) = go x (<-wf x) Px
+    where
+    go : ∀ x → Ind.Acc _<_ x → P x → ∃ λ y → (∀ i → i < y → ¬ P i) × P y
+    go x (Ind.acc rs) Px with <-any-dec P? x
+    ... | inj₁ (y , y<x , Py) = go y (rs y y<x) Py
+    ... | inj₂ ¬∃y→y<x×Py     =
+      x , (λ i i<x Pi → ¬∃y→y<x×Py (i , (i<x , Pi))) , Px
 
 -- Proposition 8.6.1. [1]
 -- DGP-i ∃P ∃Q <=> LLPO
@@ -443,33 +458,25 @@ llpo⇒dgp-Σ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
   ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
 
-  f : (∀ x → ¬ R x) → ∀ x → Ind.Acc _<_ x → P x → ¬ Q x → (∀ y → ¬ (y < x × Q y)) → ⊥
-  f ∀¬R x (Ind.acc rs) Px ¬Qx ∀y→¬[y<x×Qy] = ∀¬R x
-    ((λ i i<x → (λ Pi → f ∀¬R i (rs i i<x) Pi (λ Qi → ∀y→¬[y<x×Qy] i (i<x , Qi))
-    λ {y (y<i , Qy) → ∀y→¬[y<x×Qy] y (<-trans y<i i<x , Qy)}) ,
-    λ Qi → ∀y→¬[y<x×Qy] i (i<x , Qi)) , Px , ¬Qx)
-
-  g : (∀ x → ¬ S x) → ∀ x → Ind.Acc _<_ x → Q x → ¬ P x → (∀ y → ¬ (y < x × P y)) → ⊥
-  g ∀¬R x (Ind.acc rs) Qx ¬Px ∀y→¬[y<x×Py] = ∀¬R x
-    ((λ i i<x → (λ Pi → ∀y→¬[y<x×Py] i (i<x , Pi)) ,
-    λ Qi → g ∀¬R i (rs i i<x) Qi (λ Pi → ∀y→¬[y<x×Py] i (i<x , Pi))
-    λ {y (y<i , Py) → ∀y→¬[y<x×Py] y (<-trans y<i i<x , Py) }) , (¬Px , Qx))
-
   ¬∃R→∃P→∃Q : ¬ ∃ R → ∃ P → ∃ Q
-  ¬∃R→∃P→∃Q ¬∃R (x , Px) with <-any-dec Q? x
-  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₁ (y , y<x , Qy) = y , Qy
-  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₂ ¬∃y→y<x×Qy with Q? x
-  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₂ ¬∃y→y<x×Qy | inj₁ Qx  = x , Qx
-  ¬∃R→∃P→∃Q ¬∃R (x , Px) | inj₂ ¬∃y→y<x×Qy | inj₂ ¬Qx =
-   ⊥-elim $ f (¬∃P→∀¬P ¬∃R) x (<-wf x) Px ¬Qx (¬∃P→∀¬P ¬∃y→y<x×Qy)
+  ¬∃R→∃P→∃Q ¬∃R ∃P with findFirst P? ∃P
+  ... | (x , ∀y→y<x→¬Px , Px) with Q? x
+  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₁  Qx = x , Qx
+  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx with <-any-dec Q? x
+  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₁ (y , _ , Qy) = y , Qy
+  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₂ ¬∃           =
+    ⊥-elim $ ¬∃R (x , ((λ i i<x → ∀y→y<x→¬Px i i<x ,
+                 (λ Qi → ¬∃ (i , i<x , Qi))) , (Px , ¬Qx)))
 
   ¬∃S→∃Q→∃P : ¬ ∃ S → ∃ Q → ∃ P
-  ¬∃S→∃Q→∃P ¬∃S (x , Qx) with P? x
-  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₁ Px = x , Px
-  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₂ ¬Px with <-any-dec P? x
-  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₂ ¬Px | inj₁ (y , y<x , Py) = y , Py
-  ¬∃S→∃Q→∃P ¬∃S (x , Qx) | inj₂ ¬Px | inj₂ ¬∃y→y<x×Py     =
-    ⊥-elim $ g (¬∃P→∀¬P ¬∃S) x (<-wf x) Qx ¬Px (¬∃P→∀¬P ¬∃y→y<x×Py)
+  ¬∃S→∃Q→∃P ¬∃S ∃Q with findFirst Q? ∃Q
+  ... | (x , ∀y→y<x→¬Qx , Qx) with P? x
+  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₁  Px = x , Px
+  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px with <-any-dec P? x
+  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₁ (y , _ , Py) = y , Py
+  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₂ ¬∃           =
+    ⊥-elim $ ¬∃S (x , (λ i i<x →
+                 (λ Pi → ¬∃ (i , i<x , Pi)) , ∀y→y<x→¬Qx i i<x) , (¬Px , Qx))
 
 -- LLPO => MP∨
 llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
