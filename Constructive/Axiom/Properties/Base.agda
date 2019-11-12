@@ -345,10 +345,10 @@ mr⇒wmp mr {P = P} P? pp =
   f : ¬ ¬ ∃ (λ x → P x × ¬ P x) → ⊥
   f ¬¬∃x→Px×¬Px = ⊥-stable $ DN-map (¬[A×¬A] ∘ proj₂) ¬¬∃x→Px×¬Px
 
--- MR => MP⊎
-mr⇒mp⊎ : ∀ {a p} {A : Set a} → MR A p → MP⊎ A p
-mr⇒mp⊎ mr {P = P} {Q = Q} P? Q? ¬[¬∃P×¬∃Q] with
-  mr {P = λ x → P x ⊎ Q x} (DecU-⊎ P? Q?) (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
+-- MR => MP∨
+mr⇒mp∨ : ∀ {a p} {A : Set a} → MR A p → MP∨ A p
+mr⇒mp∨ mr {P = P} {Q = Q} P? Q? ¬¬∃x→Px⊎Qx with
+  mr {P = λ x → P x ⊎ Q x} (DecU-⊎ P? Q?) ¬¬∃x→Px⊎Qx
 ... | x , Px⊎Qx = Sum.map (DN-intro ∘′ (x ,_)) (DN-intro ∘′ (x ,_)) Px⊎Qx
 
 -- WMP ∧ MP∨ => MR
@@ -662,7 +662,7 @@ wlpo⇒wpfp xA wlpo = pfp⇒wpfp (wlpo⇒pfp xA wlpo)
 -- WPFP ∧ MP <=> LPO
 wpfp∧mp⇒lpo : ∀ {a p} {A : Set a} → WPFP A p p → MP A p → LPO A p
 wpfp∧mp⇒lpo wpfp mp =
-  wlpo∧mp⇒lpo (wpfp∧mp⊎-Alt⇒wlpo wpfp (mp⊎⇒mp⊎-Alt (mr⇒mp⊎ (mp⇒mr mp))))
+  wlpo∧mp⇒lpo (wpfp∧mp⊎-Alt⇒wlpo wpfp (mp⊎⇒mp⊎-Alt (mp∨⇒mp⊎ (mr⇒mp∨ (mp⇒mr mp)))))
               mp
 
 -- WPFP ∧ LLPO => WLPO
