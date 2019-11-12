@@ -136,20 +136,6 @@ LPO-Bool-Alt-i P = (∃ λ x → P x ≡ false) ⊎ (∀ x → P x ≡ true)
 LPO-Bool-Alt : ∀ {a} → Set a → Set a
 LPO-Bool-Alt A = (P : A → Bool) → LPO-Bool-Alt-i P
 
--- The lesser limited principle of omniscience
--- Σ⁰₁-DML
-LLPO-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
-LLPO-i P Q = DecU P → DecU Q → ¬ (∃ P × ∃ Q) → ¬ ∃ P ⊎ ¬ ∃ Q
-
-LLPO : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
-LLPO A p = {P Q : A → Set p} → LLPO-i P Q
-
-LLPO-Bool-i : ∀ {a} {A : Set a} → (P Q : A → Bool) → Set a
-LLPO-Bool-i P Q = ¬ (∃ (toPred P) × ∃ (toPred Q)) → ¬ ∃ (toPred P) ⊎ ¬ ∃ (toPred Q)
-
-LLPO-Bool : ∀ {a} → Set a → Set a
-LLPO-Bool A = (P Q : A → Bool) → LLPO-Bool-i P Q
-
 -- Weak limited principle of omniscience
 -- https://www.cs.bham.ac.uk/~mhe/papers/omniscient-journal-revised.pdf
 -- http://math.fau.edu/lubarsky/Separating%20LLPO.pdf
@@ -166,6 +152,20 @@ WLPO-Alt-i P = DecU P → ¬ ∃ P ⊎ ¬ ¬ ∃ P
 
 WLPO-Alt : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 WLPO-Alt A p = {P : A → Set p} → WLPO-Alt-i P
+
+-- The lesser limited principle of omniscience
+-- Σ⁰₁-DML
+LLPO-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
+LLPO-i P Q = DecU P → DecU Q → ¬ (∃ P × ∃ Q) → ¬ ∃ P ⊎ ¬ ∃ Q
+
+LLPO : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+LLPO A p = {P Q : A → Set p} → LLPO-i P Q
+
+LLPO-Bool-i : ∀ {a} {A : Set a} → (P Q : A → Bool) → Set a
+LLPO-Bool-i P Q = ¬ (∃ (toPred P) × ∃ (toPred Q)) → ¬ ∃ (toPred P) ⊎ ¬ ∃ (toPred Q)
+
+LLPO-Bool : ∀ {a} → Set a → Set a
+LLPO-Bool A = (P Q : A → Bool) → LLPO-Bool-i P Q
 
 -- Markov's principle
 -- LPE
