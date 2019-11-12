@@ -231,13 +231,13 @@ MP∨-i P Q = DecU P → DecU Q →
 MP∨ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 
--- DGP-Σ
+-- Σ-DGP
 -- Equivalent to LLPO
-DGP-Σ-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
-DGP-Σ-i P Q = DecU P → DecU Q → DGP-i (∃ P) (∃ Q)
+Σ-DGP-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
+Σ-DGP-i P Q = DecU P → DecU Q → DGP-i (∃ P) (∃ Q)
 
-DGP-Σ : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
-DGP-Σ A p = ∀ {P Q : A → Set p} → DGP-Σ-i P Q
+Σ-DGP : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+Σ-DGP A p = ∀ {P Q : A → Set p} → Σ-DGP-i P Q
 
 -- WKL
 takeT : ℕ → (ℕ → Bool) → List Bool

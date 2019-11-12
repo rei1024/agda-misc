@@ -28,7 +28,7 @@
        MP    WLPO -> PFP -> WPFP
        | \    |
        |  \   v
-       |   \  LLPO <=> DGP-Σ
+       |   \  LLPO <=> Σ-DGP
        |    | |
        v    v v
       WMP   MP∨
@@ -421,16 +421,16 @@ record HasProperties
       x , (λ i i<x Pi → ¬∃y→y<x×Py (i , (i<x , Pi))) , Px
 
 -- Proposition 8.6.1. [1]
--- DGP-Σ <=> LLPO
-dgp-Σ⇒llpo : ∀ {a p} {A : Set a} → DGP-Σ A p → LLPO A p
-dgp-Σ⇒llpo dgp-Σ P? Q? ¬[∃P×∃Q] =
+-- Σ-DGP <=> LLPO
+Σ-dgp⇒llpo : ∀ {a p} {A : Set a} → Σ-DGP A p → LLPO A p
+Σ-dgp⇒llpo Σ-dgp P? Q? ¬[∃P×∃Q] =
   Sum.map (λ ∃P→∃Q ∃P → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
           (λ ∃Q→∃P ∃Q → ¬[∃P×∃Q] (∃Q→∃P ∃Q , ∃Q))
-          (dgp-Σ P? Q?)
+          (Σ-dgp P? Q?)
 
-llpo⇒dgp-Σ : ∀ {r p a} {A : Set a} → HasProperties r p A →
-             LLPO A (p ⊔ a ⊔ r) → DGP-Σ A p
-llpo⇒dgp-Σ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
+llpo⇒Σ-dgp : ∀ {r p a} {A : Set a} → HasProperties r p A →
+             LLPO A (p ⊔ a ⊔ r) → Σ-DGP A p
+llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
   Sum.map ¬∃R→∃P→∃Q ¬∃S→∃Q→∃P ¬∃R⊎¬∃S
   where
   open HasProperties has
@@ -482,9 +482,9 @@ llpo⇒dgp-Σ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
     ⊥-elim $ ¬∃S (x , (λ i i<x →
                  (λ Pi → ¬∃ (i , i<x , Pi)) , ∀y→y<x→¬Qx i i<x) , (¬Px , Qx))
 
--- DGP-Σ => MP∨
-dgp-Σ⇒mp∨ : ∀ {p a} {A : Set a} → DGP-Σ A p → MP∨ A p
-dgp-Σ⇒mp∨ dgp-Σ {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q⊎¬¬∃P
+-- Σ-DGP => MP∨
+Σ-dgp⇒mp∨ : ∀ {p a} {A : Set a} → Σ-DGP A p → MP∨ A p
+Σ-dgp⇒mp∨ Σ-dgp {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q⊎¬¬∃P
   where
     ¬¬[∃P⊎∃Q] : ¬ ¬ (∃ P ⊎ ∃ Q)
     ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
@@ -493,12 +493,12 @@ dgp-Σ⇒mp∨ dgp-Σ {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q
     ¬¬∃Q⊎¬¬∃P =
       Sum.map (λ ∃P→∃Q ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ (λ ∃P → ¬∃Q (∃P→∃Q ∃P)) , ¬∃Q ])
               (λ ∃Q→∃P ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , (λ ∃Q → ¬∃P (∃Q→∃P ∃Q)) ])
-              (dgp-Σ P? Q?)
+              (Σ-dgp P? Q?)
 
 -- LLPO => MP∨
 llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
            HasProperties r p A → LLPO A (p ⊔ a ⊔ r) → MP∨ A p
-llpo⇒mp∨ has llpo = dgp-Σ⇒mp∨ (llpo⇒dgp-Σ has llpo)
+llpo⇒mp∨ has llpo = Σ-dgp⇒mp∨ (llpo⇒Σ-dgp has llpo)
 
 -- lemma for `ℕ-llpo⇒mp∨`
 private
@@ -542,8 +542,8 @@ private
 ℕ-llpo⇒mp∨ : ∀ {p} → LLPO ℕ p → MP∨ ℕ p
 ℕ-llpo⇒mp∨ = llpo⇒mp∨ (ℕ-hasProperties _)
 
-ℕ-llpo⇒dgp-Σ : ∀ {p} → LLPO ℕ p → DGP-Σ ℕ p
-ℕ-llpo⇒dgp-Σ = llpo⇒dgp-Σ (ℕ-hasProperties _)
+ℕ-llpo⇒Σ-dgp : ∀ {p} → LLPO ℕ p → Σ-DGP ℕ p
+ℕ-llpo⇒Σ-dgp = llpo⇒Σ-dgp (ℕ-hasProperties _)
 
 -- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO
