@@ -286,6 +286,11 @@ module _ {a p} {A : Set a} {P : A → Set p} where
   ∀P→∀¬¬P : (∀ x → P x) → ∀ x → ¬ ¬ P x
   ∀P→∀¬¬P ∀P x = DN-intro (∀P x)
 
+module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
+  [∀¬P→∀¬Q]→¬¬[∃Q→∃P] : ((∀ x → ¬ P x) → (∀ x → ¬ Q x)) → ¬ ¬ (∃ Q → ∃ P)
+  [∀¬P→∀¬Q]→¬¬[∃Q→∃P] ∀¬P→∀¬Q =
+    DN-ap⁻¹ (¬∀¬P→¬¬∃P ∘ contraposition ∀¬P→∀¬Q ∘ ¬¬∃P→¬∀¬P)
+
 -- Quantifier rearrangement for stable predicate
 module _ {a p} {A : Set a} {P : A → Set p} (P-stable : ∀ x → Stable (P x)) where
   P-stable⇒∃¬¬P→∃P : ∃ (λ x → ¬ ¬ P x) → ∃ P
@@ -320,6 +325,11 @@ module _ {a p} {A : Set a} {P : A → Set p} (P? : DecU P) where
   P?⇒¬∀P→¬¬∃¬P = P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?)
 
 module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
+  P?⇒[∃¬P→∃¬Q]→∀Q→∀P : DecU P → (∃ (λ x → ¬ P x) → ∃ (λ x → ¬ Q x)) →
+                       (∀ x → Q x) → ∀ x → P x
+  P?⇒[∃¬P→∃¬Q]→∀Q→∀P P? ∃¬P→∃¬Q =
+    P?⇒¬∃¬P→∀P P? ∘ contraposition ∃¬P→∃¬Q ∘ ∀P→¬∃¬P
+
   P?⇒[∃Q→∀P]→¬∀¬Q→∀P : DecU P → (∃ Q → ∀ x → P x) → ¬ (∀ x → ¬ Q x) → ∀ x → P x
   P?⇒[∃Q→∀P]→¬∀¬Q→∀P P? ∃Q→∀P ¬∀¬Q = P?⇒¬¬∀P→∀P P? (DN-map ∃Q→∀P (¬∀¬P→¬¬∃P ¬∀¬Q))
 

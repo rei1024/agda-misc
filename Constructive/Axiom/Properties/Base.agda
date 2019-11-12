@@ -28,7 +28,7 @@
        MP    WLPO -> PFP -> WPFP
        | \    |
        |  \   v
-       |   \  LLPO <=> Σ-DGP
+       |   \  LLPO <=> Σ-DGP <=> Π-DGP
        |    | |
        v    v v
       WMP   MP∨
@@ -420,6 +420,53 @@ record HasProperties
     ... | inj₂ ¬∃y→y<x×Py     =
       x , (λ i i<x Pi → ¬∃y→y<x×Py (i , (i<x , Pi))) , Px
 
+  module HasPropertiesLemma
+    {P : A → Set p} {Q : A → Set p} (P? : DecU P) (Q? : DecU Q)
+    where
+    -- ex. R 5
+    -- n : 0 1 2 3 4 5 6 7 8
+    -- P : 0 0 0 0 0 1 ? ? ?
+    -- Q : 0 0 0 0 0 0 ? ? ?
+    R S : A → Set (r ⊔ p ⊔ a)
+    R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
+    S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
+
+    lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
+    lem = <-all-dec (DecU-× (¬-DecU P?) (¬-DecU Q?))
+
+    R? : DecU R
+    R? = DecU-× lem (DecU-× P? (¬-DecU Q?))
+
+    S? : DecU S
+    S? = DecU-× lem (DecU-× (¬-DecU P?) Q?)
+
+    ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
+    ¬[∃R×∃S] ((m , ∀i→i<m→¬Pi×¬Qi , Pm , ¬Qm) ,
+             (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with <-cmp m n
+    ... | tri< m<n _ _ = proj₁ (∀i→i<n→¬Pi×¬Qi m m<n) Pm
+    ... | tri≈ _ m≡n _ = ¬Pn (subst P m≡n Pm)
+    ... | tri> _ _ n<m = proj₂ (∀i→i<m→¬Pi×¬Qi n n<m) Qn
+
+    ¬∃R→∃P→∃Q : ¬ ∃ R → ∃ P → ∃ Q
+    ¬∃R→∃P→∃Q ¬∃R ∃P with findFirst P? ∃P
+    ... | (x , ∀y→y<x→¬Px , Px) with Q? x
+    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₁  Qx = x , Qx
+    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx with <-any-dec Q? x
+    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₁ (y , _ , Qy) = y , Qy
+    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₂ ¬∃           =
+      ⊥-elim $ ¬∃R (x , ((λ i i<x → ∀y→y<x→¬Px i i<x ,
+                   (λ Qi → ¬∃ (i , i<x , Qi))) , (Px , ¬Qx)))
+
+    ¬∃S→∃Q→∃P : ¬ ∃ S → ∃ Q → ∃ P
+    ¬∃S→∃Q→∃P ¬∃S ∃Q with findFirst Q? ∃Q
+    ... | (x , ∀y→y<x→¬Qx , Qx) with P? x
+    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₁  Px = x , Px
+    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px with <-any-dec P? x
+    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₁ (y , _ , Py) = y , Py
+    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₂ ¬∃           =
+      ⊥-elim $ ¬∃S (x , (λ i i<x →
+                   (λ Pi → ¬∃ (i , i<x , Pi)) , ∀y→y<x→¬Qx i i<x) , (¬Px , Qx))
+
 -- Proposition 8.6.1. [1]
 -- Σ-DGP <=> LLPO
 Σ-dgp⇒llpo : ∀ {a p} {A : Set a} → Σ-DGP A p → LLPO A p
@@ -434,53 +481,11 @@ llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
   Sum.map ¬∃R→∃P→∃Q ¬∃S→∃Q→∃P ¬∃R⊎¬∃S
   where
   open HasProperties has
-  -- ex. R 5
-  -- n : 0 1 2 3 4 5 6 7 8
-  -- P : 0 0 0 0 0 1 ? ? ?
-  -- Q : 0 0 0 0 0 0 ? ? ?
-  R S : A → Set (r ⊔ p ⊔ a)
-  R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
-  S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
-
-  lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
-  lem = <-all-dec (DecU-× (¬-DecU P?) (¬-DecU Q?))
-
-  R? : DecU R
-  R? = DecU-× lem (DecU-× P? (¬-DecU Q?))
-
-  S? : DecU S
-  S? = DecU-× lem (DecU-× (¬-DecU P?) Q?)
-
-  ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
-  ¬[∃R×∃S] ((m , ∀i→i<m→¬Pi×¬Qi , Pm , ¬Qm) ,
-            (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with <-cmp m n
-  ... | tri< m<n _ _ = proj₁ (∀i→i<n→¬Pi×¬Qi m m<n) Pm
-  ... | tri≈ _ m≡n _ = ¬Pn (subst P m≡n Pm)
-  ... | tri> _ _ n<m = proj₂ (∀i→i<m→¬Pi×¬Qi n n<m) Qn
+  open HasPropertiesLemma P? Q?
 
   -- use LLPO
   ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
-
-  ¬∃R→∃P→∃Q : ¬ ∃ R → ∃ P → ∃ Q
-  ¬∃R→∃P→∃Q ¬∃R ∃P with findFirst P? ∃P
-  ... | (x , ∀y→y<x→¬Px , Px) with Q? x
-  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₁  Qx = x , Qx
-  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx with <-any-dec Q? x
-  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₁ (y , _ , Qy) = y , Qy
-  ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₂ ¬∃           =
-    ⊥-elim $ ¬∃R (x , ((λ i i<x → ∀y→y<x→¬Px i i<x ,
-                 (λ Qi → ¬∃ (i , i<x , Qi))) , (Px , ¬Qx)))
-
-  ¬∃S→∃Q→∃P : ¬ ∃ S → ∃ Q → ∃ P
-  ¬∃S→∃Q→∃P ¬∃S ∃Q with findFirst Q? ∃Q
-  ... | (x , ∀y→y<x→¬Qx , Qx) with P? x
-  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₁  Px = x , Px
-  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px with <-any-dec P? x
-  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₁ (y , _ , Py) = y , Py
-  ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₂ ¬∃           =
-    ⊥-elim $ ¬∃S (x , (λ i i<x →
-                 (λ Pi → ¬∃ (i , i<x , Pi)) , ∀y→y<x→¬Qx i i<x) , (¬Px , Qx))
 
 -- Σ-DGP => MP∨
 Σ-dgp⇒mp∨ : ∀ {p a} {A : Set a} → Σ-DGP A p → MP∨ A p
@@ -494,6 +499,21 @@ llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
       Sum.map (λ ∃P→∃Q ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ (λ ∃P → ¬∃Q (∃P→∃Q ∃P)) , ¬∃Q ])
               (λ ∃Q→∃P ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , (λ ∃Q → ¬∃P (∃Q→∃P ∃Q)) ])
               (Σ-dgp P? Q?)
+
+-- Σ-DGP => Π-DGP
+Σ-dgp⇒Π-dgp : ∀ {p a} {A : Set a} → Σ-DGP A p → Π-DGP A p
+Σ-dgp⇒Π-dgp Σ-dgp P? Q? =
+  Sum.map (P?⇒[∃¬P→∃¬Q]→∀Q→∀P Q?) (P?⇒[∃¬P→∃¬Q]→∀Q→∀P P?)
+          (Σ-dgp (¬-DecU Q?) (¬-DecU P?))
+
+-- Π-DGP => LLPO
+Π-dgp⇒llpo : ∀ {p a} {A : Set a} → Π-DGP A p → LLPO A p
+Π-dgp⇒llpo Π-dgp P? Q? ¬[∃P×∃Q] =
+  Sum.map (λ ∀¬Q→∀¬P ∃P → [∀¬P→∀¬Q]→¬¬[∃Q→∃P] ∀¬Q→∀¬P
+             λ ∃P→∃Q → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
+          (λ ∀¬P→∀¬Q ∃Q → [∀¬P→∀¬Q]→¬¬[∃Q→∃P] ∀¬P→∀¬Q
+             λ ∃Q→∃P → ¬[∃P×∃Q] (∃Q→∃P ∃Q , ∃Q))
+          (Π-dgp (¬-DecU Q?) (¬-DecU P?))
 
 -- LLPO => MP∨
 llpo⇒mp∨ : ∀ {r p a} {A : Set a} →

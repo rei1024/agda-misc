@@ -239,6 +239,13 @@ MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 Σ-DGP : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 Σ-DGP A p = ∀ {P Q : A → Set p} → Σ-DGP-i P Q
 
+-- Π-DGP
+Π-DGP-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
+Π-DGP-i P Q = DecU P → DecU Q → DGP-i (∀ x → P x) (∀ x → Q x)
+
+Π-DGP : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+Π-DGP A p = ∀ {P Q : A → Set p} → Π-DGP-i P Q
+
 -- WKL
 takeT : ℕ → (ℕ → Bool) → List Bool
 takeT ℕ.zero    α = []
