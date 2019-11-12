@@ -279,7 +279,8 @@ em⁻¹⇒dne⁻¹ em⁻¹ isP ¬¬x with em⁻¹ isP
 ... | inj₂ ¬x = ⊥-elim $ ¬¬x ¬x
 
 -----------------------------------------------------------------------
--- Properties of LPO, LLPO, WLPO, MP, MP⊎, WMP, KS, PFP, WPFP
+-- Properties of LPO, LLPO, WLPO, MP, MP⊎, WMP, KS, PFP, WPFP, Σ-DGP,
+--   Π-DGP, Σ-Π-DGP
 -----------------------------------------------------------------------
 
 -- EM => LPO
@@ -567,6 +568,7 @@ private
 ℕ-llpo⇒Σ-dgp : ∀ {p} → LLPO ℕ p → Σ-DGP ℕ p
 ℕ-llpo⇒Σ-dgp = llpo⇒Σ-dgp (ℕ-hasProperties _)
 
+-- Proposition 8.6.1. [1]
 -- WLPO <=> Σ-Π-DGP
 wlpo⇒Σ-Π-dgp : ∀ {a p} {A : Set a} → WLPO A p → Σ-Π-DGP A p
 wlpo⇒Σ-Π-dgp wlpo P? Q? with wlpo Q?
