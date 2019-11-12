@@ -482,15 +482,10 @@ llpo⇒dgp-Σ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
     ⊥-elim $ ¬∃S (x , (λ i i<x →
                  (λ Pi → ¬∃ (i , i<x , Pi)) , ∀y→y<x→¬Qx i i<x) , (¬Px , Qx))
 
--- LLPO => MP∨
-llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
-           HasProperties r p A → LLPO A (p ⊔ a ⊔ r) → MP∨ A p
-llpo⇒mp∨ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] =
-  Sum.swap ¬¬∃Q⊎¬¬∃P
+-- DGP-Σ => MP∨
+dgp-Σ⇒mp∨ : ∀ {p a} {A : Set a} → DGP-Σ A p → MP∨ A p
+dgp-Σ⇒mp∨ dgp-Σ {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx] = Sum.swap ¬¬∃Q⊎¬¬∃P
   where
-    dgp-Σ : (∃ P → ∃ Q) ⊎ (∃ Q → ∃ P)
-    dgp-Σ = llpo⇒dgp-Σ has llpo P? Q?
-
     ¬¬[∃P⊎∃Q] : ¬ ¬ (∃ P ⊎ ∃ Q)
     ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
 
@@ -498,7 +493,12 @@ llpo⇒mp∨ {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? ¬¬[∃x→Px⊎Qx]
     ¬¬∃Q⊎¬¬∃P =
       Sum.map (λ ∃P→∃Q ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ (λ ∃P → ¬∃Q (∃P→∃Q ∃P)) , ¬∃Q ])
               (λ ∃Q→∃P ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , (λ ∃Q → ¬∃P (∃Q→∃P ∃Q)) ])
-              dgp-Σ
+              (dgp-Σ P? Q?)
+
+-- LLPO => MP∨
+llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
+           HasProperties r p A → LLPO A (p ⊔ a ⊔ r) → MP∨ A p
+llpo⇒mp∨ has llpo = dgp-Σ⇒mp∨ (llpo⇒dgp-Σ has llpo)
 
 -- lemma for `ℕ-llpo⇒mp∨`
 private

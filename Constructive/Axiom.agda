@@ -268,7 +268,7 @@ KS A p q = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q × (P <=> ∃ Q)
 -- Principle of inverse Decision (PID)
 PFP : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
 PFP A p q = {P : A → Set p} → DecU P →
-            Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> (∃ λ x → Q x))
+            Σ (A → Set q) λ Q → DecU Q × ((∀ x → P x) <=> ∃ Q)
 
 PFP-Bool-ℕ : Set
 PFP-Bool-ℕ =
