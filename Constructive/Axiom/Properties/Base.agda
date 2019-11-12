@@ -21,11 +21,11 @@
           |      |        v
           |      |       WEM <=> DEM₃ <=> DN-distrib-⊎
           v      v
-         LPO     KS
-         /  \      \
-        /    \      \
-       v      v      v
-       MP    WLPO -> PFP -> WPFP
+         LPO     KS-------------┐
+         /  \                   \
+        /    \                   \
+       v      v                   v
+       MP    WLPO <=> Σ-Π-DGP -> PFP -> WPFP
        | \    |
        |  \   v
        |   \  LLPO <=> Σ-DGP <=> Π-DGP
@@ -36,8 +36,10 @@
 
 -- WLPO ∧ MP -> LPO
 -- WLPO ∧ WMP -> LPO
+
 -- WMP ∧ MP∨ -> MP
 -- WPFP ∧ MP -> LPO
+
 -- WPFP ∧ MP∨ -> WLPO
 -- WPFP ∧ LLPO -> WLPO
 
@@ -564,6 +566,19 @@ private
 
 ℕ-llpo⇒Σ-dgp : ∀ {p} → LLPO ℕ p → Σ-DGP ℕ p
 ℕ-llpo⇒Σ-dgp = llpo⇒Σ-dgp (ℕ-hasProperties _)
+
+-- WLPO <=> Σ-Π-DGP
+wlpo⇒Σ-Π-dgp : ∀ {a p} {A : Set a} → WLPO A p → Σ-Π-DGP A p
+wlpo⇒Σ-Π-dgp wlpo P? Q? with wlpo Q?
+... | inj₁  ∀Q = inj₁ λ _ → ∀Q
+... | inj₂ ¬∀Q = inj₂ λ ∀Q → ⊥-elim $ ¬∀Q ∀Q
+
+Σ-Π-dgp⇒wlpo : ∀ {a p} {A : Set a} → Σ-Π-DGP A p → WLPO A p
+Σ-Π-dgp⇒wlpo Σ-Π-dgp P? with Σ-Π-dgp (¬-DecU P?) P?
+... | inj₁ ∃¬P→∀P =
+  inj₁ (P?⇒¬¬∀P→∀P P? λ ¬∀P → P?⇒¬∀P→¬¬∃¬P P? ¬∀P λ ∃¬P → ¬∀P (∃¬P→∀P ∃¬P))
+... | inj₂ ∀P→∃¬P =
+  inj₂ λ ∀P → let ∃¬P = ∀P→∃¬P ∀P in proj₂ ∃¬P $ ∀P (proj₁ ∃¬P)
 
 -- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO
