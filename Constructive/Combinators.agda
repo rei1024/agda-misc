@@ -87,6 +87,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   join : (A → A → B) → A → B
   join f x = f x x
 
+-- properties of negation
 module _ {a} {A : Set a} where
   [A→¬A]→¬A : (A → ¬ A) → ¬ A
   [A→¬A]→¬A = join
@@ -105,7 +106,9 @@ module _ {a b} {A : Set a} {B : Set b} where
   ¬[A→B]→¬[A→¬¬B] : ¬ (A → B) → ¬ (A → ¬ ¬ B)
   ¬[A→B]→¬[A→¬¬B] ¬[A→B] A→¬¬B = ¬[A→B] λ x → ⊥-elim $ A→¬¬B x (¬[A→B]→¬B ¬[A→B])
 
--- properties of negation
+  [[A→B]→A]→¬A→A : ((A → B) → A) → ¬ A → A
+  [[A→B]→A]→¬A→A [A→B]→A ¬A = [A→B]→A (⊥-elim ∘′ ¬A)
+
 module _ {a b} {A : Set a} {B : Set b} where
   contraposition : (A → B) → ¬ B → ¬ A
   contraposition = flip _∘′_
@@ -113,6 +116,9 @@ module _ {a b} {A : Set a} {B : Set b} where
   -- variant of contraposition
   [A→¬¬B]→¬B→¬A : (A → ¬ ¬ B) → ¬ B → ¬ A
   [A→¬¬B]→¬B→¬A f ¬B x = (f x) ¬B
+
+  [¬A→¬B]→¬¬[B→A] : (¬ A → ¬ B) → ¬ ¬ (B → A)
+  [¬A→¬B]→¬¬[B→A] ¬A→¬B ¬[B→A] = ¬[B→A] λ y → ⊥-elim $ ¬A→¬B (¬[A→B]→¬B ¬[B→A]) y
 
   [A→¬B]→¬¬A→¬B : (A → ¬ B) → ¬ ¬ A → ¬ B
   [A→¬B]→¬¬A→¬B A→¬B ¬¬A y = ¬¬A λ x → A→¬B x y
@@ -164,8 +170,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   DN-undistrib-× = [A→¬¬B]→¬B→¬A ¬[A×B]→¬¬[¬A⊎¬B] ∘′ ¬A×¬B→¬[A⊎B]
 
   DN-undistrib-⊎ : ¬ ¬ A ⊎ ¬ ¬ B → ¬ ¬ (A ⊎ B)
-  DN-undistrib-⊎ (inj₁ ¬¬A) = DN-map inj₁ ¬¬A
-  DN-undistrib-⊎ (inj₂ ¬¬B) = DN-map inj₂ ¬¬B
+  DN-undistrib-⊎ = Sum.[ DN-map inj₁ , DN-map inj₂ ]
 
   stable-undistrib-× : Stable A × Stable B → Stable (A × B)
   stable-undistrib-× (A-stable , B-stable) ¬¬[A×B] =

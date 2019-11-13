@@ -118,9 +118,7 @@ peirce⇒dne peirce ¬¬A =
   peirce {B = Lift _ ⊥} λ A→B → ⊥-elim (¬¬A λ x → lower $ A→B x)
 
 em⇒peirce : ∀ {a b} → EM a → Peirce a b
-em⇒peirce em f with em
-... | inj₁ x  = x
-... | inj₂ ¬A = f λ x → ⊥-elim (¬A x)
+em⇒peirce em f = Sum.[ id , [[A→B]→A]→¬A→A f ] em
 
 -- DEM₁ => EM, DNE => DEM₁
 dem₁⇒em : ∀ {a} → DEM₁ a a → EM a
@@ -137,7 +135,7 @@ dem₂⇒dne : ∀ {a} → DEM₂ a lzero → DNE a
 dem₂⇒dne dem₂ ¬¬A = uncurry id (dem₂ Sum.[ (λ f → ¬¬A (f ∘′ const)) , _$ tt ])
 
 -- DNE => DEM₃
-dne⇒dem₃ : ∀ {a} → DNE a → DEM₃ a a
+dne⇒dem₃ : ∀ {a b} → DNE (a ⊔ b) → DEM₃ a b
 dne⇒dem₃ dne ¬[A×B] = dne (¬[A×B]→¬¬[¬A⊎¬B] ¬[A×B])
 
 -- Converse of contraposition
@@ -153,7 +151,7 @@ contraposition-converse⇒dne f = f DN-intro
 mi⇒em : ∀ {a} → MI a a → EM a
 mi⇒em f = Sum.swap $ f id
 
-em⇒mi : ∀ {a} → EM a → MI a a
+em⇒mi : ∀ {a b} → EM a → MI a b
 em⇒mi em f = Sum.swap $ Sum.map₁ f em
 
 -- EM <=> [¬A→B]→A⊎B
@@ -165,9 +163,7 @@ em⇒[¬A→B]→A⊎B em f = Sum.map₂ f em
 
 -- Properties of WEM
 em⇒wem : ∀ {a} → EM a → WEM a
-em⇒wem em with em
-... | inj₁ ¬A  = inj₁ ¬A
-... | inj₂ ¬¬A = inj₂ ¬¬A
+em⇒wem em {A = A} = em {A = ¬ A}
 
 -- WEM <=> DEM₃
 wem⇒dem₃ : ∀ {a} → WEM a → DEM₃ a a
@@ -323,6 +319,7 @@ mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
 mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 
 -----------------------------------------------------------------------
+-- Implications
 
 -- EM => LPO
 em⇒lpo : ∀ {a p} {A : Set a} → EM (a ⊔ p) → LPO A p
