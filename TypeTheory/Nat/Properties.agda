@@ -117,12 +117,13 @@ z≢s n eq = s≢z n (sym eq)
   (λ k 1+k≢k 1+[1+k]≡1+k → 1+k≢k (suc-injective 1+[1+k]≡1+k)) n
 
 caseNat-extract-zero : ∀ {l} {A : Set l} (z s : A) n →
-  z ≢ s →
-  caseNat z s n ≡ z → n ≡ zero
-caseNat-extract-zero z s n z≢s = ind (λ k → caseNat z s k ≡ z → k ≡ zero)
-  (λ x → refl)
-  (λ k c[z,s,k]≡z→k≡zero c[z,s,suc[k]]≡z → ⊥-elim $ z≢s
-    $ trans (sym c[z,s,suc[k]]≡z) (caseNat-step _ _ _) ) n
+                       z ≢ s →
+                       caseNat z s n ≡ z → n ≡ zero
+caseNat-extract-zero z s n z≢s =
+  ind (λ k → caseNat z s k ≡ z → k ≡ zero)
+      (λ x → refl)
+      (λ k c[z,s,k]≡z→k≡zero c[z,s,suc[k]]≡z → ⊥-elim $ z≢s
+        $ trans (sym c[z,s,suc[k]]≡z) (caseNat-step _ _ _) ) n
 
 -- Properties of _+_
 +-identityˡ : ∀ n → zero + n ≡ n
@@ -180,55 +181,56 @@ suc≡one+ n = begin
   m₀
 
 +-comm : ∀ m n → m + n ≡ n + m
-+-comm m₀ n = ind (λ m → m + n ≡ n + m)
-  (begin
-    zero + n ≡⟨ +-identityˡ n ⟩
-    n        ≡⟨ sym $ +-identityʳ n ⟩
-    n + zero ∎
-    )
-  (λ m m+n≡n+m → begin
-    suc m + n   ≡⟨ suc-+ m n ⟩
-    suc (m + n) ≡⟨ cong suc m+n≡n+m ⟩
-    suc (n + m) ≡⟨ sym $ suc-+ n m ⟩
-    suc n + m   ≡⟨ sym $ +-suc n m ⟩
-    n + suc m   ∎
-    )
-  m₀
++-comm m₀ n =
+  ind (λ m → m + n ≡ n + m)
+      (begin
+        zero + n ≡⟨ +-identityˡ n ⟩
+        n        ≡⟨ sym $ +-identityʳ n ⟩
+        n + zero ∎
+        )
+      (λ m m+n≡n+m → begin
+        suc m + n   ≡⟨ suc-+ m n ⟩
+        suc (m + n) ≡⟨ cong suc m+n≡n+m ⟩
+        suc (n + m) ≡⟨ sym $ suc-+ n m ⟩
+        suc n + m   ≡⟨ sym $ +-suc n m ⟩
+        n + suc m   ∎
+        )
+      m₀
 
 +-cancelˡ-≡ : ∀ m n o → (m + n) ≡ (m + o) → n ≡ o
-+-cancelˡ-≡ m n o = ind (λ k → k + n ≡ k + o → n ≡ o)
-  (λ zero+n≡zero+o → begin
-      n        ≡⟨ sym $ +-identityˡ n ⟩
-      zero + n ≡⟨ zero+n≡zero+o ⟩
-      zero + o ≡⟨ +-identityˡ o ⟩
-      o ∎ )
-  (λ k k+n≡k+o→n≡o suck+n≡suck+o → begin
-     n ≡⟨ k+n≡k+o→n≡o $ suc-injective $ (begin
-        suc (k + n) ≡⟨ sym $ suc-+ k n ⟩
-        suc k + n   ≡⟨ suck+n≡suck+o ⟩
-        suc k + o   ≡⟨ suc-+ k o ⟩
-        suc (k + o) ∎
-       ) ⟩
-     o ∎ )
-  m
++-cancelˡ-≡ m n o =
+  ind (λ k → k + n ≡ k + o → n ≡ o)
+      (λ zero+n≡zero+o → begin
+          n        ≡⟨ sym $ +-identityˡ n ⟩
+          zero + n ≡⟨ zero+n≡zero+o ⟩
+          zero + o ≡⟨ +-identityˡ o ⟩
+          o ∎)
+      (λ k k+n≡k+o→n≡o suck+n≡suck+o → begin
+         n ≡⟨ k+n≡k+o→n≡o $ suc-injective $ (begin
+            suc (k + n) ≡⟨ sym $ suc-+ k n ⟩
+            suc k + n   ≡⟨ suck+n≡suck+o ⟩
+            suc k + o   ≡⟨ suc-+ k o ⟩
+            suc (k + o) ∎
+           ) ⟩
+         o ∎)
+      m
 
 +-cancelʳ-≡ : ∀ m n o → (m + n) ≡ (o + n) → m ≡ o
 +-cancelʳ-≡ m n o m+n≡o+n = +-cancelˡ-≡ n m o (begin
   n + m ≡⟨ +-comm n m ⟩
   m + n ≡⟨ m+n≡o+n ⟩
   o + n ≡⟨ +-comm o n ⟩
-  n + o ∎ )
+  n + o ∎)
 
 +-conicalˡ : ∀ m n → m + n ≡ zero → m ≡ zero
-+-conicalˡ m n = ind (λ k → k + n ≡ zero → k ≡ zero) (λ _ → refl)
-  (λ k k+n≡zero→k≡zero suck+n≡zero →
-      ⊥-elim $ z≢s (k + n) $ trans (sym suck+n≡zero) (suc-+ k n)
-    ) m
++-conicalˡ m n =
+  ind (λ k → k + n ≡ zero → k ≡ zero) (λ _ → refl)
+      (λ k k+n≡zero→k≡zero suck+n≡zero →
+          ⊥-elim $ z≢s (k + n) $ trans (sym suck+n≡zero) (suc-+ k n))
+      m
 
 +-conicalʳ : ∀ m n → m + n ≡ zero → n ≡ zero
 +-conicalʳ m n m+n≡zero = +-conicalˡ n m (trans (+-comm n m) m+n≡zero)
-
--- suc[n]≡1+n
 
 -- Order
 z≤n : ∀ {n} → zero ≤ n
@@ -252,18 +254,20 @@ s≤s {m} {n} (o , m+o≡n) = o , trans (suc-+ m o) (cong suc m+o≡n)
   m + suc o   ≡⟨ +-suc m o ⟩
   suc m + o   ≡⟨ suc-+ m o ⟩
   suc (m + o) ≡⟨ cong suc m+o≡n ⟩
-  suc n       ∎ )
+  suc n       ∎)
 
 ≤-back : ∀ {m n} → suc m ≤ n → m ≤ n
 ≤-back {m} {n} (o , suc[m]+o≡n) = suc o , (begin
   m + suc o ≡⟨ +-suc m o ⟩
   suc m + o ≡⟨ suc[m]+o≡n ⟩
-  n ∎ )
+  n ∎)
 
 ≤-steps : ∀ {m n} o → m ≤ n → m ≤ o + n
-≤-steps {m} {n} o m≤n = ind (λ k → m ≤ k + n)
-  (subst (m ≤_) (sym $ +-identityˡ n) m≤n)
-  (λ k m≤k+n → subst (m ≤_) (sym $ suc-+ k n) (≤-step m≤k+n)) o
+≤-steps {m} {n} o m≤n =
+  ind (λ k → m ≤ k + n)
+      (subst (m ≤_) (sym $ +-identityˡ n) m≤n)
+      (λ k m≤k+n → subst (m ≤_) (sym $ suc-+ k n) (≤-step m≤k+n))
+      o
 
 ≤-antisym : ∀ {m n} → m ≤ n → n ≤ m → m ≡ n
 ≤-antisym {m} {n} (o , m+o≡n) (p , n+p≡m) = begin
@@ -279,7 +283,10 @@ s≤s {m} {n} (o , m+o≡n) = o , trans (suc-+ m o) (cong suc m+o≡n)
     (m + o) + p ≡⟨ +-assoc m o p ⟩
     m + (o + p) ∎
   zero≡o+p : zero ≡ o + p
-  zero≡o+p = +-cancelˡ-≡ m zero (o + p) (trans (+-identityʳ m) m≡m+[o+p])
+  zero≡o+p = +-cancelˡ-≡ m zero (o + p) (begin
+    m + zero    ≡⟨ +-identityʳ m ⟩
+    m           ≡⟨ m≡m+[o+p] ⟩
+    m + (o + p) ∎)
   p≡zero : p ≡ zero
   p≡zero = +-conicalʳ o p (sym zero≡o+p)
 
@@ -288,7 +295,7 @@ s≤s {m} {n} (o , m+o≡n) = o , trans (suc-+ m o) (cong suc m+o≡n)
   m + (p + q) ≡⟨ sym $ +-assoc m p q ⟩
   (m + p) + q ≡⟨ cong (_+ q) m+p≡n ⟩
   n + q       ≡⟨ n+q≡o ⟩
-  o           ∎ )
+  o           ∎)
 
 n≤zero⇒n≡zero : ∀ {n} → n ≤ zero → n ≡ zero
 n≤zero⇒n≡zero {n} (o , n+o≡zero) = +-conicalˡ n o n+o≡zero
@@ -325,7 +332,7 @@ n≮n n (m , sucn+m≡n) = z≢s m $ +-cancelˡ-≡ n zero (suc m) (begin
   n + zero  ≡⟨ +-identityʳ n ⟩
   n         ≡⟨ sym sucn+m≡n ⟩
   suc n + m ≡⟨ sym $ +-suc n m ⟩
-  n + suc m ∎ )
+  n + suc m ∎)
 
 <⇒≢ : ∀ {m n} → m < n → m ≢ n
 <⇒≢ {m} {n} m<n m≡n = n≮n m (subst (m <_) (sym m≡n) m<n)
@@ -340,7 +347,7 @@ n≮n n (m , sucn+m≡n) = z≢s m $ +-cancelˡ-≡ n zero (suc m) (begin
       (λ k _ m+suc[k]≡n → inj₁ (k , (begin
         suc m + k ≡⟨ sym $ +-suc m k ⟩
         m + suc k ≡⟨ m+suc[k]≡n ⟩
-        n ∎ )))
+        n ∎)))
       o m+o≡n
 
 <⇒≤ : ∀ {m n} → m < n → m ≤ n
@@ -368,7 +375,7 @@ zero∸n≡zero =
         zero ∸ suc k    ≡⟨ m∸suc[n]≡pred[m∸n] zero k ⟩
         pred (zero ∸ k) ≡⟨ cong pred zero∸k≡zero ⟩
         pred zero       ≡⟨ pred-zero ⟩
-        zero            ∎ )
+        zero            ∎)
 
 suc[m]∸suc[n]≡m∸n : ∀ m n → suc m ∸ suc n ≡ m ∸ n
 suc[m]∸suc[n]≡m∸n m =
@@ -378,7 +385,7 @@ suc[m]∸suc[n]≡m∸n m =
         pred (suc m ∸ zero) ≡⟨ cong pred (n∸zero≡n (suc m)) ⟩
         pred (suc m)        ≡⟨ pred-suc m ⟩
         m                   ≡⟨ sym $ n∸zero≡n m ⟩
-        m ∸ zero            ∎ )
+        m ∸ zero            ∎)
       λ k suc[m]∸suc[k]≡m∸k → begin
           suc m ∸ suc (suc k)  ≡⟨ m∸suc[n]≡pred[m∸n] (suc m) (suc k) ⟩
           pred (suc m ∸ suc k) ≡⟨ cong pred suc[m]∸suc[k]≡m∸k ⟩
@@ -414,7 +421,7 @@ m∸[m+n]≡zero m n =
         suc k ∸ (suc k + n) ≡⟨ cong (suc k ∸_) $ suc-+ k n ⟩
         suc k ∸ suc (k + n) ≡⟨ suc[m]∸suc[n]≡m∸n k (k + n) ⟩
         k ∸ (k + n)         ≡⟨ k∸[k+n]≡zero ⟩
-        zero                ∎ ) m
+        zero                ∎) m
 
 m≤n⇒m∸n≡zero : ∀ {m n} → m ≤ n → m ∸ n ≡ zero
 m≤n⇒m∸n≡zero {m} {n} (o , m+o≡n) = begin
@@ -546,6 +553,7 @@ private
   subst-other-g B-irrelevant g f refl refl gy≡z with B-irrelevant gy≡z refl
   subst-other-g B-irrelevant g f refl refl .refl | refl = refl
 
+  -- stdlib
   -- variant of subst-application
   subst-lemma : ∀ {a₁ a₂ b₁ b₂} {A₁ : Set a₁} {A₂ : Set a₂}
                   {B₁ : A₁ → Set b₁} {B₂ : A₂ → Set b₂}
@@ -585,10 +593,9 @@ module _ {p} (P : N → N → Set p) where
     (∀ m n → P m n → P (suc m) (suc n)) →
     ∀ m n → P m n
   inddiag P-zz P-zs P-sz P-ss m n with order? m n
-  ... | lt (o , suc[m]+o≡n) = subst (P m) suc[m]+o≡n (inddiag-< P-zs P-ss m o)
-  ... | eq m≡n              = subst (P m) m≡n (inddiag-≡ P-zz P-ss m)
-  ... | gt (o , suc[n]+o≡m) =
-    subst (λ k → P k n) suc[n]+o≡m (inddiag-> P-sz P-ss n o)
+  ... | lt (o , sm+o≡n) = subst (P m) sm+o≡n (inddiag-< P-zs P-ss m o)
+  ... | eq m≡n          = subst (P m) m≡n (inddiag-≡ P-zz P-ss m)
+  ... | gt (o , sn+o≡m) = subst (λ k → P k n) sn+o≡m (inddiag-> P-sz P-ss n o)
 
   inddiag-zz : ∀ Pzz Pzs Psz Pss → inddiag Pzz Pzs Psz Pss zero zero ≡ Pzz
   inddiag-zz Pzz Pzs Psz Pss with order? zero zero
