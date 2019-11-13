@@ -98,6 +98,13 @@ module _ {a} {A : Set a} where
   ¬[A×¬A] : ¬ (A × ¬ A)
   ¬[A×¬A] = uncurry (flip _$_)
 
+module _ {a b} {A : Set a} {B : Set b} where
+  ¬[A→B]→¬B : ¬ (A → B) → ¬ B
+  ¬[A→B]→¬B ¬[A→B] y = ¬[A→B] (const y)
+
+  ¬[A→B]→¬[A→¬¬B] : ¬ (A → B) → ¬ (A → ¬ ¬ B)
+  ¬[A→B]→¬[A→¬¬B] ¬[A→B] A→¬¬B = ¬[A→B] λ x → ⊥-elim $ A→¬¬B x (¬[A→B]→¬B ¬[A→B])
+
 -- properties of negation
 module _ {a b} {A : Set a} {B : Set b} where
   contraposition : (A → B) → ¬ B → ¬ A
@@ -148,7 +155,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   DN-ap ff fx = DN-bind (λ f → DN-map f fx) ff
 
   DN-ap⁻¹ : (¬ ¬ A → ¬ ¬ B) → ¬ ¬ (A → B)
-  DN-ap⁻¹ f ¬[A→B] = ¬[A→B] λ x → ⊥-elim $ f (DN-intro x) λ y → ¬[A→B] (const y)
+  DN-ap⁻¹ f ¬[A→B] = ¬[A→B]→¬[A→¬¬B] ¬[A→B] (DN-bind⁻¹ f)
 
   DN-distrib-× : ¬ ¬ (A × B) → ¬ ¬ A × ¬ ¬ B
   DN-distrib-× ¬¬A×B = DN-map proj₁ ¬¬A×B , DN-map proj₂ ¬¬A×B
