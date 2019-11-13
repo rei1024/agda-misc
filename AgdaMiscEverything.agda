@@ -43,15 +43,14 @@ import Constructive.Common
 import Constructive.Searchable
 
 ------------------------------------------------------------------------
--- Logic
+-- Type theory
 
--- TODO move to `TypeTheory`
 -- Natural number
-import Math.Logic.Nat.Operations
+import TypeTheory.Nat.Operations
 
-import Math.Logic.Nat.Properties
+import TypeTheory.Nat.Properties
 
-import Math.Logic.Nat.Instance
+import TypeTheory.Nat.Instance
 
 ------------------------------------------------------------------------
 -- Formal language

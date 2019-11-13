@@ -5,7 +5,7 @@
 -- agad-stdlib
 open import Relation.Binary.PropositionalEquality
 
-module Math.Logic.Nat.Operations
+module TypeTheory.Nat.Operations
   {a}
   -- | Type of natural number
   (N : Set a)

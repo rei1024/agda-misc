@@ -5,7 +5,7 @@
 -- agad-stdlib
 open import Relation.Binary.PropositionalEquality
 
-module Math.Logic.Nat.Properties
+module TypeTheory.Nat.Properties
   {a}
   (N : Set a)
   (zero : N)
@@ -32,7 +32,7 @@ open import Relation.Nullary
 import Relation.Nullary.Decidable as NDec
 
 -- agda-misc
-open import Math.Logic.Nat.Operations N zero suc ind ind-base ind-step
+open import TypeTheory.Nat.Operations N zero suc ind ind-base ind-step
 
 open ≡-Reasoning
 

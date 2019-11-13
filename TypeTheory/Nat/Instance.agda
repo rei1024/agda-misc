@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K --safe #-}
 
-module Math.Logic.Nat.Instance where
+module TypeTheory.Nat.Instance where
 
 -- agda-stdlib
 open import Level renaming (zero to lzero; suc to lsuc)
@@ -8,7 +8,7 @@ open import Data.Nat using (ℕ; zero; suc)
 open import Relation.Binary.PropositionalEquality using (refl)
 
 -- agda-misc
-import Math.Logic.Nat.Operations as NatOperations
+import TypeTheory.Nat.Operations as NatOperations
 
 ℕ-ind : ∀ {l} (P : ℕ → Set l) → P zero → (∀ k → P k → P (suc k)) → ∀ n → P n
 ℕ-ind P P-base P-step zero    = P-base
