@@ -38,6 +38,7 @@
 -- WLPO ∧ WMP -> LPO
 
 -- WMP ∧ MP∨ -> MP
+
 -- WPFP ∧ MP -> LPO
 
 -- WPFP ∧ MP∨ -> WLPO
@@ -139,6 +140,29 @@ dem₂⇒dne dem₂ ¬¬A = uncurry id (dem₂ Sum.[ (λ f → ¬¬A (f ∘′ c
 dne⇒dem₃ : ∀ {a} → DNE a → DEM₃ a a
 dne⇒dem₃ dne ¬[A×B] = dne (¬[A×B]→¬¬[¬A⊎¬B] ¬[A×B])
 
+-- Converse of contraposition
+dne⇒contraposition-converse : ∀ {a b} → DNE a →
+                              {A : Set a} {B : Set b} → (¬ A → ¬ B) → B → A
+dne⇒contraposition-converse dne ¬A→¬B b = dne $ contraposition ¬A→¬B (DN-intro b)
+
+contraposition-converse⇒dne : ∀ {a} → ({A B : Set a} → (¬ A → ¬ B) → B → A) →
+                              DNE a
+contraposition-converse⇒dne f = f DN-intro
+
+-- MI <=> EM
+mi⇒em : ∀ {a} → MI a a → EM a
+mi⇒em f = Sum.swap $ f id
+
+em⇒mi : ∀ {a} → EM a → MI a a
+em⇒mi em f = Sum.swap $ Sum.map₁ f em
+
+-- EM <=> [¬A→B]→A⊎B
+em⇒[¬A→B]→A⊎B : ∀ {a b} → EM a → {A : Set a} {B : Set b} → (¬ A → B) → A ⊎ B
+em⇒[¬A→B]→A⊎B em f = Sum.map₂ f em
+
+[¬A→B]→A⊎B⇒em : ∀ {a} → ({A B : Set a} → (¬ A → B) → A ⊎ B) → EM a
+[¬A→B]→A⊎B⇒em f = f id
+
 -- Properties of WEM
 em⇒wem : ∀ {a} → EM a → WEM a
 em⇒wem em with em
@@ -171,31 +195,8 @@ wem-i∧stable⇒dec : ∀ {a} {A : Set a} → WEM-i A → Stable A → Dec A
 wem-i∧stable⇒dec (inj₁ x) stable = no x
 wem-i∧stable⇒dec (inj₂ y) stable = yes (stable y)
 
--- Converse of contraposition
-dne⇒contraposition-converse : ∀ {a b} → DNE a →
-                              {A : Set a} {B : Set b} → (¬ A → ¬ B) → B → A
-dne⇒contraposition-converse dne ¬A→¬B b = dne $ contraposition ¬A→¬B (DN-intro b)
-
-contraposition-converse⇒dne : ∀ {a} → ({A B : Set a} → (¬ A → ¬ B) → B → A) →
-                              DNE a
-contraposition-converse⇒dne f = f DN-intro
-
--- MI <=> EM
-mi⇒em : ∀ {a} → MI a a → EM a
-mi⇒em f = Sum.swap $ f id
-
-em⇒mi : ∀ {a} → EM a → MI a a
-em⇒mi em f = Sum.swap $ Sum.map₁ f em
-
--- EM <=> [¬A→B]→A⊎B
-em⇒[¬A→B]→A⊎B : ∀ {a b} → EM a → {A : Set a} {B : Set b} → (¬ A → B) → A ⊎ B
-em⇒[¬A→B]→A⊎B em f = Sum.map₂ f em
-
-[¬A→B]→A⊎B⇒em : ∀ {a} → ({A B : Set a} → (¬ A → B) → A ⊎ B) → EM a
-[¬A→B]→A⊎B⇒em f = f id
-
 -- EM => DGP => WEM
-em⇒dgp : ∀ {a} → EM a → DGP a a
+em⇒dgp : ∀ {a b} → EM (a ⊔ b) → DGP a b
 em⇒dgp em = em⇒[¬A→B]→A⊎B em λ ¬[A→B] b → ⊥-elim $ ¬[A→B] (const b)
 
 dgp⇒dem₃ : ∀ {a b} → DGP a b → DEM₃ a b
