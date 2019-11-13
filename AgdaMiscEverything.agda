@@ -23,6 +23,7 @@ import Algorithms.List.Sort.Quick.Properties
 ------------------------------------------------------------------------
 -- Constructive mathematics
 
+-- Definitions of Axioms that are nonconstructive
 import Constructive.Axiom
 
 import Constructive.Axiom.Properties
@@ -33,10 +34,12 @@ import Constructive.Axiom.Properties.Bool
 
 import Constructive.Axiom.Properties.Transport
 
+-- Combinators for reasoning
 import Constructive.Combinators
 
 import Constructive.Common
 
+-- Searchable set
 import Constructive.Searchable
 
 ------------------------------------------------------------------------

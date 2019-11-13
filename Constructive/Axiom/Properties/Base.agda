@@ -26,10 +26,10 @@
         /    \                   \
        v      v                   v
        MP    WLPO <=> Σ-Π-DGP -> PFP -> WPFP
-       | \    |
-       |  \   v
-       |   \  LLPO <=> Σ-DGP <=> Π-DGP
-       |    | |
+       |\     |
+       | \    v
+       |  \  LLPO <=> Σ-DGP <=> Π-DGP
+       |   \  |
        v    v v
       WMP   MP∨
 -}
@@ -283,6 +283,46 @@ em⁻¹⇒dne⁻¹ em⁻¹ isP ¬¬x with em⁻¹ isP
 --   Π-DGP, Σ-Π-DGP
 -----------------------------------------------------------------------
 
+-----------------------------------------------------------------------
+-- Convert between alternative forms
+
+-- MP <=> MR
+mp⇒mr : ∀ {a p} {A : Set a} → MP A p → MR A p
+mp⇒mr mp P? ¬¬∃P = P?⇒∃¬¬P→∃P P? $ mp (¬-DecU P?) (¬¬∃P→¬∀¬P ¬¬∃P)
+
+mr⇒mp : ∀ {a p} {A : Set a} → MR A p → MP A p
+mr⇒mp mr P? ¬∀P = mr (¬-DecU P?) (P?⇒¬∀P→¬¬∃¬P P? ¬∀P)
+
+-- WLPO <=> WLPO-Alt
+wlpo⇒wlpo-Alt : ∀ {a p} {A : Set a} → WLPO A p → WLPO-Alt A p
+wlpo⇒wlpo-Alt wlpo P? = Sum.map ∀¬P→¬∃P ¬∀¬P→¬¬∃P (wlpo (¬-DecU P?))
+
+wlpo-Alt⇒wlpo : ∀ {a p} {A : Set a} → WLPO-Alt A p → WLPO A p
+wlpo-Alt⇒wlpo wlpo-Alt P? =
+  Sum.map (P?⇒¬∃¬P→∀P P?) ¬¬∃¬P→¬∀P (wlpo-Alt (¬-DecU P?))
+
+-- MP⊎ <=> MP⊎-Alt
+mp⊎⇒mp⊎-Alt : ∀ {a p} {A : Set a} → MP⊎ A p → MP⊎-Alt A p
+mp⊎⇒mp⊎-Alt mp⊎ P? Q? =
+  Sum.map (contraposition ∀P→¬∃¬P) (contraposition ∀P→¬∃¬P) ∘′
+  mp⊎ (¬-DecU P?) (¬-DecU Q?) ∘′
+  contraposition (Prod.map (P?⇒¬∃¬P→∀P P?) (P?⇒¬∃¬P→∀P Q?))
+
+mp⊎-Alt⇒mp⊎ : ∀ {a p} {A : Set a} → MP⊎-Alt A p → MP⊎ A p
+mp⊎-Alt⇒mp⊎ mp⊎-Alt P? Q? =
+  Sum.map (contraposition ¬∃P→∀¬P) (contraposition ¬∃P→∀¬P) ∘′
+  mp⊎-Alt (¬-DecU P?) (¬-DecU Q?) ∘′
+  contraposition (Prod.map ∀¬P→¬∃P ∀¬P→¬∃P)
+
+-- MP⊎ <=> MP∨
+mp⊎⇒mp∨ : ∀ {a p} {A : Set a} → MP⊎ A p → MP∨ A p
+mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]→¬[¬∃P×¬∃Q] ¬¬∃x→Px⊎Qx)
+
+mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
+mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
+
+-----------------------------------------------------------------------
+
 -- EM => LPO
 em⇒lpo : ∀ {a p} {A : Set a} → EM (a ⊔ p) → LPO A p
 em⇒lpo em _ = em
@@ -323,22 +363,7 @@ wem⇒wlpo wem P? with wem
 ... | inj₁ ¬∀P  = inj₂ ¬∀P
 ... | inj₂ ¬¬∀P = inj₁ (P?⇒¬¬∀P→∀P P? ¬¬∀P)
 
--- WLPO <=> WLPO-Alt
-wlpo⇒wlpo-Alt : ∀ {a p} {A : Set a} → WLPO A p → WLPO-Alt A p
-wlpo⇒wlpo-Alt wlpo P? = Sum.map ∀¬P→¬∃P ¬∀¬P→¬¬∃P (wlpo (¬-DecU P?))
-
-wlpo-Alt⇒wlpo : ∀ {a p} {A : Set a} → WLPO-Alt A p → WLPO A p
-wlpo-Alt⇒wlpo wlpo-Alt P? =
-  Sum.map (P?⇒¬∃¬P→∀P P?) ¬¬∃¬P→¬∀P (wlpo-Alt (¬-DecU P?))
-
--- MP <=> MR
-mp⇒mr : ∀ {a p} {A : Set a} → MP A p → MR A p
-mp⇒mr mp P? ¬¬∃P = P?⇒∃¬¬P→∃P P? $ mp (¬-DecU P?) (¬¬∃P→¬∀¬P ¬¬∃P)
-
-mr⇒mp : ∀ {a p} {A : Set a} → MR A p → MP A p
-mr⇒mp mr P? ¬∀P = mr (¬-DecU P?) (P?⇒¬∀P→¬¬∃¬P P? ¬∀P)
-
--- (WMP ∧ MP∨) <=> MP
+-- (WMP ∧ MP∨) <=> MR
 mr⇒wmp : ∀ {a p} {A : Set a} → MR A p → WMP A p
 mr⇒wmp mr {P = P} P? pp =
   mr P? $ Sum.[ id , (λ ¬¬∃x→Px×¬Px _ → f ¬¬∃x→Px×¬Px) ] (pp P?)
@@ -372,26 +397,6 @@ wmp∧mp∨⇒mr {a} {p} {A} wmp mp∨ {P = P} P? ¬¬∃P = wmp P? Lem.¬¬∃Q
 
     ¬¬∃Q⊎¬¬∃R : ¬ ¬ ∃ Q ⊎ ¬ ¬ ∃ R
     ¬¬∃Q⊎¬¬∃R = mp∨ Q? R? ¬¬∃x→Qx⊎Rx
-
--- MP⊎ <=> MP⊎-Alt
-mp⊎⇒mp⊎-Alt : ∀ {a p} {A : Set a} → MP⊎ A p → MP⊎-Alt A p
-mp⊎⇒mp⊎-Alt mp⊎ P? Q? =
-  Sum.map (contraposition ∀P→¬∃¬P) (contraposition ∀P→¬∃¬P) ∘′
-  mp⊎ (¬-DecU P?) (¬-DecU Q?) ∘′
-  contraposition (Prod.map (P?⇒¬∃¬P→∀P P?) (P?⇒¬∃¬P→∀P Q?))
-
-mp⊎-Alt⇒mp⊎ : ∀ {a p} {A : Set a} → MP⊎-Alt A p → MP⊎ A p
-mp⊎-Alt⇒mp⊎ mp⊎-Alt P? Q? =
-  Sum.map (contraposition ¬∃P→∀¬P) (contraposition ¬∃P→∀¬P) ∘′
-  mp⊎-Alt (¬-DecU P?) (¬-DecU Q?) ∘′
-  contraposition (Prod.map ∀¬P→¬∃P ∀¬P→¬∃P)
-
--- MP⊎ <=> MP∨
-mp⊎⇒mp∨ : ∀ {a p} {A : Set a} → MP⊎ A p → MP∨ A p
-mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]→¬[¬∃P×¬∃Q] ¬¬∃x→Px⊎Qx)
-
-mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
-mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 
 -- Properties that required to prove `llpo⇒Σ-dgp`
 record HasProperties
@@ -474,12 +479,6 @@ record HasProperties
 
 -- Proposition 8.6.1. [1]
 -- Σ-DGP <=> LLPO
-Σ-dgp⇒llpo : ∀ {a p} {A : Set a} → Σ-DGP A p → LLPO A p
-Σ-dgp⇒llpo Σ-dgp P? Q? ¬[∃P×∃Q] =
-  Sum.map (λ ∃P→∃Q ∃P → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
-          (λ ∃Q→∃P ∃Q → ¬[∃P×∃Q] (∃Q→∃P ∃Q , ∃Q))
-          (Σ-dgp P? Q?)
-
 llpo⇒Σ-dgp : ∀ {r p a} {A : Set a} → HasProperties r p A →
              LLPO A (p ⊔ a ⊔ r) → Σ-DGP A p
 llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
@@ -490,6 +489,12 @@ llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
 
   ¬∃R⊎¬∃S : ¬ ∃ R ⊎ ¬ ∃ S
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
+
+Σ-dgp⇒llpo : ∀ {a p} {A : Set a} → Σ-DGP A p → LLPO A p
+Σ-dgp⇒llpo Σ-dgp P? Q? ¬[∃P×∃Q] =
+  Sum.map (λ ∃P→∃Q ∃P → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
+          (λ ∃Q→∃P ∃Q → ¬[∃P×∃Q] (∃Q→∃P ∃Q , ∃Q))
+          (Σ-dgp P? Q?)
 
 -- Σ-DGP => MP∨
 Σ-dgp⇒mp∨ : ∀ {p a} {A : Set a} → Σ-DGP A p → MP∨ A p
@@ -538,8 +543,7 @@ private
   ... | inj₂ ¬P0 with ℕ≤-any-dec (P? ∘ suc) n
   ℕ≤-any-dec {P = P} P? (suc n) | inj₂ ¬P0 | inj₁ (m , m≤n , Psm) =
     inj₁ (suc m , s≤s m≤n , Psm)
-  ℕ≤-any-dec {P = P} P? (suc n) | inj₂ ¬P0 | inj₂ ¬∃m→m≤n×Psm =
-    inj₂ f
+  ℕ≤-any-dec {P = P} P? (suc n) | inj₂ ¬P0 | inj₂ ¬∃m→m≤n×Psm     = inj₂ f
     where
     f : (∃ λ m → m ≤ suc n × P m) → ⊥
     f (zero  , m≤sn  , Pm)  = ¬P0 Pm
@@ -626,7 +630,7 @@ ks⇒pfp : ∀ {a p q} {A : Set a} → KS A (a ⊔ p) q → PFP A p q
 ks⇒pfp ks {P = P} P? = ks (∀ x → P x)
 
 -- PFP => WPFP
-pfp⇒wpfp : ∀ {a p} {A : Set a} → PFP A p p → WPFP A p p
+pfp⇒wpfp : ∀ {a p q} {A : Set a} → PFP A p q → WPFP A p q
 pfp⇒wpfp pfp {P = P} P? with pfp P?
 ... | Q , Q? , ∀P→∃Q , ∃Q→∀P = (λ x → ¬ Q x) , (¬-DecU Q? , (f , g))
   where
@@ -651,6 +655,10 @@ wlpo⇒pfp {p = p} xA wlpo {P = P} P? with wlpo P?
   g : ∃ (λ x → Lift p ⊥) → ∀ x → P x
   g (x , L⊥) = ⊥-elim $ lower L⊥
 
+-- WLPO => WPFP
+wlpo⇒wpfp : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPFP A p p
+wlpo⇒wpfp xA wlpo = pfp⇒wpfp (wlpo⇒pfp xA wlpo)
+
 -- Proposition 6.2.3 [1]
 -- WPFP ∧ MP⊎-Alt => WLPO
 -- This can be proved by `wpfp∧llpo⇒wlpo` but it requires `HasPropertiesForLLPO⇒MP∨`
@@ -663,16 +671,6 @@ wpfp∧mp⊎-Alt⇒wlpo {a} {p} {A} wpfp mp⊎-Alt {P = P} P? with wpfp P?
   ¬∀P⊎¬∀Q : ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
   ¬∀P⊎¬∀Q = mp⊎-Alt P? Q? ¬[∀P×∀Q]
 
--- WLPO => WPFP
-wlpo⇒wpfp : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPFP A p p
-wlpo⇒wpfp xA wlpo = pfp⇒wpfp (wlpo⇒pfp xA wlpo)
-
--- WPFP ∧ MP <=> LPO
-wpfp∧mp⇒lpo : ∀ {a p} {A : Set a} → WPFP A p p → MP A p → LPO A p
-wpfp∧mp⇒lpo wpfp mp =
-  wlpo∧mp⇒lpo (wpfp∧mp⊎-Alt⇒wlpo wpfp (mp⊎⇒mp⊎-Alt (mp∨⇒mp⊎ (mr⇒mp∨ (mp⇒mr mp)))))
-              mp
-
 -- WPFP ∧ LLPO => WLPO
 wpfp∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → LLPO A p → WLPO A p
 wpfp∧llpo⇒wlpo wpfp llpo P? with wpfp P?
@@ -683,6 +681,12 @@ wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj�
   inj₁ (P?⇒¬∃¬P→∀P P? ¬∃¬P)
 wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q =
   inj₂ λ ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q)
+
+-- WPFP ∧ MP <=> LPO
+wpfp∧mp⇒lpo : ∀ {a p} {A : Set a} → WPFP A p p → MP A p → LPO A p
+wpfp∧mp⇒lpo wpfp mp =
+  wlpo∧mp⇒lpo (wpfp∧mp⊎-Alt⇒wlpo wpfp (mp⊎⇒mp⊎-Alt (mp∨⇒mp⊎ (mr⇒mp∨ (mp⇒mr mp)))))
+              mp
 
 -- [1] Hannes Diener "Constructive Reverse Mathematics"
 -- [2] Hajime lshihara "Markov’s principle, Church’s thesis and LindeUf’s theorem"

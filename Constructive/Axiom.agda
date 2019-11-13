@@ -39,6 +39,7 @@ open import Constructive.Common
 
 ---------------------------------------------------------------------------
 -- Axioms
+-- -i indicates instance
 
 -- Excluded middle
 EM : ∀ a → Set (lsuc a)
@@ -81,6 +82,14 @@ DEM₂ a b = {A : Set a} {B : Set b} → DEM₂-i A B
 DEM₃ : ∀ a b → Set (lsuc (a ⊔ b))
 DEM₃ a b = {A : Set a} {B : Set b} → DEM₃-i A B
 
+-- Gödel-Dummett logic
+-- Dirk Gently's Principle (DGP)
+DGP-i : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
+DGP-i A B = (A → B) ⊎ (B → A)
+
+DGP : ∀ a b → Set (lsuc (a ⊔ b))
+DGP a b = {A : Set a} {B : Set b} → DGP-i A B
+
 -- Weak excluded middle
 -- https://ncatlab.org/nlab/show/weak+excluded+middle
 -- WLEM WPEM
@@ -89,14 +98,6 @@ WEM-i A = Dec⊎ (¬ A)
 
 WEM : ∀ a → Set (lsuc a)
 WEM a = {A : Set a} → WEM-i A
-
--- Gödel-Dummett logic
--- Dirk Gently's Principle (DGP)
-DGP-i : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
-DGP-i A B = (A → B) ⊎ (B → A)
-
-DGP : ∀ a b → Set (lsuc (a ⊔ b))
-DGP a b = {A : Set a} {B : Set b} → DGP-i A B
 
 -- Double-negation shift
 -- if domain of P is finite this can be proved.
