@@ -85,7 +85,7 @@ DEM₃ a b = {A : Set a} {B : Set b} → DEM₃-i A B
 -- https://ncatlab.org/nlab/show/weak+excluded+middle
 -- WLEM WPEM
 WEM-i : ∀ {a} → Set a → Set a
-WEM-i A = ¬ A ⊎ ¬ ¬ A
+WEM-i A = Dec⊎ (¬ A)
 
 WEM : ∀ a → Set (lsuc a)
 WEM a = {A : Set a} → WEM-i A

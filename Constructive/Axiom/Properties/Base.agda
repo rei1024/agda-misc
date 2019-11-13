@@ -217,14 +217,14 @@ dns⇒¬¬em dns = DN-map (λ x {A} → x A) $ dns λ x → DN-Dec⊎
 
 ¬¬em⇒dns : ∀ {a} → ¬ ¬ EM a → DNS a a
 ¬¬em⇒dns ¬¬em =
-  λ ∀x→¬¬Px ¬[∀x→Px] → ¬¬em λ em → ¬[∀x→Px] (λ x → (em⇒dne em) (∀x→¬¬Px x))
+  λ ∀x→¬¬Px ¬[∀x→Px] → ¬¬em λ em → ¬[∀x→Px] (λ x → em⇒dne em (∀x→¬¬Px x))
 
--- other properties
-[¬A→A]→A⇒dne : ∀ {a} → ({A : Set a} → (¬ A → A) → A) → DNE a
-[¬A→A]→A⇒dne f ¬¬A = f λ ¬A → ⊥-elim (¬¬A ¬A)
+-- call/cc is classical
+call/cc⇒dne : ∀ {a} → ({A : Set a} → (¬ A → A) → A) → DNE a
+call/cc⇒dne f ¬¬A = f λ ¬A → ⊥-elim (¬¬A ¬A)
 
-em⇒[¬A→A]→A : ∀ {a} → EM a → {A : Set a} → (¬ A → A) → A
-em⇒[¬A→A]→A em f = Sum.[ id , f ] em
+em⇒call/cc : ∀ {a} → EM a → {A : Set a} → (¬ A → A) → A
+em⇒call/cc em f = Sum.[ id , f ] em
 
 -- DNE <=> ¬[A×¬B]→A→B
 dne⇒¬[A×¬B]→A→B : ∀ {a b} → DNE (a ⊔ b) →
@@ -393,6 +393,7 @@ mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]
 mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
 mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
 
+-- Properties that required to prove `llpo⇒Σ-dgp`
 record HasProperties
   {a} r p (A : Set a) : Set (a ⊔ lsuc r ⊔ lsuc p)
   where
@@ -604,6 +605,13 @@ wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? | inj₂ ¬¬∃P =
       f : ¬ ∃ R → ¬ ∃ Q → ¬ ∃ P
       f ¬∃R ¬∃Q (x , Px) = ¬∃R (x , (Px , ¬∃P→∀¬P ¬∃Q x))
 
+-- direct proof of WLPO => MP⊎
+wlpo-Alt⇒mp⊎ : ∀ {a p} {A : Set a} → WLPO-Alt A p → MP⊎ A p
+wlpo-Alt⇒mp⊎ wlpo-Alt P? Q? ¬[¬∃P×¬∃Q] with wlpo-Alt P? | wlpo-Alt Q?
+... | inj₁ ¬∃P  | inj₁ ¬∃Q  = ⊥-elim $ ¬[¬∃P×¬∃Q] (¬∃P , ¬∃Q)
+... | inj₁ ¬∃P  | inj₂ ¬¬∃Q = inj₂ ¬¬∃Q
+... | inj₂ ¬¬∃P | _         = inj₁ ¬¬∃P
+
 -- EM => KS
 em⇒ks : ∀ {a p} q {A : Set a} (x : A) → EM p → KS A p q
 em⇒ks q x em P with em {A = P}
@@ -650,10 +658,10 @@ wpfp∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → MP⊎-Alt A p
 wpfp∧mp⊎-Alt⇒wlpo {a} {p} {A} wpfp mp⊎-Alt {P = P} P? with wpfp P?
 ... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P = Sum.map₁ ¬∀Q→∀P (Sum.swap ¬∀P⊎¬∀Q)
   where
-  f : ¬ ((∀ x → P x) × (∀ x → Q x))
-  f (∀P , ∀Q) = ∀P→¬∀Q ∀P ∀Q
+  ¬[∀P×∀Q] : ¬ ((∀ x → P x) × (∀ x → Q x))
+  ¬[∀P×∀Q] (∀P , ∀Q) = ∀P→¬∀Q ∀P ∀Q
   ¬∀P⊎¬∀Q : ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
-  ¬∀P⊎¬∀Q = mp⊎-Alt P? Q? f
+  ¬∀P⊎¬∀Q = mp⊎-Alt P? Q? ¬[∀P×∀Q]
 
 -- WLPO => WPFP
 wlpo⇒wpfp : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPFP A p p
