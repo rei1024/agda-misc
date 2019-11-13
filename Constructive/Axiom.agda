@@ -37,9 +37,10 @@ open import Function
 -- agda-misc
 open import Constructive.Common
 
+---------------------------------------------------------------------------
 -- Axioms
--- Excluded middle
 
+-- Excluded middle
 EM : ∀ a → Set (lsuc a)
 EM a = ∀ {A : Set a} → Dec⊎ A
 
@@ -253,27 +254,6 @@ MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 Σ-Π-DGP : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 Σ-Π-DGP A p = ∀ {P Q : A → Set p} → Σ-Π-DGP-i P Q
 
--- WKL
-takeT : ℕ → (ℕ → Bool) → List Bool
-takeT ℕ.zero    α = []
-takeT (ℕ.suc n) α = α 0 ∷ takeT n (λ m → α (ℕ.suc m))
-
-IsDecTree : (List Bool → Set) → Set
-IsDecTree T = ∀ u v → Prefix _≡_ v u → T u → T v
-
-IsInfiniteTree : (List Bool → Set) → Set
-IsInfiniteTree T = ∀ n → ∃ λ u → T u × n ≤ length u
-
-AdmitsInfinitePath : (List Bool → Set) → Set
-AdmitsInfinitePath T = Σ (ℕ → Bool) λ α → ∀ n → T (takeT n α)
-
-WKL : Set₁
-WKL = ∀ T → IsDecTree T → IsInfiniteTree T → AdmitsInfinitePath T
-
--- BD-N
-Peseudobounded : (ℕ → Set) → Set
-Peseudobounded S = (s : ℕ → ℕ) → (∀ n → S (s n)) → ∃ λ N → s N < N
-
 -- Kripke's Schema
 KS : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
 KS A p q = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q × (P <=> ∃ Q)
@@ -316,3 +296,46 @@ EM⁻¹ a = {A : Set a} → isProp A → Dec⊎ A
 
 DNE⁻¹ : ∀ a → Set (lsuc a)
 DNE⁻¹ a = {A : Set a} → isProp A → Stable A
+
+-- WKL
+takeT : ℕ → (ℕ → Bool) → List Bool
+takeT ℕ.zero    α = []
+takeT (ℕ.suc n) α = α 0 ∷ takeT n (λ m → α (ℕ.suc m))
+
+-- "THE WEAK KONIG LEMMA, BROUWER’S FAN THEOREM, DE MORGAN’S LAW, AND DEPENDENT CHOICE"
+PreTree : Set₁
+PreTree = List Bool → Set
+
+IsDetachable : PreTree → Set
+IsDetachable T = DecU T
+
+-- closed under restrictions
+IsClosed : PreTree → Set
+IsClosed T = ∀ u v → Prefix _≡_ v u → T u → T v
+
+IsInfinite : PreTree → Set
+IsInfinite T = ∀ n → ∃ λ u → T u × n ≡ length u
+
+IsFinite : PreTree → Set
+IsFinite T = ∃ λ n → ∀ u → ¬ T u × n ≡ length u
+
+IsWellFounded : PreTree → Set
+IsWellFounded T = Σ (ℕ → Bool) λ α → ∃ λ n → ¬ T (takeT n α)
+
+HasInfinitePath : PreTree → Set
+HasInfinitePath T = Σ (ℕ → Bool) λ α → ∀ n → T (takeT n α)
+
+IsTree : PreTree → Set
+IsTree T = IsDetachable T × IsClosed T
+
+-- Weak Kőnig Lemma
+WKL : Set₁
+WKL = ∀ T → IsTree T → IsInfinite T → HasInfinitePath T
+
+-- Brouwer’s Fan Theorem
+FAN : Set₁
+FAN = ∀ T → IsTree T → IsWellFounded T → IsFinite T
+
+-- BD-N
+Peseudobounded : (ℕ → Set) → Set
+Peseudobounded S = (s : ℕ → ℕ) → (∀ n → S (s n)) → ∃ λ N → s N < N
