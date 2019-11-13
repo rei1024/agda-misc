@@ -91,6 +91,9 @@ module _ {a} {A : Set a} where
   [A→¬A]→¬A : (A → ¬ A) → ¬ A
   [A→¬A]→¬A = join
 
+  [¬A→A]→¬¬A : (¬ A → A) → ¬ ¬ A
+  [¬A→A]→¬¬A ¬A→A ¬A = ¬A (¬A→A ¬A)
+
   -- Law of noncontradiction (LNC)
   ¬[A×¬A] : ¬ (A × ¬ A)
   ¬[A×¬A] = uncurry (flip _$_)
@@ -323,6 +326,9 @@ module _ {a p} {A : Set a} {P : A → Set p} (P? : DecU P) where
 
   P?⇒¬∀P→¬¬∃¬P : ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ P x)
   P?⇒¬∀P→¬¬∃¬P = P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?)
+
+  P?⇒[¬∀P→∀P]→∀P : (¬ (∀ x → P x) → ∀ x → P x) → ∀ x → P x
+  P?⇒[¬∀P→∀P]→∀P ¬∀P→∀P = P?⇒¬¬∀P→∀P λ ¬∀P → ¬∀P (¬∀P→∀P ¬∀P)
 
   P?⇒[∃¬P→∀P]→∀P : (∃ (λ x → ¬ P x) → ∀ x → P x) → ∀ x → P x
   P?⇒[∃¬P→∀P]→∀P ∃¬P→∀P =

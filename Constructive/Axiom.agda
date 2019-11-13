@@ -24,6 +24,7 @@ module Constructive.Axiom where
 -- agda-stdlib
 open import Level renaming (suc to lsuc; zero to lzero)
 open import Data.Bool using (Bool; true; false)
+open import Data.Empty using (⊥)
 open import Data.Sum as Sum
 open import Data.Product as Prod
 open import Data.List using (List; []; _∷_; length)
@@ -81,6 +82,13 @@ DEM₂ a b = {A : Set a} {B : Set b} → DEM₂-i A B
 
 DEM₃ : ∀ a b → Set (lsuc (a ⊔ b))
 DEM₃ a b = {A : Set a} {B : Set b} → DEM₃-i A B
+
+-- call/cc
+Call/CC-i : ∀ {a} → Set a → Set a
+Call/CC-i A = Peirce-i A ⊥
+
+Call/CC : ∀ a → Set (lsuc a)
+Call/CC a = ∀ {A : Set a} → Call/CC-i A
 
 -- Gödel-Dummett logic
 -- Dirk Gently's Principle (DGP)

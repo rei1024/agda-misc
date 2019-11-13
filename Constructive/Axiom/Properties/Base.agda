@@ -220,11 +220,11 @@ dns⇒¬¬em dns = DN-map (λ x {A} → x A) $ dns λ x → DN-Dec⊎
   λ ∀x→¬¬Px ¬[∀x→Px] → ¬¬em λ em → ¬[∀x→Px] (λ x → em⇒dne em (∀x→¬¬Px x))
 
 -- call/cc is classical
-call/cc⇒dne : ∀ {a} → ({A : Set a} → (¬ A → A) → A) → DNE a
-call/cc⇒dne f ¬¬A = f λ ¬A → ⊥-elim (¬¬A ¬A)
+call/cc⇒dne : ∀ {a} → Call/CC a → DNE a
+call/cc⇒dne call/cc ¬¬A = call/cc λ ¬A → ⊥-elim (¬¬A ¬A)
 
-em⇒call/cc : ∀ {a} → EM a → {A : Set a} → (¬ A → A) → A
-em⇒call/cc em f = Sum.[ id , f ] em
+em⇒call/cc : ∀ {a} → EM a → Call/CC a
+em⇒call/cc em ¬A→A = Sum.[ id , ¬A→A ] em
 
 -- DNE <=> ¬[A×¬B]→A→B
 dne⇒¬[A×¬B]→A→B : ∀ {a b} → DNE (a ⊔ b) →
