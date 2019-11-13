@@ -163,6 +163,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   DN-ap⁻¹ : (¬ ¬ A → ¬ ¬ B) → ¬ ¬ (A → B)
   DN-ap⁻¹ f ¬[A→B] = ¬[A→B]→¬[A→¬¬B] ¬[A→B] (DN-bind⁻¹ f)
 
+-- distributive properties
   DN-distrib-× : ¬ ¬ (A × B) → ¬ ¬ A × ¬ ¬ B
   DN-distrib-× ¬¬A×B = DN-map proj₁ ¬¬A×B , DN-map proj₂ ¬¬A×B
 
@@ -212,9 +213,9 @@ module _ {a b} {A : Set a} {B : Set b} where
   dec⊎-⊎ (inj₂ ¬x) (inj₂ ¬y) = inj₂ (¬A×¬B→¬[A⊎B] (¬x , ¬y))
 
   dec⊎-× : Dec⊎ A → Dec⊎ B → Dec⊎ (A × B)
-  dec⊎-× (inj₁ x) (inj₁ y)  = inj₁ (x , y)
-  dec⊎-× (inj₁ x) (inj₂ ¬y) = inj₂ (¬y ∘ proj₂)
-  dec⊎-× (inj₂ ¬x) _        = inj₂ (¬x ∘ proj₁)
+  dec⊎-× (inj₁ x)  (inj₁ y)  = inj₁ (x , y)
+  dec⊎-× (inj₁ x)  (inj₂ ¬y) = inj₂ (¬y ∘ proj₂)
+  dec⊎-× (inj₂ ¬x) _         = inj₂ (¬x ∘ proj₁)
 
 -- Properties of Stable
 module _ {a} {A : Set a} where
