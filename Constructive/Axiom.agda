@@ -14,7 +14,6 @@
 -- BD-N
 -- LLPOₙ
 
--- WLPO -> WKL
 -- WKL <=> LLPO
 
 {-# OPTIONS --without-K --safe --exact-split #-}
@@ -114,8 +113,8 @@ WEM a = {A : Set a} → WEM-i A
 DNS-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
 DNS-i P = (∀ x → ¬ ¬ P x) → ¬ ¬ (∀ x → P x)
 
-DNS : ∀ a p → Set (lsuc (a ⊔ p))
-DNS a p = {A : Set a} {P : A → Set p} → DNS-i P
+DNS : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+DNS A p = {P : A → Set p} → DNS-i P
 
 -- Independence-of-premise
 IP : ∀ p q r → Set (lsuc (p ⊔ q ⊔ r))

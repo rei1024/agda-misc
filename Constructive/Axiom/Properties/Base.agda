@@ -205,14 +205,14 @@ dgp⇒wem dgp = dem₃⇒wem $ dgp⇒dem₃ dgp
 
 -- Properties of DNS
 -- DNE => DNS
-dne⇒dns : ∀ {a b} → DNE (a ⊔ b) → DNS a (a ⊔ b)
-dne⇒dns dne f = dne λ x → x λ y → y λ z → dne (f z)
+dne⇒dns : ∀ {a p} {A : Set a} → DNE (a ⊔ p) → DNS A (a ⊔ p)
+dne⇒dns dne f = λ x → x λ y → dne (f y)
 
 -- DNS <=> ¬ ¬ EM
-dns⇒¬¬em : ∀ {a} → DNS (lsuc a) a → ¬ ¬ EM a
-dns⇒¬¬em dns = DN-map (λ x {A} → x A) $ dns λ x → DN-Dec⊎
+dns⇒¬¬em : ∀ {a} → ({A : Set (lsuc a)} → DNS A a) → ¬ ¬ EM a
+dns⇒¬¬em dns = DN-map (λ x {A} → x A) $ dns (λ _ → DN-Dec⊎)
 
-¬¬em⇒dns : ∀ {a} → ¬ ¬ EM a → DNS a a
+¬¬em⇒dns : ∀ {a} → ¬ ¬ EM a → ({A : Set a} → DNS A a)
 ¬¬em⇒dns ¬¬em =
   λ ∀x→¬¬Px ¬[∀x→Px] → ¬¬em λ em → ¬[∀x→Px] (λ x → em⇒dne em (∀x→¬¬Px x))
 
