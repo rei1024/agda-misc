@@ -76,6 +76,7 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 
 -- agda-misc
 open import Constructive.Axiom
+import Constructive.Axiom.Properties.Base.Lemma as Lemma
 open import Constructive.Combinators
 open import Constructive.Common
 open import TypeTheory.HoTT.Data.Sum.Properties using (isProp-⊎)
@@ -478,7 +479,7 @@ record HasProperties
 -- Σ-DGP <=> LLPO
 llpo⇒Σ-dgp : ∀ {r p a} {A : Set a} → HasProperties r p A →
              LLPO A (p ⊔ a ⊔ r) → Σ-DGP A p
-llpo⇒Σ-dgp {r} {p} {a} {A = A} has llpo {P = P} {Q} P? Q? =
+llpo⇒Σ-dgp has llpo {P = P} {Q} P? Q? =
   Sum.map ¬∃R→∃P→∃Q ¬∃S→∃Q→∃P ¬∃R⊎¬∃S
   where
   open HasProperties has
@@ -526,41 +527,11 @@ llpo⇒mp∨ : ∀ {r p a} {A : Set a} →
            HasProperties r p A → LLPO A (p ⊔ a ⊔ r) → MP∨ A p
 llpo⇒mp∨ has llpo = Σ-dgp⇒mp∨ (llpo⇒Σ-dgp has llpo)
 
--- lemma for `ℕ-llpo⇒mp∨`
-private
-  1+n≰0 : ∀ n → ¬ (suc n ≤ 0)
-  1+n≰0 n ()
-
-  ℕ≤-any-dec : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∃ λ m → m ≤ n × P m)
-  ℕ≤-any-dec {P = P} P? zero with P? 0
-  ... | inj₁  P0 = inj₁ (0 , ℕₚ.≤-refl , P0)
-  ... | inj₂ ¬P0 = inj₂ λ {(m , m≤0 , Pm) → ¬P0 (subst P (ℕₚ.n≤0⇒n≡0 m≤0) Pm)}
-  ℕ≤-any-dec P? (suc n) with P? 0
-  ... | inj₁  P0 = inj₁ (0 , (z≤n , P0))
-  ... | inj₂ ¬P0 with ℕ≤-any-dec (P? ∘ suc) n
-  ℕ≤-any-dec {P = P} P? (suc n) | inj₂ ¬P0 | inj₁ (m , m≤n , Psm) =
-    inj₁ (suc m , s≤s m≤n , Psm)
-  ℕ≤-any-dec {P = P} P? (suc n) | inj₂ ¬P0 | inj₂ ¬∃m→m≤n×Psm     = inj₂ f
-    where
-    f : (∃ λ m → m ≤ suc n × P m) → ⊥
-    f (zero  , m≤sn  , Pm)  = ¬P0 Pm
-    f (suc m , sm≤sn , Psm) = ¬∃m→m≤n×Psm (m , (ℕₚ.≤-pred sm≤sn , Psm))
-
-  ℕ<-any-dec : ∀ {p} {P : ℕ → Set p} → DecU P →
-               DecU (λ n → ∃ λ m → m ℕ.< n × P m)
-  ℕ<-any-dec P? zero     = inj₂ λ {(m , m<0 , _) → 1+n≰0 m m<0}
-  ℕ<-any-dec {P = P} P? (suc n) with ℕ≤-any-dec P? n
-  ... | inj₁ (m , m≤n , Pm) = inj₁ (m , s≤s m≤n , Pm)
-  ... | inj₂ ¬∃m→m≤n×Pm     = inj₂ (contraposition f ¬∃m→m≤n×Pm)
-    where
-    f : (∃ λ m → suc m ≤ suc n × P m) → ∃ λ m → m ≤ n × P m
-    f (m , sm≤sn , Pm) = m , (ℕₚ.≤-pred sm≤sn , Pm)
-
 ℕ-hasProperties : ∀ p → HasProperties lzero p ℕ
 ℕ-hasProperties _ = record
   { _<_       = ℕ._<_
   ; <-cmp     = ℕₚ.<-cmp
-  ; <-any-dec = ℕ<-any-dec
+  ; <-any-dec = Lemma.ℕ<-any-dec
   ; <-wf      = ℕInd.<-wellFounded
   }
 
@@ -660,7 +631,7 @@ wlpo⇒wpfp xA wlpo = pfp⇒wpfp (wlpo⇒pfp xA wlpo)
 -- WPFP ∧ MP⊎-Alt => WLPO
 -- This can be proved by `wpfp∧llpo⇒wlpo` but it requires `HasPropertiesForLLPO⇒MP∨`
 wpfp∧mp⊎-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → MP⊎-Alt A p → WLPO A p
-wpfp∧mp⊎-Alt⇒wlpo {a} {p} {A} wpfp mp⊎-Alt {P = P} P? with wpfp P?
+wpfp∧mp⊎-Alt⇒wlpo wpfp mp⊎-Alt {P = P} P? with wpfp P?
 ... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P = Sum.map₁ ¬∀Q→∀P (Sum.swap ¬∀P⊎¬∀Q)
   where
   ¬[∀P×∀Q] : ¬ ((∀ x → P x) × (∀ x → Q x))
@@ -670,14 +641,15 @@ wpfp∧mp⊎-Alt⇒wlpo {a} {p} {A} wpfp mp⊎-Alt {P = P} P? with wpfp P?
 
 -- WPFP ∧ LLPO => WLPO
 wpfp∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → LLPO A p → WLPO A p
-wpfp∧llpo⇒wlpo wpfp llpo P? with wpfp P?
-wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P with
-  llpo (¬-DecU P?) (¬-DecU Q?)
-       λ {(∃¬P , ∃¬Q) → ∀P→¬∃¬P (¬∀Q→∀P (∃¬P→¬∀P ∃¬Q)) ∃¬P}
-wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₁ ¬∃¬P =
-  inj₁ (P?⇒¬∃¬P→∀P P? ¬∃¬P)
-wpfp∧llpo⇒wlpo wpfp llpo P? | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P | inj₂ ¬∃¬Q =
-  inj₂ λ ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q)
+wpfp∧llpo⇒wlpo wpfp llpo {P = P} P? with wpfp P?
+... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P =
+  Sum.map (P?⇒¬∃¬P→∀P P?)
+          (λ ¬∃¬Q ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q))
+          ¬∃¬P⊎¬∃¬Q
+  where
+  ¬∃¬P⊎¬∃¬Q : ¬ ∃ (λ x → ¬ P x) ⊎ ¬ ∃ (λ x → ¬ Q x)
+  ¬∃¬P⊎¬∃¬Q = llpo (¬-DecU P?) (¬-DecU Q?)
+                    (λ{(∃¬P , ∃¬Q) → ∀P→¬∃¬P (¬∀Q→∀P (∃¬P→¬∀P ∃¬Q)) ∃¬P})
 
 -- WPFP ∧ MP <=> LPO
 wpfp∧mp⇒lpo : ∀ {a p} {A : Set a} → WPFP A p p → MP A p → LPO A p
