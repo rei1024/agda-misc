@@ -37,6 +37,7 @@ open import Function
 
 -- agda-misc
 open import Constructive.Common
+open import TypeTheory.HoTT.Base using (isProp)
 
 ---------------------------------------------------------------------------
 -- Axioms
@@ -294,12 +295,6 @@ ACLT A B p = {P : A → B → Set p} →
              ((x : A) → ∃ λ y → P x y) → Σ (A → B) λ f → (x : A) → P x (f x)
 
 -- HoTT
-isProp : ∀ {a} → Set a → Set a
-isProp A = (x y : A) → x ≡ y
-
-isSet : ∀ {a} → Set a → Set a
-isSet A = {x y : A} (p q : x ≡ y) → p ≡ q
-
 EM⁻¹ : ∀ a → Set (lsuc a)
 EM⁻¹ a = {A : Set a} → isProp A → Dec⊎ A
 

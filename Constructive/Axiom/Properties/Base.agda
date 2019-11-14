@@ -78,6 +78,9 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Constructive.Axiom
 open import Constructive.Combinators
 open import Constructive.Common
+open import TypeTheory.HoTT.Data.Sum.Properties using (isProp-⊎)
+open import TypeTheory.HoTT.Relation.Nullary.Negation.Properties
+  using (isProp-¬)
 
 -- Properties
 aclt : ∀ {a b p} {A : Set a} {B : Set b} → ACLT A B p
@@ -260,12 +263,10 @@ em⇒em⁻¹ em _ = em
 
 -- DNE⁻¹ <=> EM⁻¹
 dne⁻¹⇒em⁻¹ : ∀ {a} → Extensionality a lzero → DNE⁻¹ a → EM⁻¹ a
-dne⁻¹⇒em⁻¹ ext dne⁻¹ isP = dne⁻¹ isP′ DN-Dec⊎ where
+dne⁻¹⇒em⁻¹ ext dne⁻¹ isP = dne⁻¹ isP′ DN-Dec⊎
+  where
   isP′ : ∀ x y → x ≡ y
-  isP′ (inj₁  x) (inj₁  y) = cong inj₁ (isP x y)
-  isP′ (inj₁  x) (inj₂ ¬y) = ⊥-elim $ ¬y x
-  isP′ (inj₂ ¬x) (inj₁  y) = ⊥-elim $ ¬x y
-  isP′ (inj₂ ¬x) (inj₂ ¬y) = cong inj₂ (ext λ x → ⊥-elim $ ¬x x)
+  isP′ = isProp-⊎ ¬[A×¬A] isP (isProp-¬ ext)
 
 em⁻¹⇒dne⁻¹ : ∀ {a} → EM⁻¹ a → DNE⁻¹ a
 em⁻¹⇒dne⁻¹ em⁻¹ isP ¬¬x with em⁻¹ isP
