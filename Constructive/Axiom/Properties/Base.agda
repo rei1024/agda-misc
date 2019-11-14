@@ -44,9 +44,6 @@
 -- WPFP ∧ MP∨ -> WLPO
 -- WPFP ∧ LLPO -> WLPO
 
--- TODO
--- WLPO => MP∨
-
 ------------------------------------------------------------------------
 
 {-# OPTIONS --without-K --safe --exact-split #-}

@@ -15,10 +15,10 @@ module TypeTheory.Nat.Operations
   (suc : N → N)
   -- | Induction principle
   (ind : ∀ {p} (P : N → Set p) → P zero → (∀ k → P k → P (suc k)) → ∀ n → P n)
-  -- | Computaton rule for `zero`
+  -- | Computation rule for `zero`
   (ind-base : ∀ {p} (P : N → Set p) P-base P-step →
               ind P P-base P-step zero ≡ P-base)
-  -- | Computaton rule for `suc`
+  -- | Computation rule for `suc`
   (ind-step : ∀ {p} (P : N → Set p) P-base P-step n →
               ind P P-base P-step (suc n) ≡ P-step n (ind P P-base P-step n))
   where
