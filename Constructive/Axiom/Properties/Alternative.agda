@@ -1,3 +1,6 @@
+--  Alternative proof of LLPO => MP∨
+
+{-# OPTIONS --without-K --safe #-}
 module Constructive.Axiom.Properties.Alternative where
 
 -- agda-stdlib

@@ -34,6 +34,9 @@ import Constructive.Axiom.Properties.Bool
 
 import Constructive.Axiom.Properties.Transport
 
+-- Alternative proof of LLPO => MP∨
+import Constructive.Axiom.Properties.Alternative
+
 -- Combinators for reasoning
 import Constructive.Combinators
 
@@ -43,30 +46,16 @@ import Constructive.Common
 import Constructive.Searchable
 
 ------------------------------------------------------------------------
--- Type theory
-
--- Natural number
-import TypeTheory.Nat.Operations
-
-import TypeTheory.Nat.Properties
-
-import TypeTheory.Nat.Instance
-
--- Homotopy Type Theory
-import TypeTheory.HoTT.Base
-
-import TypeTheory.HoTT.Data.Empty.Properties
-
-import TypeTheory.HoTT.Data.Sum.Properties
-
-import TypeTheory.HoTT.Function.Properties
-
-import TypeTheory.HoTT.Relation.Nullary.Negation.Properties
-
-------------------------------------------------------------------------
 -- Formal language
 
 import Math.FormalLanguage
+
+------------------------------------------------------------------------
+-- Googology
+
+import Math.Googology.Function
+
+import Math.Googology.Function.Properties
 
 ------------------------------------------------------------------------
 -- Number theory
@@ -97,8 +86,22 @@ import Math.NumberTheory.Product.Nat
 import Math.NumberTheory.Product.Nat.Properties
 
 ------------------------------------------------------------------------
--- Googology
+-- Type theory
 
-import Math.Googology.Function
+-- Natural number
+import TypeTheory.Nat.Operations
 
-import Math.Googology.Function.Properties
+import TypeTheory.Nat.Properties
+
+import TypeTheory.Nat.Instance
+
+-- Homotopy Type Theory
+import TypeTheory.HoTT.Base
+
+import TypeTheory.HoTT.Data.Empty.Properties
+
+import TypeTheory.HoTT.Data.Sum.Properties
+
+import TypeTheory.HoTT.Function.Properties
+
+import TypeTheory.HoTT.Relation.Nullary.Negation.Properties

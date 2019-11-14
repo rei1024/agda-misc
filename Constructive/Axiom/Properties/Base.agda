@@ -101,6 +101,9 @@ lpo-Fin = dec⇒dec⊎ ∘ Finₚ.any? ∘ DecU⇒decidable
 dec-dns-i : ∀ {a p} {A : Set a} {P : A → Set p} → DecU P → DNS-i P
 dec-dns-i P? ∀¬¬P = DN-intro (P?⇒∀¬¬P→∀P P? ∀¬¬P)
 
+-- TODO
+-- dns-Fin : ∀ {n p} → DNS (Fin n) p
+
 ------------------------------------------------------------------------
 -- Equivalence between classical proposition
 ------------------------------------------------------------------------
@@ -415,8 +418,8 @@ record HasProperties
   ... | inj₁ (m , m<n , ¬Pm) = inj₂ λ ∀i→i<n→Pi → ¬Pm (∀i→i<n→Pi m m<n)
   ... | inj₂ ¬∃m→m<n×¬Pm     = inj₁ (¬∃¬→∀ P? ¬∃m→m<n×¬Pm)
 
-  findFirst : {P : A → Set p} →
-              DecU P → ∃ P → ∃ λ x → (∀ y → y < x → ¬ P y) × P x
+  findFirst : {P : A → Set p} → DecU P →
+              ∃ P → ∃ λ x → (∀ y → y < x → ¬ P y) × P x
   findFirst {P} P? (x , Px) = go x (<-wf x) Px
     where
     go : ∀ x → Ind.Acc _<_ x → P x → ∃ λ y → (∀ i → i < y → ¬ P i) × P y
