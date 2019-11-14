@@ -106,6 +106,9 @@ module _ {a b} {A : Set a} {B : Set b} where
   ¬[A→B]→¬[A→¬¬B] : ¬ (A → B) → ¬ (A → ¬ ¬ B)
   ¬[A→B]→¬[A→¬¬B] ¬[A→B] A→¬¬B = ¬[A→B] λ x → ⊥-elim $ A→¬¬B x (¬[A→B]→¬B ¬[A→B])
 
+  ¬[A→B]→B→A : ¬ (A → B) → B → A
+  ¬[A→B]→B→A ¬[A→B] y = ⊥-elim $ ¬[A→B] λ _ → y
+
   [[A→B]→A]→¬A→A : ((A → B) → A) → ¬ A → A
   [[A→B]→A]→¬A→A [A→B]→A ¬A = [A→B]→A (⊥-elim ∘′ ¬A)
 

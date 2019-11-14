@@ -20,11 +20,11 @@
           |      |        |
           |      |        v
           |      |       WEM <=> DEM₃ <=> DN-distrib-⊎
-          v      v
+          v      v        |
          LPO     KS-------------┐
-         /  \                   \
-        /    \                   \
-       v      v                   v
+         /  \             |     \
+        /    \            |      \
+       v      v           v       v
        MP    WLPO <=> Σ-Π-DGP -> PFP -> WPFP
        |\     |
        | \    v
@@ -196,7 +196,7 @@ wem-i∧stable⇒dec (inj₂ y) stable = yes (stable y)
 
 -- EM => DGP => WEM
 em⇒dgp : ∀ {a b} → EM (a ⊔ b) → DGP a b
-em⇒dgp em = em⇒[¬A→B]→A⊎B em λ ¬[A→B] b → ⊥-elim $ ¬[A→B] (const b)
+em⇒dgp em = em⇒[¬A→B]→A⊎B em ¬[A→B]→B→A
 
 dgp⇒dem₃ : ∀ {a b} → DGP a b → DEM₃ a b
 dgp⇒dem₃ dgp ¬[A×B] with dgp
@@ -356,11 +356,9 @@ wlpo⇒llpo wlpo P? Q? ¬[∃P×∃Q] with wlpo (¬-DecU P?) | wlpo (¬-DecU Q?)
 ... | inj₂ ¬∀¬P | inj₁ ∀¬Q  = inj₂ (∀¬P→¬∃P ∀¬Q)
 ... | inj₂ ¬∀¬P | inj₂ ¬∀¬Q = ⊥-elim $ ¬∀¬P×¬∀¬Q→¬¬[∃P×∃Q] (¬∀¬P , ¬∀¬Q) ¬[∃P×∃Q]
 
--- WEM => WLPO
-wem⇒wlpo : ∀ {a p} {A : Set a} → WEM (a ⊔ p) → WLPO A p
-wem⇒wlpo wem P? with wem
-... | inj₁ ¬∀P  = inj₂ ¬∀P
-... | inj₂ ¬¬∀P = inj₁ (P?⇒¬¬∀P→∀P P? ¬¬∀P)
+-- WEM => WLPO-Alt
+wem⇒wlpo-Alt : ∀ {a p} {A : Set a} → WEM (a ⊔ p) → WLPO-Alt A p
+wem⇒wlpo-Alt wem P? = wem
 
 -- (WMP ∧ MP∨) <=> MR
 mr⇒wmp : ∀ {a p} {A : Set a} → MR A p → WMP A p
