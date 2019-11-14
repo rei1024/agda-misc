@@ -14,9 +14,9 @@ record Functor (F : Set → Set) : Set₁ where
   field
     fmap-id : ∀ {A} (x : F A) → fmap id x ≡ x
     fmap-∘  : ∀ {A B C} (f : B → C) (g : A → B) (x : F A) →
-      fmap f (fmap g x) ≡ fmap (f ∘′ g) x
+              fmap f (fmap g x) ≡ fmap (f ∘′ g) x
     fmap-cong : ∀ {A B} {f g : A → B} {x : F A} →
-      (∀ v → f v ≡ g v) → fmap f x ≡ fmap g x
+                (∀ v → f v ≡ g v) → fmap f x ≡ fmap g x
 
   _<$>_ : ∀ {A B} → (A → B) → F A → F B
   _<$>_ = fmap
@@ -40,9 +40,9 @@ record Applicative (F : Set → Set) : Set₁ where
 
   field
     natural : ∀ {A B C D} (f : A → C) (g : B → D) (fx : F A) (fy : F B) →
-      fmap f fx <,> fmap g fy ≡ fmap (Prod.map f g) (fx <,> fy)
+              fmap f fx <,> fmap g fy ≡ fmap (Prod.map f g) (fx <,> fy)
     assoc : ∀ {A B C} (fx : F A) (fy : F B) (fz : F C) →
-      fmap ×-assoc ((fx <,> fy) <,> fz) ≡ (fx <,> (fy <,> fz))
+            fmap ×-assoc ((fx <,> fy) <,> fz) ≡ (fx <,> (fy <,> fz))
     unitˡ : ∀ {B} (fy : F B) → fmap proj₂ (unit <,> fy) ≡ fy
     unitʳ : ∀ {A} (fx : F A) → fmap proj₁ (fx <,> unit) ≡ fx
 
@@ -56,7 +56,7 @@ record Applicative (F : Set → Set) : Set₁ where
   liftA2 f fx fy = fmap (uncurry f) (fx <,> fy)
 
   natural₁ : ∀ {A B C} (f : A → C) (fx : F A) (fy : F B) →
-    fmap f fx <,> fy ≡ fmap (Prod.map₁ f) (fx <,> fy)
+             fmap f fx <,> fy ≡ fmap (Prod.map₁ f) (fx <,> fy)
   natural₁ f fx fy = begin
     fmap f fx <,> fy               ≡⟨ cong (fmap f fx <,>_) $ sym $ fmap-id fy ⟩
     fmap f fx <,> fmap id fy       ≡⟨ natural f id fx fy ⟩
@@ -64,7 +64,7 @@ record Applicative (F : Set → Set) : Set₁ where
     where open ≡-Reasoning
 
   natural₂ : ∀ {A B D} (g : B → D) (fx : F A) (fy : F B) →
-    fx <,> fmap g fy ≡ fmap (Prod.map₂ g) (fx <,> fy)
+             fx <,> fmap g fy ≡ fmap (Prod.map₂ g) (fx <,> fy)
   natural₂ g fx fy = begin
     fx <,> fmap g fy               ≡⟨ cong (_<,> fmap g fy) $ sym $ fmap-id fx ⟩
     fmap id fx <,> fmap g fy       ≡⟨ natural id g fx fy ⟩
@@ -72,7 +72,7 @@ record Applicative (F : Set → Set) : Set₁ where
     where open ≡-Reasoning
 
   assoc⁻¹ : ∀ {A B C} (fx : F A) (fy : F B) (fz : F C) →
-    fmap ×-assoc⁻¹ (fx <,> (fy <,> fz)) ≡ (fx <,> fy) <,> fz
+            fmap ×-assoc⁻¹ (fx <,> (fy <,> fz)) ≡ (fx <,> fy) <,> fz
   assoc⁻¹ fx fy fz = begin
     fmap ×-assoc⁻¹ (fx <,> (fy <,> fz))
       ≡⟨ sym $ cong (fmap ×-assoc⁻¹) (assoc fx fy fz) ⟩
@@ -182,7 +182,7 @@ record Applicative (F : Set → Set) : Set₁ where
    where open ≡-Reasoning
 
   <*>-composition : ∀ {A B C} (u : F (A → C)) (v : F (B → A)) (w : F B) →
-     pure _∘′_ <*> u <*> v <*> w ≡ u <*> (v <*> w)
+                    pure _∘′_ <*> u <*> v <*> w ≡ u <*> (v <*> w)
   <*>-composition u v w = begin
     pure _∘′_ <*> u <*> v <*> w
       ≡⟨ cong (λ t → t <*> v <*> w) $ <*>-fmap _∘′_ u ⟩
@@ -270,10 +270,10 @@ record ApplicativeViaAp (F : Set → Set) : Set₁ where
   field
     identity     : ∀ {A} (fx : F A) → pure id <*> fx ≡ fx
     composition  : ∀ {A B C} (u : F (A → C)) (v : F (B → A)) (w : F B) →
-       pure _∘′_ <*> u <*> v <*> w ≡ u <*> (v <*> w)
+                   pure _∘′_ <*> u <*> v <*> w ≡ u <*> (v <*> w)
     homomorphism : ∀ {A B} (f : A → B) (x : A) → pure f <*> pure x ≡ pure (f x)
     interchange  : ∀ {A B} (u : F (A → B)) (y : A) →
-      u <*> pure y ≡ pure (_$ y) <*> u
+                   u <*> pure y ≡ pure (_$ y) <*> u
     <*>-fmap     : ∀ {A B} (f : A → B) (fx : F A) → pure f <*> fx ≡ fmap f fx
 
   _<,>_ : ∀ {A B} → F A → F B → F (A × B)
@@ -317,7 +317,7 @@ record Monad (F : Set → Set) : Set₁ where
     identityˡ      : ∀ {A} (fx : F A) → join (fmap return fx) ≡ fx
     identityʳ      : ∀ {A} (fx : F A) → join (return fx) ≡ fx
     join-natural   : ∀ {A B} (f : A → B) (ffx : F (F A)) →
-      join (fmap (fmap f) ffx) ≡ fmap f (join ffx)
+                     join (fmap (fmap f) ffx) ≡ fmap f (join ffx)
     return-natural : ∀ {A B} (f : A → B) (x : A) → return (f x) ≡ fmap f (return x)
 
   _>>=_ : ∀ {A B} → F A → (A → F B) → F B
@@ -390,7 +390,7 @@ kleisli-assoc
   >>=-identityʳ m = identityˡ m
 
   >>=-assoc : ∀ {A B C} (m : F A) (k : A → F B) (h : B → F C) →
-      m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
+              m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
   >>=-assoc m k h = begin
     m >>= (λ x → k x >>= h)
       ≡⟨⟩
@@ -410,7 +410,7 @@ kleisli-assoc
     where open ≡-Reasoning
 
   fmap->>= : ∀ {A B C} (f : B → C) (m : F A) (k : A → F B) →
-    fmap f (m >>= k) ≡ m >>= (λ x → fmap f (k x))
+             fmap f (m >>= k) ≡ m >>= (λ x → fmap f (k x))
   fmap->>= f m k = begin
     fmap f (m >>= k)                ≡⟨⟩
     fmap f (join (fmap k m))        ≡⟨ sym $ join-natural f (fmap k m) ⟩
@@ -420,7 +420,7 @@ kleisli-assoc
     where open ≡-Reasoning
 
   fmap-move : ∀ {A B C D} (f : C → D) (g : A → B → C) (m1 : F A) (m2 : F B) →
-    fmap f (m1 >>= λ x → fmap (g x) m2) ≡ m1 >>= (λ x → fmap (f ∘′ g x) m2)
+         fmap f (m1 >>= λ x → fmap (g x) m2) ≡ m1 >>= (λ x → fmap (f ∘′ g x) m2)
   fmap-move f g m1 m2 = begin
     fmap f (m1 >>= λ x → fmap (g x) m2)   ≡⟨ fmap->>= f m1 (λ x → fmap (g x) m2) ⟩
     m1 >>= (λ x → fmap f (fmap (g x) m2)) ≡⟨ >>=-cong (λ x → fmap-∘ f (g x) m2) ⟩

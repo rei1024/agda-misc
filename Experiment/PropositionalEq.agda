@@ -21,7 +21,7 @@ PathInd : (C : (x y : A) → x ≡ y → Set c) →
 PathInd C c x .x refl = c x
 
 PathInd-refl : ∀ (C : (x y : A) → x ≡ y → Set c) (c : ∀ x → C x x refl) x →
-            PathInd C c x x refl ≡ c x
+               PathInd C c x x refl ≡ c x
 PathInd-refl C c x = refl
 
 -- Based path induction
@@ -30,5 +30,5 @@ BasedPathInd : (a : A) (C : ∀ x → a ≡ x → Set c) → C a refl →
 BasedPathInd a C c .a refl = c
 
 BasedPathInd-refl : ∀ (a : A) (C : ∀ x → a ≡ x → Set c) (c : C a refl) →
-                 BasedPathInd a C c a refl ≡ c
+                    BasedPathInd a C c a refl ≡ c
 BasedPathInd-refl _ _ _ = refl

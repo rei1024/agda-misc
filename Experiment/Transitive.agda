@@ -21,8 +21,9 @@ reverse R-sym [ x∼y ] = [ R-sym x∼y ]
 reverse R-sym (x ∼⁺⟨ x₁ ⟩ x₂) = _ ∼⁺⟨ reverse R-sym x₂ ⟩ reverse R-sym x₁
 
 fold-reverse : (R-trans : Transitive R) (R-sym : Symmetric R) (xs : A [ R ]⁺ B) →
-   (∀ {a b c} (x : R b c) (y : R a b) → R-trans (R-sym x) (R-sym y) ≡ R-sym (R-trans y x)) →
-  fold R-trans (reverse R-sym xs) ≡ R-sym (fold R-trans xs)
+              (∀ {a b c} (x : R b c) (y : R a b) →
+                R-trans (R-sym x) (R-sym y) ≡ R-sym (R-trans y x)) →
+              fold R-trans (reverse R-sym xs) ≡ R-sym (fold R-trans xs)
 fold-reverse R-trans R-sym [ x∼y ] homo = ≡.refl
 fold-reverse R-trans R-sym (x ∼⁺⟨ xs₁ ⟩ xs₂) homo = begin
   R-trans (fold R-trans (reverse R-sym xs₂)) (fold R-trans (reverse R-sym xs₁))
