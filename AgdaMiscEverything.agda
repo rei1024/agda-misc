@@ -52,6 +52,17 @@ import TypeTheory.Nat.Properties
 
 import TypeTheory.Nat.Instance
 
+-- Homotopy Type Theory
+import TypeTheory.HoTT.Base
+
+import TypeTheory.HoTT.Data.Empty.Properties
+
+import TypeTheory.HoTT.Data.Sum.Properties
+
+import TypeTheory.HoTT.Function.Properties
+
+import TypeTheory.HoTT.Relation.Nullary.Negation.Properties
+
 ------------------------------------------------------------------------
 -- Formal language
 
