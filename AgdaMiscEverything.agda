@@ -30,6 +30,8 @@ import Constructive.Axiom.Properties
 
 import Constructive.Axiom.Properties.Base
 
+import Constructive.Axiom.Properties.Base.Lemma
+
 import Constructive.Axiom.Properties.Bool
 
 import Constructive.Axiom.Properties.Transport
@@ -105,3 +107,6 @@ import TypeTheory.HoTT.Data.Sum.Properties
 import TypeTheory.HoTT.Function.Properties
 
 import TypeTheory.HoTT.Relation.Nullary.Negation.Properties
+
+-- Identity type
+import TypeTheory.Identity

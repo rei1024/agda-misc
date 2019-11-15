@@ -1,7 +1,7 @@
 -- Martin-Löf identity type
 
 {-# OPTIONS --without-K --safe #-}
-module Experiment.Identity where
+module TypeTheory.Identity where
 
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Binary
