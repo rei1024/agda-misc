@@ -563,9 +563,8 @@ private
   subst-lemma _ _ refl = refl
 
 module _ {p} (P : N → N → Set p) where
-  inddiag-< :
-    (∀ n → P zero (suc n)) → (∀ m n → P m n → P (suc m) (suc n)) →
-    ∀ m o → P m (suc m + o)
+  inddiag-< : (∀ n → P zero (suc n)) → (∀ m n → P m n → P (suc m) (suc n)) →
+              ∀ m o → P m (suc m + o)
   inddiag-< Pzs Pss m o =
     ind (λ k → P k (suc k + o))
         (subst (P zero) (suc≡one+ o) (Pzs o))
@@ -575,9 +574,8 @@ module _ {p} (P : N → N → Set p) where
   inddiag-≡ : P zero zero → (∀ m n → P m n → P (suc m) (suc n)) → ∀ n → P n n
   inddiag-≡ Pzz Pss n = ind (λ k → P k k) Pzz (λ k Pkk → Pss k k Pkk) n
 
-  inddiag-> :
-    (∀ n → P (suc n) zero) → (∀ m n → P m n → P (suc m) (suc n)) →
-    ∀ n o → P (suc n + o) n
+  inddiag-> : (∀ n → P (suc n) zero) → (∀ m n → P m n → P (suc m) (suc n)) →
+              ∀ n o → P (suc n + o) n
   inddiag-> Psz Pss n o =
     ind (λ k → P (suc k + o) k)
         (subst (λ k → P k zero) (suc≡one+ o) (Psz o))
@@ -586,12 +584,11 @@ module _ {p} (P : N → N → Set p) where
         n
 
   -- diagonal induction
-  inddiag :
-    P zero zero →
-    (∀ n → P zero (suc n)) →
-    (∀ m → P (suc m) zero) →
-    (∀ m n → P m n → P (suc m) (suc n)) →
-    ∀ m n → P m n
+  inddiag : P zero zero →
+            (∀ n → P zero (suc n)) →
+            (∀ m → P (suc m) zero) →
+            (∀ m n → P m n → P (suc m) (suc n)) →
+            ∀ m n → P m n
   inddiag P-zz P-zs P-sz P-ss m n with order? m n
   ... | lt (o , sm+o≡n) = subst (P m) sm+o≡n (inddiag-< P-zs P-ss m o)
   ... | eq m≡n          = subst (P m) m≡n (inddiag-≡ P-zz P-ss m)
