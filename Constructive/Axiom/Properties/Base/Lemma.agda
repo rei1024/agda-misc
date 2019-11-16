@@ -94,20 +94,20 @@ Sum-map-injective f-inj g-inj {inj₁ x} {inj₁ x₁} eq = cong inj₁ (f-inj (
 Sum-map-injective f-ing g-inj {inj₂ y} {inj₂ y₁} eq = cong inj₂ (g-inj (inj₂-injective eq))
 
 parity-injective : ∀ {m n} → parity m ≡ parity n → m ≡ n
-parity-injective {zero} {zero} pm≡pn = refl
-parity-injective {zero} {suc (suc n)} pm≡pn with parity n
-parity-injective {zero} {suc (suc n)} () | inj₁ _
-parity-injective {zero} {suc (suc n)} () | inj₂ _
-parity-injective {suc (suc m)} {zero} pm≡pn with parity m
-parity-injective {suc (suc m)} {zero} () | inj₁ _
-parity-injective {suc (suc m)} {zero} () | inj₂ _
-parity-injective {suc zero} {suc zero} pm≡pn = refl
-parity-injective {suc zero} {suc (suc n)} pm≡pn with parity n
-parity-injective {suc zero} {suc (suc n)} () | inj₁ _
-parity-injective {suc zero} {suc (suc n)} () | inj₂ _
-parity-injective {suc (suc m)} {suc zero} pm≡pn with parity m
-parity-injective {suc (suc m)} {suc zero} () | inj₁ _
-parity-injective {suc (suc m)} {suc zero} () | inj₂ _
+parity-injective {zero}        {zero}        pm≡pn = refl
+parity-injective {zero}        {suc (suc n)} pm≡pn with parity n
+parity-injective {zero}        {suc (suc n)} () | inj₁ _
+parity-injective {zero}        {suc (suc n)} () | inj₂ _
+parity-injective {suc (suc m)} {zero}        pm≡pn with parity m
+parity-injective {suc (suc m)} {zero}        () | inj₁ _
+parity-injective {suc (suc m)} {zero}        () | inj₂ _
+parity-injective {suc zero}    {suc zero}    pm≡pn = refl
+parity-injective {suc zero}    {suc (suc n)} pm≡pn with parity n
+parity-injective {suc zero}    {suc (suc n)} () | inj₁ _
+parity-injective {suc zero}    {suc (suc n)} () | inj₂ _
+parity-injective {suc (suc m)} {suc zero}    pm≡pn with parity m
+parity-injective {suc (suc m)} {suc zero}    () | inj₁ _
+parity-injective {suc (suc m)} {suc zero}    () | inj₂ _
 parity-injective {suc (suc m)} {suc (suc n)} pm≡pn =
   cong (suc ∘ suc)
        (parity-injective
@@ -126,3 +126,13 @@ parity-odd′ {m} {n} eq = parity-injective (begin
   inj₂ n             ≡⟨ sym $ parity-odd n ⟩
   parity (1 + 2 * n) ∎)
   where open ≡-Reasoning
+
+mix : ℕ ⊎ ℕ → ℕ
+mix = Sum.[ (λ n → 2 * n) , (λ n → 1 + 2 * n) ]
+
+parity-mix : ∀ s → parity (mix s) ≡ s
+parity-mix (inj₁ n) = parity-even n
+parity-mix (inj₂ n) = parity-odd n
+
+mix-parity : ∀ n → mix (parity n) ≡ n
+mix-parity n = parity-injective (parity-mix (parity n))

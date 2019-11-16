@@ -340,7 +340,7 @@ llpo⇒llpo-ℕ llpo P? ∀mn→m≢n→Pm⊎Pn with
        (uncurry (Lemma.lemma₁ ∀mn→m≢n→Pm⊎Pn))
 ... | inj₁ ¬∃n→¬P2n   = inj₁ (P?⇒¬∃¬P→∀P (λ n → P? (2 * n)) ¬∃n→¬P2n)
 ... | inj₂ ¬∃n→¬P1+2n = inj₂ (P?⇒¬∃¬P→∀P (λ n → P? (suc (2 * n))) ¬∃n→¬P1+2n)
-{-
+
 private
   module _ {p} {P Q : ℕ → Set p} (P? : DecU P) (Q? : DecU Q) where
     combine : DecU (λ n → Sum.[ P , Q ] (Lemma.parity n))
@@ -348,22 +348,23 @@ private
     ... | inj₁ m = P? m
     ... | inj₂ m = Q? m
 
+{-
     lemma : ¬ (∃ P × ∃ Q) → ∀ m n → m ≢ n →
             Sum.[ (λ o → ¬ P o) , (λ o → ¬ Q o) ] (Lemma.parity m) ⊎
             Sum.[ (λ o → ¬ P o) , (λ o → ¬ Q o) ] (Lemma.parity n)
-    lemma ¬[∃P×∃Q] m n m≢n with
+    lemma _ m n m≢n with
       Lemma.parity n | inspect Lemma.parity n | Lemma.parity m | inspect Lemma.parity m
     ... | inj₁ o | [ eq₁ ] | inj₁ p | [ eq₂ ] = {!   !}
     ... | inj₁ o | [ eq₁ ] | inj₂ p | [ eq₂ ] = {!   !}
     ... | inj₂ o | [ eq₁ ] | inj₁ p | [ eq₂ ] = {!   !}
     ... | inj₂ o | [ eq₁ ] | inj₂ p | [ eq₂ ] = {!   !}
 
-llpo-ℕ⇒llpo : ∀ {p} → LLPO-ℕ p → LLPO ℕ p
-llpo-ℕ⇒llpo llpo-ℕ P? Q? ¬[∃P×∃Q] with llpo-ℕ (combine (¬-DecU P?) (¬-DecU Q?)) (lemma P? Q? ¬[∃P×∃Q])
-... | inj₁ ∀n→[¬P,¬Q]parity[2*n] =
-  inj₁ λ {(m , Pm) → (subst Sum.[ _ , _ ] (Lemma.parity-even m) (∀n→[¬P,¬Q]parity[2*n] m)) Pm}
-... | inj₂ ∀n→[¬P,¬Q]parity[1+2*n] =
-  inj₂ λ {(m , Pm) → (subst Sum.[ _ , _ ] (Lemma.parity-odd m) (∀n→[¬P,¬Q]parity[1+2*n] m)) Pm}
+llpo-ℕ⇒llpo-Alt : ∀ {p} → LLPO-ℕ p → LLPO-Alt ℕ p
+llpo-ℕ⇒llpo-Alt llpo-ℕ P? Q? ¬¬[∀P⊎∀Q] with llpo-ℕ (combine P? Q?) {!   !}
+... | inj₁ ∀n→[P,Q]parity[2*n]   =
+  inj₁ λ n → subst Sum.[ _ , _ ] (Lemma.parity-even n) (∀n→[P,Q]parity[2*n] n)
+... | inj₂ ∀n→[P,Q]parity[1+2*n] =
+  inj₂ λ n → subst Sum.[ _ , _ ] (Lemma.parity-odd n) (∀n→[P,Q]parity[1+2*n] n)
 -}
 
 -----------------------------------------------------------------------
@@ -417,9 +418,9 @@ mr⇒wmp mr {P = P} P? pp =
 
 -- MR => MP∨
 mr⇒mp∨ : ∀ {a p} {A : Set a} → MR A p → MP∨ A p
-mr⇒mp∨ mr {P = P} {Q = Q} P? Q? ¬¬∃x→Px⊎Qx with
+mr⇒mp∨ mr {P = P} {Q = Q} P? Q? ¬¬∃x→Px⊎Qx =
+  Sum.map DN-intro DN-intro $ ∃-distrib-⊎ $
   mr {P = λ x → P x ⊎ Q x} (DecU-⊎ P? Q?) ¬¬∃x→Px⊎Qx
-... | x , Px⊎Qx = Sum.map (DN-intro ∘′ (x ,_)) (DN-intro ∘′ (x ,_)) Px⊎Qx
 
 -- WMP ∧ MP∨ => MR
 -- α = P, β = Q, γ = R in [2]
@@ -602,10 +603,9 @@ wlpo⇒Σ-Π-dgp wlpo P? Q? with wlpo Q?
 -- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO
 wmp∧wlpo-Alt⇒lpo : ∀ {a p} {A : Set a} → WMP A p → WLPO-Alt A p → LPO A p
-wmp∧wlpo-Alt⇒lpo             wmp wlpo-Alt         P? with wlpo-Alt P?
-wmp∧wlpo-Alt⇒lpo             wmp wlpo-Alt         P? | inj₁ ¬∃P  = inj₂ ¬∃P
-wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? | inj₂ ¬¬∃P =
-  inj₁ (wmp P? Lem.res)
+wmp∧wlpo-Alt⇒lpo {a} {p} {A} wmp wlpo-Alt {P = P} P? with wlpo-Alt P?
+... | inj₁ ¬∃P  = inj₂ ¬∃P
+... | inj₂ ¬¬∃P = inj₁ (wmp P? Lem.res)
   where
   module Lem {Q : A → Set p} (Q? : DecU Q) where
     R : A → Set p

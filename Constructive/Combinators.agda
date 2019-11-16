@@ -305,6 +305,9 @@ module _ {a p} {A : Set a} {P : A → Set p} where
   ∀P→∀¬¬P : (∀ x → P x) → ∀ x → ¬ ¬ P x
   ∀P→∀¬¬P ∀P x = DN-intro (∀P x)
 
+  ∃P→∃¬¬P : ∃ P → ∃ λ x → ¬ ¬ P x
+  ∃P→∃¬¬P (x , Px) = x , DN-intro Px
+
 module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   [∀¬P→∀¬Q]→¬¬[∃Q→∃P] : ((∀ x → ¬ P x) → (∀ x → ¬ Q x)) → ¬ ¬ (∃ Q → ∃ P)
   [∀¬P→∀¬Q]→¬¬[∃Q→∃P] ∀¬P→∀¬Q =
