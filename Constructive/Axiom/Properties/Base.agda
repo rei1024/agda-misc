@@ -58,7 +58,7 @@ open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
 open import Data.Sum as Sum
 open import Data.Product as Prod
-open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; s≤s; z≤n; _≤?_)
+open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; s≤s; z≤n; _≤?_; _+_; _*_)
 import Data.Nat.Properties as ℕₚ
 import Data.Nat.Induction as ℕInd
 open import Data.Fin using (Fin)
@@ -319,6 +319,52 @@ mp⊎⇒mp∨ mp⊎ P? Q? ¬¬∃x→Px⊎Qx = mp⊎ P? Q? ([¬¬∃x→Px⊎Qx]
 
 mp∨⇒mp⊎ : ∀ {a p} {A : Set a} → MP∨ A p → MP⊎ A p
 mp∨⇒mp⊎ mp∨ P? Q? ¬[¬∃P×¬∃Q] = mp∨ P? Q? (¬[¬∃P×¬∃Q]→¬¬∃x→Px⊎Qx ¬[¬∃P×¬∃Q])
+
+-- LLPO <=> LLPO-Alt
+llpo⇒llpo-Alt : ∀ {a p} {A : Set a} → LLPO A p → LLPO-Alt A p
+llpo⇒llpo-Alt llpo P? Q? =
+  Sum.map (P?⇒¬∃¬P→∀P P?) (P?⇒¬∃¬P→∀P Q?) ∘′
+  llpo (¬-DecU P?) (¬-DecU Q?) ∘′
+  contraposition (¬A×¬B→¬[A⊎B] ∘ Prod.map ∃¬P→¬∀P ∃¬P→¬∀P)
+
+llpo-Alt⇒llpo : ∀ {a p} {A : Set a} → LLPO-Alt A p → LLPO A p
+llpo-Alt⇒llpo llpo-Alt P? Q? =
+  Sum.map ∀¬P→¬∃P ∀¬P→¬∃P ∘′
+  llpo-Alt (¬-DecU P?) (¬-DecU Q?) ∘′
+  DN-map (Sum.map ¬∃P→∀¬P ¬∃P→∀¬P) ∘′ ¬[A×B]→¬¬[¬A⊎¬B]
+
+-- LLPO <=> LLPO-ℕ
+llpo⇒llpo-ℕ : ∀ {p} → LLPO ℕ p → LLPO-ℕ p
+llpo⇒llpo-ℕ llpo P? ∀mn→m≢n→Pm⊎Pn with
+  llpo (λ n → ¬-DecU P? (2 * n)) (λ n → ¬-DecU P? (1 + 2 * n))
+       (uncurry (Lemma.lemma₁ ∀mn→m≢n→Pm⊎Pn))
+... | inj₁ ¬∃n→¬P2n   = inj₁ (P?⇒¬∃¬P→∀P (λ n → P? (2 * n)) ¬∃n→¬P2n)
+... | inj₂ ¬∃n→¬P1+2n = inj₂ (P?⇒¬∃¬P→∀P (λ n → P? (suc (2 * n))) ¬∃n→¬P1+2n)
+{-
+private
+  module _ {p} {P Q : ℕ → Set p} (P? : DecU P) (Q? : DecU Q) where
+    combine : DecU (λ n → Sum.[ P , Q ] (Lemma.parity n))
+    combine n with Lemma.parity n
+    ... | inj₁ m = P? m
+    ... | inj₂ m = Q? m
+
+    lemma : ¬ (∃ P × ∃ Q) → ∀ m n → m ≢ n →
+            Sum.[ (λ o → ¬ P o) , (λ o → ¬ Q o) ] (Lemma.parity m) ⊎
+            Sum.[ (λ o → ¬ P o) , (λ o → ¬ Q o) ] (Lemma.parity n)
+    lemma ¬[∃P×∃Q] m n m≢n with
+      Lemma.parity n | inspect Lemma.parity n | Lemma.parity m | inspect Lemma.parity m
+    ... | inj₁ o | [ eq₁ ] | inj₁ p | [ eq₂ ] = {!   !}
+    ... | inj₁ o | [ eq₁ ] | inj₂ p | [ eq₂ ] = {!   !}
+    ... | inj₂ o | [ eq₁ ] | inj₁ p | [ eq₂ ] = {!   !}
+    ... | inj₂ o | [ eq₁ ] | inj₂ p | [ eq₂ ] = {!   !}
+
+llpo-ℕ⇒llpo : ∀ {p} → LLPO-ℕ p → LLPO ℕ p
+llpo-ℕ⇒llpo llpo-ℕ P? Q? ¬[∃P×∃Q] with llpo-ℕ (combine (¬-DecU P?) (¬-DecU Q?)) (lemma P? Q? ¬[∃P×∃Q])
+... | inj₁ ∀n→[¬P,¬Q]parity[2*n] =
+  inj₁ λ {(m , Pm) → (subst Sum.[ _ , _ ] (Lemma.parity-even m) (∀n→[¬P,¬Q]parity[2*n] m)) Pm}
+... | inj₂ ∀n→[¬P,¬Q]parity[1+2*n] =
+  inj₂ λ {(m , Pm) → (subst Sum.[ _ , _ ] (Lemma.parity-odd m) (∀n→[¬P,¬Q]parity[1+2*n] m)) Pm}
+-}
 
 -----------------------------------------------------------------------
 -- Implications
@@ -608,24 +654,24 @@ pfp⇒wpfp pfp {P = P} P? with pfp P?
   g = P?⇒[∃Q→∀P]→¬∀¬Q→∀P P? ∃Q→∀P
 
 -- WLPO => PFP
-wlpo⇒pfp : ∀ {a p} {A : Set a} → A → WLPO A p → PFP A p p
-wlpo⇒pfp {p = p} xA wlpo {P = P} P? with wlpo P?
-... | inj₁ ∀P  = (λ _ → Lift p ⊤) , (λ _ → inj₁ (lift tt)) , (f , g)
+wlpo⇒pfp : ∀ {a p} q {A : Set a} → A → WLPO A p → PFP A p q
+wlpo⇒pfp {p = p} q xA wlpo {P = P} P? with wlpo P?
+... | inj₁ ∀P  = (λ _ → Lift q ⊤) , (λ _ → inj₁ (lift tt)) , (f , g)
   where
-  f : (∀ x → P x) → ∃ λ x → Lift p ⊤
+  f : (∀ x → P x) → ∃ λ x → Lift q ⊤
   f _ = xA , lift tt
-  g : (∃ λ x → Lift p ⊤) → (∀ x → P x)
+  g : (∃ λ x → Lift q ⊤) → (∀ x → P x)
   g _ = ∀P
-... | inj₂ ¬∀P = (λ _ → Lift p ⊥) , (λ _ → inj₂ lower) , f , g
+... | inj₂ ¬∀P = (λ _ → Lift q ⊥) , (λ _ → inj₂ lower) , f , g
   where
-  f : (∀ x → P x) → ∃ (λ x → Lift p ⊥)
+  f : (∀ x → P x) → ∃ (λ x → Lift q ⊥)
   f ∀P = ⊥-elim $ ¬∀P ∀P
-  g : ∃ (λ x → Lift p ⊥) → ∀ x → P x
+  g : ∃ (λ x → Lift q ⊥) → ∀ x → P x
   g (x , L⊥) = ⊥-elim $ lower L⊥
 
 -- WLPO => WPFP
-wlpo⇒wpfp : ∀ {a p} {A : Set a} (xA : A) → WLPO A p → WPFP A p p
-wlpo⇒wpfp xA wlpo = pfp⇒wpfp (wlpo⇒pfp xA wlpo)
+wlpo⇒wpfp : ∀ {a p} q {A : Set a} (xA : A) → WLPO A p → WPFP A p q
+wlpo⇒wpfp q xA wlpo = pfp⇒wpfp (wlpo⇒pfp q xA wlpo)
 
 -- Proposition 6.2.3 [1]
 -- WPFP ∧ MP⊎-Alt => WLPO

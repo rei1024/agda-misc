@@ -28,7 +28,7 @@ open import Data.Sum as Sum
 open import Data.Product as Prod
 open import Data.List using (List; []; _∷_; length)
 open import Data.List.Relation.Binary.Prefix.Heterogeneous using (Prefix)
-open import Data.Nat using (ℕ; _≤_; _<_)
+open import Data.Nat using (ℕ; _≤_; _<_; _+_; _*_)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
@@ -171,11 +171,22 @@ LLPO-i P Q = DecU P → DecU Q → ¬ (∃ P × ∃ Q) → ¬ ∃ P ⊎ ¬ ∃ Q
 LLPO : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 LLPO A p = {P Q : A → Set p} → LLPO-i P Q
 
+LLPO-Alt-i : ∀ {a p} {A : Set a} → (P Q : A → Set p) → Set (a ⊔ p)
+LLPO-Alt-i P Q = DecU P → DecU Q →
+                 ¬ ¬ ((∀ x → P x) ⊎ (∀ x → Q x)) → (∀ x → P x) ⊎ (∀ x → Q x)
+
+LLPO-Alt : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+LLPO-Alt A p = {P Q : A → Set p} → LLPO-Alt-i P Q
+
 LLPO-Bool-i : ∀ {a} {A : Set a} → (P Q : A → Bool) → Set a
 LLPO-Bool-i P Q = ¬ (∃ (toPred P) × ∃ (toPred Q)) → ¬ ∃ (toPred P) ⊎ ¬ ∃ (toPred Q)
 
 LLPO-Bool : ∀ {a} → Set a → Set a
 LLPO-Bool A = (P Q : A → Bool) → LLPO-Bool-i P Q
+
+LLPO-ℕ : ∀ p → Set (lsuc p)
+LLPO-ℕ p = {P : ℕ → Set p} → DecU P → (∀ m n → m ≢ n → P m ⊎ P n) →
+           (∀ n → P (2 * n)) ⊎ (∀ n → P (1 + 2 * n))
 
 -- Markov's principle
 -- LPE
@@ -306,29 +317,29 @@ takeT ℕ.zero    α = []
 takeT (ℕ.suc n) α = α 0 ∷ takeT n (λ m → α (ℕ.suc m))
 
 -- "THE WEAK KONIG LEMMA, BROUWER’S FAN THEOREM, DE MORGAN’S LAW, AND DEPENDENT CHOICE"
-PreTree : Set₁
-PreTree = List Bool → Set
+2^Bool* : Set₁
+2^Bool* = List Bool → Set
 
-IsDetachable : PreTree → Set
+IsDetachable : 2^Bool* → Set
 IsDetachable T = DecU T
 
 -- closed under restrictions
-IsClosed : PreTree → Set
+IsClosed : 2^Bool* → Set
 IsClosed T = ∀ u v → Prefix _≡_ v u → T u → T v
 
-IsInfinite : PreTree → Set
+IsInfinite : 2^Bool* → Set
 IsInfinite T = ∀ n → ∃ λ u → T u × n ≡ length u
 
-IsFinite : PreTree → Set
+IsFinite : 2^Bool* → Set
 IsFinite T = ∃ λ n → ∀ u → ¬ T u × n ≡ length u
 
-IsWellFounded : PreTree → Set
+IsWellFounded : 2^Bool* → Set
 IsWellFounded T = Σ (ℕ → Bool) λ α → ∃ λ n → ¬ T (takeT n α)
 
-HasInfinitePath : PreTree → Set
+HasInfinitePath : 2^Bool* → Set
 HasInfinitePath T = Σ (ℕ → Bool) λ α → ∀ n → T (takeT n α)
 
-IsTree : PreTree → Set
+IsTree : 2^Bool* → Set
 IsTree T = IsDetachable T × IsClosed T
 
 -- Weak Kőnig Lemma

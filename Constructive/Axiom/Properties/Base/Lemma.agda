@@ -9,7 +9,8 @@ open import Data.Empty
 open import Data.Nat
 import Data.Nat.Properties as ℕₚ
 open import Data.Product
-open import Data.Sum
+open import Data.Sum as Sum
+open import Data.Sum.Properties
 open import Function.Base
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
@@ -48,3 +49,80 @@ private
   where
   f : (∃ λ m → suc m ≤ suc n × P m) → ∃ λ m → m ≤ n × P m
   f (m , sm≤sn , Pm) = m , (ℕₚ.≤-pred sm≤sn , Pm)
+
+-- lemma for llpo-ℕ⇒llpo
+lemma₁ : ∀ {p} {P : ℕ → Set p} →
+         (∀ m n → m ≢ n → P m ⊎ P n) →
+         ∃ (λ n → ¬ P (2 * n)) → ∃ (λ n → ¬ P (suc (2 * n))) → ⊥
+lemma₁ ∀mn→m≢n→Pm⊎Pn (m , ¬P2m) (n , ¬P1+2n) with
+  ∀mn→m≢n→Pm⊎Pn (2 * m) (suc (2 * n)) (ℕₚ.even≢odd m n)
+... | inj₁ P2m   = ¬P2m P2m
+... | inj₂ P1+2n = ¬P1+2n P1+2n
+
+parity : ℕ → ℕ ⊎ ℕ
+parity zero          = inj₁ zero
+parity (suc zero)    = inj₂ zero
+parity (suc (suc n)) = Sum.map suc suc (parity n)
+
+parity-even : ∀ n → parity (2 * n) ≡ inj₁ n
+parity-even zero    = refl
+parity-even (suc n) = begin
+  parity (2 * (suc n))             ≡⟨ cong parity (ℕₚ.*-distribˡ-+ 2 1 n) ⟩
+  parity (2 + 2 * n)               ≡⟨⟩
+  Sum.map suc suc (parity (2 * n)) ≡⟨ cong (Sum.map suc suc) (parity-even n) ⟩
+  Sum.map suc suc (inj₁ n)         ≡⟨⟩
+  inj₁ (suc n)                     ∎
+  where open ≡-Reasoning
+
+parity-odd : ∀ n → parity (suc (2 * n)) ≡ inj₂ n
+parity-odd zero    = refl
+parity-odd (suc n) = begin
+  parity (suc (2 * suc n))             ≡⟨ cong (parity ∘ suc) $ ℕₚ.*-distribˡ-+ 2 1 n ⟩
+  parity (1 + (2 * 1 + 2 * n))         ≡⟨⟩
+  parity (2 + (1 + 2 * n))             ≡⟨⟩
+  Sum.map suc suc (parity (1 + 2 * n)) ≡⟨ cong (Sum.map suc suc) (parity-odd n) ⟩
+  Sum.map suc suc (inj₂ n)             ≡⟨⟩
+  inj₂ (suc n)                         ∎
+  where open ≡-Reasoning
+
+Sum-map-injective : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+                    {f : A → C} {g : B → D} →
+                    (∀ {u v} → f u ≡ f v → u ≡ v) →
+                    (∀ {u v} → g u ≡ g v → u ≡ v) → ∀ {x y} →
+                    Sum.map f g x ≡ Sum.map f g y → x ≡ y
+Sum-map-injective f-inj g-inj {inj₁ x} {inj₁ x₁} eq = cong inj₁ (f-inj (inj₁-injective eq))
+Sum-map-injective f-ing g-inj {inj₂ y} {inj₂ y₁} eq = cong inj₂ (g-inj (inj₂-injective eq))
+
+parity-injective : ∀ {m n} → parity m ≡ parity n → m ≡ n
+parity-injective {zero} {zero} pm≡pn = refl
+parity-injective {zero} {suc (suc n)} pm≡pn with parity n
+parity-injective {zero} {suc (suc n)} () | inj₁ _
+parity-injective {zero} {suc (suc n)} () | inj₂ _
+parity-injective {suc (suc m)} {zero} pm≡pn with parity m
+parity-injective {suc (suc m)} {zero} () | inj₁ _
+parity-injective {suc (suc m)} {zero} () | inj₂ _
+parity-injective {suc zero} {suc zero} pm≡pn = refl
+parity-injective {suc zero} {suc (suc n)} pm≡pn with parity n
+parity-injective {suc zero} {suc (suc n)} () | inj₁ _
+parity-injective {suc zero} {suc (suc n)} () | inj₂ _
+parity-injective {suc (suc m)} {suc zero} pm≡pn with parity m
+parity-injective {suc (suc m)} {suc zero} () | inj₁ _
+parity-injective {suc (suc m)} {suc zero} () | inj₂ _
+parity-injective {suc (suc m)} {suc (suc n)} pm≡pn =
+  cong (suc ∘ suc)
+       (parity-injective
+          (Sum-map-injective ℕₚ.suc-injective ℕₚ.suc-injective pm≡pn))
+
+parity-even′ : ∀ {m n} → parity m ≡ inj₁ n → m ≡ 2 * n
+parity-even′ {m} {n} eq = parity-injective (begin
+    parity m       ≡⟨ eq ⟩
+    inj₁ n         ≡⟨ sym $ parity-even n ⟩
+    parity (2 * n) ∎)
+  where open ≡-Reasoning
+
+parity-odd′ : ∀ {m n} → parity m ≡ inj₂ n → m ≡ 1 + 2 * n
+parity-odd′ {m} {n} eq = parity-injective (begin
+  parity m           ≡⟨ eq ⟩
+  inj₂ n             ≡⟨ sym $ parity-odd n ⟩
+  parity (1 + 2 * n) ∎)
+  where open ≡-Reasoning
