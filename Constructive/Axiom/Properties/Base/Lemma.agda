@@ -21,10 +21,6 @@ open import Constructive.Common
 
 
 -- lemma for `ℕ-llpo⇒mp∨`
-private
-  1+n≰0 : ∀ n → ¬ (suc n ≤ 0)
-  1+n≰0 n ()
-
 ℕ≤-any-dec : ∀ {p} {P : ℕ → Set p} → DecU P → DecU (λ n → ∃ λ m → m ≤ n × P m)
 ℕ≤-any-dec {P = P} P? zero with P? 0
 ... | inj₁  P0 = inj₁ (0 , ℕₚ.≤-refl , P0)
@@ -40,15 +36,32 @@ private
   f (zero  , m≤sn  , Pm)  = ¬P0 Pm
   f (suc m , sm≤sn , Psm) = ¬∃m→m≤n×Psm (m , (ℕₚ.≤-pred sm≤sn , Psm))
 
-ℕ<-any-dec : ∀ {p} {P : ℕ → Set p} → DecU P →
-             DecU (λ n → ∃ λ m → m < n × P m)
-ℕ<-any-dec P? zero     = inj₂ λ {(m , m<0 , _) → 1+n≰0 m m<0}
-ℕ<-any-dec {P = P} P? (suc n) with ℕ≤-any-dec P? n
-... | inj₁ (m , m≤n , Pm) = inj₁ (m , s≤s m≤n , Pm)
-... | inj₂ ¬∃m→m≤n×Pm     = inj₂ (contraposition f ¬∃m→m≤n×Pm)
-  where
-  f : (∃ λ m → suc m ≤ suc n × P m) → ∃ λ m → m ≤ n × P m
-  f (m , sm≤sn , Pm) = m , (ℕₚ.≤-pred sm≤sn , Pm)
+private
+  1+n≰0 : ∀ n → ¬ (suc n ≤ 0)
+  1+n≰0 n ()
+
+module _ {p} {P : ℕ → Set p} (P? : DecU P) where
+  ℕ<-any-dec : DecU (λ n → ∃ λ m → m < n × P m)
+  ℕ<-any-dec zero           = inj₂ λ {(m , m<0 , _) → 1+n≰0 m m<0}
+  ℕ<-any-dec (suc n) with ℕ≤-any-dec P? n
+  ... | inj₁ (m , m≤n , Pm) = inj₁ (m , s≤s m≤n , Pm)
+  ... | inj₂ ¬∃m→m≤n×Pm     = inj₂ (contraposition f ¬∃m→m≤n×Pm)
+    where
+    f : (∃ λ m → suc m ≤ suc n × P m) → ∃ λ m → m ≤ n × P m
+    f (m , sm≤sn , Pm) = m , (ℕₚ.≤-pred sm≤sn , Pm)
+
+  ℕ≤-all-dec : DecU (λ n → ∀ m → m ≤ n → P m)
+  ℕ≤-all-dec n with ℕ≤-any-dec (¬-DecU P?) n
+  ... | inj₁ (m , m≤n , ¬Pm) = inj₂ λ ∀i→i≤n→Pi → ¬Pm (∀i→i≤n→Pi m m≤n)
+  ... | inj₂ ¬∃m→m≤n×¬Pm     =
+    inj₁ λ m m≤n → DecU⇒stable P? m λ ¬Pm → ¬∃m→m≤n×¬Pm (m , m≤n , ¬Pm)
+
+module _ {p} {P : ℕ → Set p} (P? : DecU P) where
+  ℕ<-all-dec : DecU (λ n → ∀ m → m < n → P m)
+  ℕ<-all-dec n with ℕ<-any-dec (¬-DecU P?) n
+  ... | inj₁ (m , m<n , ¬Pm) = inj₂ λ ∀i→i<n→Pi → ¬Pm (∀i→i<n→Pi m m<n)
+  ... | inj₂ ¬∃m→m<n×¬Pm     =
+    inj₁ λ m m<n → DecU⇒stable P? m λ ¬Pm → ¬∃m→m<n×¬Pm (m , m<n , ¬Pm)
 
 -- lemma for llpo-ℕ⇒llpo
 lemma₁ : ∀ {p} {P : ℕ → Set p} →

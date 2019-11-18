@@ -42,7 +42,8 @@ open import TypeTheory.HoTT.Base using (isProp)
 -- Axioms
 -- -i indicates instance
 
--- Excluded middle
+-- Law of Excluded middle
+-- LEM
 EM : ∀ a → Set (lsuc a)
 EM a = ∀ {A : Set a} → Dec⊎ A
 
@@ -258,21 +259,28 @@ MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 Σ-DGP-i P Q = DecU P → DecU Q → DGP-i (∃ P) (∃ Q)
 
 Σ-DGP : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
-Σ-DGP A p = ∀ {P Q : A → Set p} → Σ-DGP-i P Q
+Σ-DGP A p = {P Q : A → Set p} → Σ-DGP-i P Q
 
 -- Π-DGP
 Π-DGP-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
 Π-DGP-i P Q = DecU P → DecU Q → DGP-i (∀ x → P x) (∀ x → Q x)
 
 Π-DGP : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
-Π-DGP A p = ∀ {P Q : A → Set p} → Π-DGP-i P Q
+Π-DGP A p = {P Q : A → Set p} → Π-DGP-i P Q
 
 -- Σ-Π-DGP
 Σ-Π-DGP-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
 Σ-Π-DGP-i P Q = DecU P → DecU Q → DGP-i (∃ P) (∀ x → Q x)
 
 Σ-Π-DGP : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
-Σ-Π-DGP A p = ∀ {P Q : A → Set p} → Σ-Π-DGP-i P Q
+Σ-Π-DGP A p = {P Q : A → Set p} → Σ-Π-DGP-i P Q
+
+-- Σ-Call/CC
+Σ-Call/CC-i : ∀ {a p} {A : Set a} (P : A → Set p) → Set (a ⊔ p)
+Σ-Call/CC-i P = DecU P → Call/CC-i (∃ P)
+
+Σ-Call/CC : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+Σ-Call/CC A p = {P : A → Set p} → Σ-Call/CC-i P
 
 -- Kripke's Schema
 KS : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)

@@ -82,7 +82,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   dec⊎⇒¬[A×B]→¬A⊎¬B : Dec⊎ A → Dec⊎ B → ¬ (A × B) → ¬ A ⊎ ¬ B
   dec⊎⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₁ y)  ¬[A×B] = ⊥-elim $ ¬[A×B] (x , y)
   dec⊎⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₂ ¬y) ¬[A×B] = inj₂ ¬y
-  dec⊎⇒¬[A×B]→¬A⊎¬B (inj₂ ¬x) emB       ¬[A×B] = inj₁ ¬x
+  dec⊎⇒¬[A×B]→¬A⊎¬B (inj₂ ¬x) _         ¬[A×B] = inj₁ ¬x
 
   join : (A → A → B) → A → B
   join f x = f x x
@@ -346,12 +346,15 @@ module _ {a p} {A : Set a} {P : A → Set p} (P? : DecU P) where
   P?⇒¬∀P→¬¬∃¬P : ¬ (∀ x → P x) → ¬ ¬ ∃ (λ x → ¬ P x)
   P?⇒¬∀P→¬¬∃¬P = P-stable⇒¬∀P→¬¬∃¬P (DecU⇒stable P?)
 
+  -- call/cc
   P?⇒[¬∀P→∀P]→∀P : (¬ (∀ x → P x) → ∀ x → P x) → ∀ x → P x
   P?⇒[¬∀P→∀P]→∀P ¬∀P→∀P = P?⇒¬¬∀P→∀P λ ¬∀P → ¬∀P (¬∀P→∀P ¬∀P)
 
   P?⇒[∃¬P→∀P]→∀P : (∃ (λ x → ¬ P x) → ∀ x → P x) → ∀ x → P x
   P?⇒[∃¬P→∀P]→∀P ∃¬P→∀P =
     P?⇒¬¬∀P→∀P λ ¬∀P → P?⇒¬∀P→¬¬∃¬P ¬∀P λ ∃¬P → ¬∀P (∃¬P→∀P ∃¬P)
+
+  -- [∀¬P→¬∀Q]→¬∃¬Q→¬¬∃P
 
 module _ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} where
   P?⇒[∃¬P→∃¬Q]→∀Q→∀P : DecU P → (∃ (λ x → ¬ P x) → ∃ (λ x → ¬ Q x)) →
