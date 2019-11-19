@@ -12,6 +12,7 @@ module Algorithms.List.Sort.Quick.Properties
 open import Level
 open import Data.List
 import      Data.List.Properties as Listₚ
+import Data.List.Relation.Binary.Equality.Setoid as EqualitySetoid
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
 open import Data.Product
 import      Data.Nat as ℕ
@@ -31,6 +32,14 @@ open import Algorithms.List.Sort.Quick
 open DecTotalOrder DTO renaming (Carrier to A)
 open Quicksort _≤?_
 open PermutationSetoid Eq.setoid
+open EqualitySetoid Eq.setoid
+{-
+sort-acc-cong : ∀ {xs ys rs₁ rs₂} → xs ≋ ys → sort-acc xs rs₁ ≋ sort-acc ys rs₂
+sort-acc-cong {[]}     {[]}     {rs₁}     {rs₂}     xs≋ys = ≋-refl
+sort-acc-cong {x ∷ xs} {y ∷ ys} {acc rs₁} {acc rs₂} (x≈y EqualitySetoid.∷ xs≋ys) =
+  ++⁺ (sort-acc-cong {!   !}) (++⁺ (x≈y ∷ []) {!   !})
+-}
+
 {-
 sort-acc-filter : ∀ x xs rs lt₁ lt₂ →
   sort-acc (x ∷ xs) (acc rs) ≡

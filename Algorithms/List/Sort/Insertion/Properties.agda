@@ -76,10 +76,10 @@ private
   -- stdlib
   _≈?_ : ∀ x y → Dec (x ≈ y)
   x ≈? y with x ≤? y | y ≤? x
-  (x ≈? y) | yes x≤y | yes y≤x = yes (antisym x≤y y≤x)
-  (x ≈? y) | yes x≤y | no  y≰x = no (≱⇒≉ y≰x)
-  (x ≈? y) | no  x≰y | yes y≤x = no (≰⇒≉ x≰y)
-  (x ≈? y) | no  x≰y | no  y≰x = ⊥-elim $ ≰∧≱⇒⊥ x≰y y≰x
+  ... | yes x≤y | yes y≤x = yes (antisym x≤y y≤x)
+  ... | yes x≤y | no  y≰x = no (≱⇒≉ y≰x)
+  ... | no  x≰y | yes y≤x = no (≰⇒≉ x≰y)
+  ... | no  x≰y | no  y≰x = ⊥-elim $ ≰∧≱⇒⊥ x≰y y≰x
 
   ≤⇒<∨≈ : ∀ {x y} → x ≤ y → x < y ⊎ x ≈ y
   ≤⇒<∨≈ {x} {y} x≤y with x ≈? y
@@ -89,8 +89,8 @@ private
 insert-permutation : ∀ x xs → insert x xs ↭ x ∷ xs
 insert-permutation x []       = ↭-refl
 insert-permutation x (y ∷ ys) with x ≤? y
-... | yes _ = ↭-refl
-... | no  _ = ↭-trans (prep Eq.refl (insert-permutation x ys))
+... | true  because _ = ↭-refl
+... | false because _ = ↭-trans (prep Eq.refl (insert-permutation x ys))
                       (swap Eq.refl Eq.refl ↭-refl)
 
 insert-pres-Sorted : ∀ x {xs} → Sorted xs → Sorted (insert x xs)

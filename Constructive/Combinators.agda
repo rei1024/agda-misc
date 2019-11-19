@@ -38,19 +38,23 @@ module _ {a b c} {A : Set a} {B : Set b} {C : Set c} where
   →-undistrib-×-⊎-flip : (A × B) → (A → C) ⊎ (B → C) → C
   →-undistrib-×-⊎-flip = flip →-undistrib-×-⊎
 
+-- contradiction
+contradiction : ∀ {a w} {A : Set a} {WhatEver : Set w} → A → ¬ A → WhatEver
+contradiction x ¬x = ⊥-elim (¬x x)
+
 -- sum and product
 module _ {a b} {A : Set a} {B : Set b} where
   A⊎B→¬A→B : A ⊎ B → ¬ A → B
-  A⊎B→¬A→B (inj₁ x) ¬A = ⊥-elim $ ¬A x
+  A⊎B→¬A→B (inj₁ x) ¬A = contradiction x ¬A
   A⊎B→¬A→B (inj₂ y) ¬A = y
 
   A⊎B→¬B→A : A ⊎ B → ¬ B → A
   A⊎B→¬B→A (inj₁ x) ¬B = x
-  A⊎B→¬B→A (inj₂ y) ¬B = ⊥-elim $ ¬B y
+  A⊎B→¬B→A (inj₂ y) ¬B = contradiction y ¬B
 
   ¬A⊎B→A→B : ¬ A ⊎ B → A → B
-  ¬A⊎B→A→B (inj₁ x) z = ⊥-elim (x z)
-  ¬A⊎B→A→B (inj₂ y) z = y
+  ¬A⊎B→A→B (inj₁ ¬A) x = contradiction x ¬A
+  ¬A⊎B→A→B (inj₂ y)  _ = y
 
   [A→B]→¬[A×¬B] : (A → B) → ¬ (A × ¬ B)
   [A→B]→¬[A×¬B] f (x , y) = y (f x)
@@ -77,10 +81,10 @@ module _ {a b} {A : Set a} {B : Set b} where
   -- Double negated DEM₃
   ¬[A×B]→¬¬[¬A⊎¬B] : ¬ (A × B) → ¬ ¬ (¬ A ⊎ ¬ B)
   ¬[A×B]→¬¬[¬A⊎¬B] ¬[A×B] ¬[¬A⊎¬B] =
-    ¬[¬A⊎¬B] (inj₁ λ x → ⊥-elim $ ¬[¬A⊎¬B] (inj₂ (λ y → ¬[A×B] (x , y))))
+    ¬[¬A⊎¬B] (inj₁ λ x → contradiction (inj₂ (λ y → ¬[A×B] (x , y))) ¬[¬A⊎¬B])
 
   dec⊎⇒¬[A×B]→¬A⊎¬B : Dec⊎ A → Dec⊎ B → ¬ (A × B) → ¬ A ⊎ ¬ B
-  dec⊎⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₁ y)  ¬[A×B] = ⊥-elim $ ¬[A×B] (x , y)
+  dec⊎⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₁ y)  ¬[A×B] = contradiction (x , y) ¬[A×B]
   dec⊎⇒¬[A×B]→¬A⊎¬B (inj₁ x)  (inj₂ ¬y) ¬[A×B] = inj₂ ¬y
   dec⊎⇒¬[A×B]→¬A⊎¬B (inj₂ ¬x) _         ¬[A×B] = inj₁ ¬x
 
@@ -107,7 +111,7 @@ module _ {a b} {A : Set a} {B : Set b} where
   ¬[A→B]→¬[A→¬¬B] ¬[A→B] A→¬¬B = ¬[A→B] λ x → ⊥-elim $ A→¬¬B x (¬[A→B]→¬B ¬[A→B])
 
   ¬[A→B]→B→A : ¬ (A → B) → B → A
-  ¬[A→B]→B→A ¬[A→B] y = ⊥-elim $ ¬[A→B] λ _ → y
+  ¬[A→B]→B→A ¬[A→B] y = contradiction (λ _ → y) ¬[A→B]
 
   [[A→B]→A]→¬A→A : ((A → B) → A) → ¬ A → A
   [[A→B]→A]→¬A→A [A→B]→A ¬A = [A→B]→A (⊥-elim ∘′ ¬A)
