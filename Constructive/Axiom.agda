@@ -126,8 +126,20 @@ private
   toPred : ∀ {a} {A : Set a} → (A → Bool) → (A → Set)
   toPred P x = P x ≡ true
 
+-- Searchable set
+Searchable-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
+Searchable-i P = DecU P → (∃ λ x₀ → P x₀ → ∀ x → P x)
+
+Searchable : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+Searchable A p = {P : A → Set p} → Searchable-i P
+
+Searchable-Bool : ∀ {a} → Set a → Set a
+Searchable-Bool A = Σ ((A → Bool) → A)
+                      λ ε → (P : A → Bool) → P (ε P) ≡ true → (x : A) → P x ≡ true
+
 -- The limited principle of omniscience
 -- https://ncatlab.org/nlab/show/principle+of+omniscience
+--- Omniscient type
 LPO-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
 LPO-i P = DecU P → ∃ P ⊎ ¬ ∃ P
 

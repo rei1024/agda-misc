@@ -656,7 +656,7 @@ pfp⇒wpfp pfp {P = P} P? with pfp P?
   g = P?⇒[∃Q→∀P]→¬∀¬Q→∀P P? ∃Q→∀P
 
 -- WLPO => PFP
-wlpo⇒pfp : ∀ {a p} q {A : Set a} → A → WLPO A p → PFP A p q
+wlpo⇒pfp : ∀ {a p} q {A : Set a} → Inhabited A → WLPO A p → PFP A p q
 wlpo⇒pfp {p = p} q xA wlpo {P = P} P? with wlpo P?
 ... | inj₁ ∀P  = (λ _ → Lift q ⊤) , (λ _ → inj₁ (lift tt)) , (f , g)
   where
@@ -672,7 +672,7 @@ wlpo⇒pfp {p = p} q xA wlpo {P = P} P? with wlpo P?
   g (x , L⊥) = ⊥-elim $ lower L⊥
 
 -- WLPO => WPFP
-wlpo⇒wpfp : ∀ {a p} q {A : Set a} (xA : A) → WLPO A p → WPFP A p q
+wlpo⇒wpfp : ∀ {a p} q {A : Set a} → Inhabited A → WLPO A p → WPFP A p q
 wlpo⇒wpfp q xA wlpo = pfp⇒wpfp (wlpo⇒pfp q xA wlpo)
 
 -- Proposition 6.2.3 [1]
@@ -719,6 +719,25 @@ lpo⇒P1212 {p} lpo {P} P? = {!   !}
   R? : DecU R
   R? k = ?
 -}
+
+-- Searchable set
+-- Searchable <=> Inhabited ∧ LPO
+searchable⇒lpo : ∀ {a p} {A : Set a} → Searchable A p → LPO A p
+searchable⇒lpo searchable P? with searchable (¬-DecU P?)
+... | x₀ , ¬Px₀→∀¬P = Sum.[ (λ Px₀  → inj₁ (x₀ , Px₀)) ,
+                            (λ ¬Px₀ → inj₂ (∀¬P→¬∃P (¬Px₀→∀¬P ¬Px₀))) ]′
+                          (P? x₀)
+
+searchable⇒inhabited : ∀ {a p} {A : Set a} →
+                       Searchable A p → Inhabited A
+searchable⇒inhabited {p = p} searchable =
+  proj₁ (searchable {P = λ _ → Lift p ⊤} λ _ → inj₁ (lift tt))
+
+inhabited∧lpo⇒searchable : ∀ {a p} {A : Set a} →
+                           Inhabited A → LPO A p → Searchable A p
+inhabited∧lpo⇒searchable inhabited lpo P? with lpo (¬-DecU P?)
+... | inj₁ (x , ¬Px) = x , (λ Px → contradiction Px ¬Px)
+... | inj₂ ¬∃¬P      = inhabited , (λ _ → P?⇒¬∃¬P→∀P P? ¬∃¬P)
 
 -- [1] Hannes Diener "Constructive Reverse Mathematics"
 -- [2] Hajime lshihara "Markov’s principle, Church’s thesis and LindeUf’s theorem"

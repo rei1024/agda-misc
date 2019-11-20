@@ -37,3 +37,6 @@ Dec⊎ A = A ⊎ ¬ A
 -- Unary decidable predicate
 DecU : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
 DecU P = ∀ x → P x ⊎ ¬ P x
+
+Inhabited : ∀ {a} → Set a → Set a
+Inhabited A = A
