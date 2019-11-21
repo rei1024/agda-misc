@@ -110,7 +110,7 @@ H[2+n,0,1]≡0 : ∀ n → H (2 + n) 0 1 ≡ 0
 H[2+n,0,1]≡0 zero    = refl
 H[2+n,0,1]≡0 (suc n) = H[2+n,0,1]≡0 n
 
-H[4+n,0,2*b]≡1 : ∀ n b → H (4 + n) 0 (2 * b) ≡ 1
+H[4+n,0,2*b]≡1   : ∀ n b → H (4 + n) 0 (2 * b) ≡ 1
 H[4+n,0,1+2*b]≡0 : ∀ n b → H (4 + n) 0 (1 + 2 * b) ≡ 0
 H[4+n,0,2*b]≡1 n zero    = refl
 H[4+n,0,2*b]≡1 n (suc b) = begin-equality
@@ -135,9 +135,11 @@ H[4+n,0,1+2*b]≡0 n b = begin-equality
 
 private
   ack-H-helper :
-    ∀ (P : ℕ → ℕ → Set) → (∀ n → P 0 n) →
+    (P : ℕ → ℕ → Set) →
+    (∀ n → P 0 n) →
     (∀ m → P m 1 → P (suc m) 0) →
-    (∀ m n → P (suc m) n → (∀ n′ → P m n′) → P (suc m) (suc n)) → ∀ m n → P m n
+    (∀ m n → P (suc m) n → (∀ n′ → P m n′) → P (suc m) (suc n)) →
+    ∀ m n → P m n
   ack-H-helper P P[0,n] P[m,0] P[m,n] = go where
     go : ∀ m n → P m n
     go 0       n       = P[0,n] n

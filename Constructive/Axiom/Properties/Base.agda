@@ -194,10 +194,10 @@ wem⇒DN-distrib-⊎ {a} {b} wem ¬¬[A⊎B] with lower-wem a b wem | lower-wem 
 DN-distrib-⊎⇒wem : ∀ {a} → ({A B : Set a} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B) → WEM a
 DN-distrib-⊎⇒wem DN-distrib-⊎ = Sum.swap $ Sum.map₂ TN-to-N $ DN-distrib-⊎ DN-Dec⊎
 
--- WEM-i ∧ Stable => Dec
-wem-i∧stable⇒dec : ∀ {a} {A : Set a} → WEM-i A → Stable A → Dec A
-wem-i∧stable⇒dec (inj₁ x) stable = no x
-wem-i∧stable⇒dec (inj₂ y) stable = yes (stable y)
+-- WEM-i ∧ Stable => Dec⊎
+wem-i∧stable⇒dec⊎ : ∀ {a} {A : Set a} → WEM-i A → Stable A → Dec⊎ A
+wem-i∧stable⇒dec⊎ (inj₁ x) stable = inj₂ x
+wem-i∧stable⇒dec⊎ (inj₂ y) stable = inj₁ (stable y)
 
 -- EM => DGP => WEM
 em⇒dgp : ∀ {a b} → EM (a ⊔ b) → DGP a b
@@ -381,7 +381,7 @@ em⇒lpo em _ = em
 -- LPO => LLPO
 lpo⇒llpo : ∀ {a p} {A : Set a} → LPO A p → LLPO A p
 lpo⇒llpo lpo P? Q? ¬[∃P×∃Q] with lpo P? | lpo Q?
-... | inj₁ ∃P  | inj₁ ∃Q  = ⊥-elim $ ¬[∃P×∃Q] (∃P , ∃Q)
+... | inj₁ ∃P  | inj₁ ∃Q  = contradiction (∃P , ∃Q) ¬[∃P×∃Q]
 ... | inj₁ ∃P  | inj₂ ¬∃Q = inj₂ ¬∃Q
 ... | inj₂ ¬∃P | _        = inj₁ ¬∃P
 
@@ -393,14 +393,14 @@ lpo⇒mr : ∀ {a p} {A : Set a} → LPO A p → MR A p
 lpo⇒mr lpo P? ¬¬∃P = Sum.[ id , (λ ¬∃P → ⊥-elim $ ¬¬∃P ¬∃P) ] (lpo P?)
 
 wlpo-Alt∧mr⇒lpo : ∀ {a p} {A : Set a} → WLPO-Alt A p → MR A p → LPO A p
-wlpo-Alt∧mr⇒lpo wlpo-Alt mr P? = Sum.swap $ Sum.map₂ (mr P?) (wlpo-Alt P?)
+wlpo-Alt∧mr⇒lpo wlpo-Alt mr P? = wem-i∧stable⇒dec⊎ (wlpo-Alt P?) (mr P?)
 
--- WLPO => LLPO
-wlpo⇒llpo : ∀ {a p} {A : Set a} → WLPO A p → LLPO A p
-wlpo⇒llpo wlpo P? Q? ¬[∃P×∃Q] with wlpo (¬-DecU P?) | wlpo (¬-DecU Q?)
-... | inj₁ ∀¬P  | _         = inj₁ (∀¬P→¬∃P ∀¬P)
-... | inj₂ ¬∀¬P | inj₁ ∀¬Q  = inj₂ (∀¬P→¬∃P ∀¬Q)
-... | inj₂ ¬∀¬P | inj₂ ¬∀¬Q = ⊥-elim $ ¬∀¬P×¬∀¬Q→¬¬[∃P×∃Q] (¬∀¬P , ¬∀¬Q) ¬[∃P×∃Q]
+-- WLPO => LLPO-Alt
+wlpo⇒llpo-Alt : ∀ {a p} {A : Set a} → WLPO A p → LLPO-Alt A p
+wlpo⇒llpo-Alt wlpo P? Q? ¬¬[∀P⊎∀Q] with wlpo P? | wlpo Q?
+... | inj₁ ∀P  | _        = inj₁ ∀P
+... | inj₂ ¬∀P | inj₁ ∀Q  = inj₂ ∀Q
+... | inj₂ ¬∀P | inj₂ ¬∀Q = contradiction (¬A×¬B→¬[A⊎B] (¬∀P , ¬∀Q)) ¬¬[∀P⊎∀Q]
 
 -- WEM => WLPO-Alt
 wem⇒wlpo-Alt : ∀ {a p} {A : Set a} → WEM (a ⊔ p) → WLPO-Alt A p
