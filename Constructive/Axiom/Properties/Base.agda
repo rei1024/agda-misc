@@ -44,6 +44,8 @@
 -- WPFP ∧ MP∨ -> WLPO
 -- WPFP ∧ LLPO -> WLPO
 
+-- Inhabited ∧ LPO <=> Searchable
+
 ------------------------------------------------------------------------
 
 {-# OPTIONS --without-K --safe --exact-split #-}
@@ -458,8 +460,11 @@ record HasProperties
   ... | inj₁ (m , m<n , ¬Pm) = inj₂ λ ∀i→i<n→Pi → ¬Pm (∀i→i<n→Pi m m<n)
   ... | inj₂ ¬∃m→m<n×¬Pm     = inj₁ (¬∃¬→∀ P? ¬∃m→m<n×¬Pm)
 
+  First : (A → Set p) → A → Set (a ⊔ p ⊔ r)
+  First P x = (∀ y → y < x → ¬ P y) × P x
+
   findFirst : {P : A → Set p} → DecU P →
-              ∃ P → ∃ λ x → (∀ y → y < x → ¬ P y) × P x
+              ∃ P → ∃ (First P)
   findFirst {P} P? (x , Px) = go x (<-wf x) Px
     where
     go : ∀ x → Ind.Acc _<_ x → P x → ∃ λ y → (∀ i → i < y → ¬ P i) × P y
@@ -467,6 +472,12 @@ record HasProperties
     ... | inj₁ (y , y<x , Py) = go y (rs y y<x) Py
     ... | inj₂ ¬∃y→y<x×Py     =
       x , (λ i i<x Pi → ¬∃y→y<x×Py (i , (i<x , Pi))) , Px
+
+  First-unique : ∀ {P : A → Set p} {x y} → First P x → First P y → x ≡ y
+  First-unique {P} {x} {y} (∀i→i<x→¬Pi , Px) (∀i→i<y→¬Pi , Py) with <-cmp x y
+  ... | tri< x<y _ _ = contradiction Px (∀i→i<y→¬Pi x x<y)
+  ... | tri≈ _ x≡y _ = x≡y
+  ... | tri> _ _ x>y = contradiction Py (∀i→i<x→¬Pi y x>y)
 
   module HasPropertiesLemma
     {P : A → Set p} {Q : A → Set p} (P? : DecU P) (Q? : DecU Q)

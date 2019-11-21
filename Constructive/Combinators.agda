@@ -116,6 +116,13 @@ module _ {a b} {A : Set a} {B : Set b} where
   [[A→B]→A]→¬A→A : ((A → B) → A) → ¬ A → A
   [[A→B]→A]→¬A→A [A→B]→A ¬A = [A→B]→A (⊥-elim ∘′ ¬A)
 
+  [[A→B]→A]→¬¬A : ((A → B) → A) → ¬ ¬ A
+  [[A→B]→A]→¬¬A [A→B]→A ¬A = ¬A ([[A→B]→A]→¬A→A [A→B]→A ¬A)
+
+  [[[A→B]→A]→A]→¬B→¬¬A→A : (((A → B) → A) → A) → ¬ B → ¬ ¬ A → A
+  [[[A→B]→A]→A]→¬B→¬¬A→A [[A→B]→A]→A ¬B ¬¬A =
+    [[A→B]→A]→A λ A→B → contradiction (flip _∘′_ A→B ¬B) ¬¬A
+
 module _ {a b} {A : Set a} {B : Set b} where
   contraposition : (A → B) → ¬ B → ¬ A
   contraposition = flip _∘′_

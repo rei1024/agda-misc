@@ -139,7 +139,7 @@ Searchable-Bool A = Σ ((A → Bool) → A)
 
 -- The limited principle of omniscience
 -- https://ncatlab.org/nlab/show/principle+of+omniscience
---- Omniscient type
+-- Omniscient type
 LPO-i : ∀ {a p} {A : Set a} → (A → Set p) → Set (a ⊔ p)
 LPO-i P = DecU P → ∃ P ⊎ ¬ ∃ P
 
