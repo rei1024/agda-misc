@@ -65,7 +65,8 @@ MI-i A B = (A → B) → ¬ A ⊎ B
 MI : ∀ a b → Set (lsuc (a ⊔ b))
 MI a b = {A : Set a} {B : Set b} → MI-i A B
 
---  De Morgan's laws
+-- De Morgan's laws
+-- DML
 DEM₁-i : ∀ {a b} → Set a → Set b → Set (a ⊔ b)
 DEM₁-i A B = ¬ (¬ A × ¬ B) → A ⊎ B
 
@@ -293,6 +294,21 @@ MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 
 Σ-Call/CC : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 Σ-Call/CC A p = {P : A → Set p} → Σ-Call/CC-i P
+
+-- Σ-Σ-Peirce
+Σ-Σ-Peirce-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
+Σ-Σ-Peirce-i P Q = DecU P → DecU Q → Peirce-i (∃ P) (∃ Q)
+
+Σ-Σ-Peirce : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+Σ-Σ-Peirce A p = {P Q : A → Set p} → Σ-Σ-Peirce-i P Q
+
+-- Σ-Π-Peirce
+Σ-Π-Peirce-i : ∀ {a p} {A : Set a} (P Q : A → Set p) → Set (a ⊔ p)
+Σ-Π-Peirce-i P Q = DecU P → DecU Q → Peirce-i (∃ P) (∀ x → Q x)
+
+Σ-Π-Peirce : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
+Σ-Π-Peirce A p = {P Q : A → Set p} → Σ-Π-Peirce-i P Q
+
 
 -- Kripke's Schema
 KS : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)

@@ -46,6 +46,8 @@
 
 -- Inhabited ∧ LPO <=> Searchable
 
+-- MR <=> Σ-Σ-Peirce
+
 ------------------------------------------------------------------------
 
 {-# OPTIONS --without-K --safe --exact-split #-}
@@ -612,6 +614,33 @@ mr⇒Σ-call/cc mr P? = mr P? ∘′ [¬A→A]→¬¬A
 
 Σ-call/cc⇒mr : ∀ {a p} {A : Set a} → Σ-Call/CC A p → MR A p
 Σ-call/cc⇒mr Σ-call/cc P? ¬¬∃P = Σ-call/cc P? λ ¬∃P → ⊥-elim $ ¬¬∃P ¬∃P
+
+-- Question 15 [1]
+-- MR <=> Σ-Σ-Peirce
+mr⇒Σ-Σ-peirce : ∀ {a p} {A : Set a} → MR A p → Σ-Σ-Peirce A p
+mr⇒Σ-Σ-peirce mr P? Q? [∃P→∃Q]→∃P = mr P? ([[A→B]→A]→¬¬A [∃P→∃Q]→∃P)
+
+Σ-Σ-peirce⇒mr : ∀ {a p} {A : Set a} → Σ-Σ-Peirce A p → MR A p
+Σ-Σ-peirce⇒mr {A = A} Σ-Σ-peirce P? =
+  [[[A→B]→A]→A]→¬B→¬¬A→A (Σ-Σ-peirce {Q = λ _ → Lift _ ⊥} P? (λ _ → inj₂ lower))
+                         f
+  where
+  f : Σ A (λ _ → Lift _ ⊥) → ⊥
+  f (_ , ())
+
+-- MR => Σ-Π-Peirce
+mr⇒Σ-Π-peirce : ∀ {a p} {A : Set a} → MR A p → Σ-Π-Peirce A p
+mr⇒Σ-Π-peirce mr P? Q? [∃P→∀Q]→∃P = mr P? ([[A→B]→A]→¬¬A [∃P→∀Q]→∃P)
+
+-- Inhabited ∧ Σ-Π-peirce => MR
+inhabited∧Σ-Π-peirce⇒mr : ∀ {a p} {A : Set a} →
+                          Inhabited A → Σ-Π-Peirce A p → MR A p
+inhabited∧Σ-Π-peirce⇒mr {p = p} {A} inhabited Σ-Π-peirce P? =
+  [[[A→B]→A]→A]→¬B→¬¬A→A (Σ-Π-peirce {Q = λ _ → Lift _ ⊥} P? (λ _ → inj₂ lower))
+                         f
+  where
+  f : ¬ ((x : A) → Lift p ⊥)
+  f ∀x→L⊥ = lower (∀x→L⊥ inhabited)
 
 -- Proposition 6.4.1. [1]
 -- WMP ∧ WLPO-Alt => LPO
