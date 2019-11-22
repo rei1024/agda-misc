@@ -184,6 +184,13 @@ dem₃⇒wem : ∀ {a} → DEM₃ a a → WEM a
 dem₃⇒wem dem₃ = dem₃ ¬[A×¬A]
 
 -- WEM <=> DN-distrib-⊎
+dgp-i⇒DN-distrib-⊎-i : ∀ {a b} {A : Set a} {B : Set b} →
+                       DGP-i B A → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
+dgp-i⇒DN-distrib-⊎-i dgp-i ¬¬[A⊎B] =
+  Sum.map (λ B→A ¬A → ¬¬[A⊎B] Sum.[ ¬A , contraposition B→A ¬A ])
+          (λ A→B ¬B → ¬¬[A⊎B] Sum.[ contraposition A→B ¬B , ¬B ])
+          dgp-i
+
 wem⇒DN-distrib-⊎ : ∀ {a b} → WEM (a ⊔ b) →
                    {A : Set a} {B : Set b} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
 wem⇒DN-distrib-⊎ {a} {b} wem ¬¬[A⊎B] with lower-wem a b wem | lower-wem b a wem
@@ -203,10 +210,14 @@ wem-i∧stable⇒dec⊎ (inj₂ y) stable = inj₁ (stable y)
 em⇒dgp : ∀ {a b} → EM (a ⊔ b) → DGP a b
 em⇒dgp em = em⇒[¬A→B]→A⊎B em ¬[A→B]→B→A
 
+dgp-i⇒dem₃-i : ∀ {a b} {A : Set a} {B : Set b} → DGP-i A B → DEM₃-i A B
+dgp-i⇒dem₃-i dgp-i ¬[A×B] =
+  Sum.map (λ A→B → contraposition (λ x → x , A→B x) ¬[A×B])
+          (λ B→A → contraposition (λ y → B→A y , y) ¬[A×B])
+          dgp-i
+
 dgp⇒dem₃ : ∀ {a b} → DGP a b → DEM₃ a b
-dgp⇒dem₃ dgp ¬[A×B] with dgp
-... | inj₁ A→B = inj₁ (contraposition (λ x → x , A→B x) ¬[A×B])
-... | inj₂ B→A = inj₂ (contraposition (λ y → B→A y , y) ¬[A×B])
+dgp⇒dem₃ dgp ¬[A×B] = dgp-i⇒dem₃-i dgp ¬[A×B]
 
 dgp⇒wem : ∀ {a} → DGP a a → WEM a
 dgp⇒wem dgp = dem₃⇒wem $ dgp⇒dem₃ dgp
@@ -277,9 +288,7 @@ dne⁻¹⇒em⁻¹ ext dne⁻¹ isP = dne⁻¹ isP′ DN-Dec⊎
   isP′ = isProp-⊎ ¬[A×¬A] isP (isProp-¬ ext)
 
 em⁻¹⇒dne⁻¹ : ∀ {a} → EM⁻¹ a → DNE⁻¹ a
-em⁻¹⇒dne⁻¹ em⁻¹ isP ¬¬x with em⁻¹ isP
-... | inj₁  x = x
-... | inj₂ ¬x = ⊥-elim $ ¬¬x ¬x
+em⁻¹⇒dne⁻¹ em⁻¹ isP = dec⊎⇒stable (em⁻¹ isP)
 
 -----------------------------------------------------------------------
 -- Properties of LPO, LLPO, WLPO, MP, MP⊎, WMP, KS, PFP, WPFP, Σ-DGP,
@@ -390,7 +399,7 @@ lpo⇒wlpo-Alt : ∀ {a p} {A : Set a} → LPO A p → WLPO-Alt A p
 lpo⇒wlpo-Alt lpo P? = ¬-dec⊎ (lpo P?)
 
 lpo⇒mr : ∀ {a p} {A : Set a} → LPO A p → MR A p
-lpo⇒mr lpo P? ¬¬∃P = Sum.[ id , (λ ¬∃P → ⊥-elim $ ¬¬∃P ¬∃P) ] (lpo P?)
+lpo⇒mr lpo P? = dec⊎⇒stable (lpo P?)
 
 wlpo-Alt∧mr⇒lpo : ∀ {a p} {A : Set a} → WLPO-Alt A p → MR A p → LPO A p
 wlpo-Alt∧mr⇒lpo wlpo-Alt mr P? = wem-i∧stable⇒dec⊎ (wlpo-Alt P?) (mr P?)
@@ -543,10 +552,7 @@ llpo⇒Σ-dgp has llpo {P = P} {Q} P? Q? =
   ¬∃R⊎¬∃S = llpo R? S? ¬[∃R×∃S]
 
 Σ-dgp⇒llpo : ∀ {a p} {A : Set a} → Σ-DGP A p → LLPO A p
-Σ-dgp⇒llpo Σ-dgp P? Q? ¬[∃P×∃Q] =
-  Sum.map (λ ∃P→∃Q ∃P → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
-          (λ ∃Q→∃P ∃Q → ¬[∃P×∃Q] (∃Q→∃P ∃Q , ∃Q))
-          (Σ-dgp P? Q?)
+Σ-dgp⇒llpo Σ-dgp P? Q? ¬[∃P×∃Q] = dgp-i⇒dem₃-i (Σ-dgp P? Q?) ¬[∃P×∃Q]
 
 -- Σ-DGP => MP∨
 Σ-dgp⇒mp∨ : ∀ {p a} {A : Set a} → Σ-DGP A p → MP∨ A p
@@ -556,10 +562,7 @@ llpo⇒Σ-dgp has llpo {P = P} {Q} P? Q? =
   ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
 
   ¬¬∃P⊎¬¬∃Q : ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
-  ¬¬∃P⊎¬¬∃Q =
-    Sum.map (λ ∃Q→∃P ¬∃P → ¬¬[∃P⊎∃Q] Sum.[ ¬∃P , (λ ∃Q → ¬∃P (∃Q→∃P ∃Q)) ])
-            (λ ∃P→∃Q ¬∃Q → ¬¬[∃P⊎∃Q] Sum.[ (λ ∃P → ¬∃Q (∃P→∃Q ∃P)) , ¬∃Q ])
-            (Σ-dgp Q? P?)
+  ¬¬∃P⊎¬¬∃Q = dgp-i⇒DN-distrib-⊎-i (Σ-dgp Q? P?) ¬¬[∃P⊎∃Q]
 
 -- Σ-DGP => Π-DGP
 Σ-dgp⇒Π-dgp : ∀ {p a} {A : Set a} → Σ-DGP A p → Π-DGP A p
@@ -567,14 +570,10 @@ llpo⇒Σ-dgp has llpo {P = P} {Q} P? Q? =
   Sum.map (P?⇒[∃¬P→∃¬Q]→∀Q→∀P Q?) (P?⇒[∃¬P→∃¬Q]→∀Q→∀P P?)
           (Σ-dgp (¬-DecU Q?) (¬-DecU P?))
 
--- Π-DGP => LLPO
-Π-dgp⇒llpo : ∀ {a p} {A : Set a} → Π-DGP A p → LLPO A p
-Π-dgp⇒llpo Π-dgp P? Q? ¬[∃P×∃Q] =
-  Sum.map (λ ∀¬Q→∀¬P ∃P → [∀¬P→∀¬Q]→¬¬[∃Q→∃P] ∀¬Q→∀¬P
-             λ ∃P→∃Q → ¬[∃P×∃Q] (∃P , ∃P→∃Q ∃P))
-          (λ ∀¬P→∀¬Q ∃Q → [∀¬P→∀¬Q]→¬¬[∃Q→∃P] ∀¬P→∀¬Q
-             λ ∃Q→∃P → ¬[∃P×∃Q] (∃Q→∃P ∃Q , ∃Q))
-          (Π-dgp (¬-DecU Q?) (¬-DecU P?))
+-- Π-DGP => LLPO-Alt
+Π-dgp⇒llpo-Alt : ∀ {a p} {A : Set a} → Π-DGP A p → LLPO-Alt A p
+Π-dgp⇒llpo-Alt Π-dgp P? Q? = Sum.map (P?⇒¬¬∀P→∀P P?) (P?⇒¬¬∀P→∀P Q?) ∘′
+                             dgp-i⇒DN-distrib-⊎-i (Π-dgp Q? P?)
 
 -- LLPO => MP∨
 llpo⇒mp∨ : ∀ {r p a} {A : Set a} →

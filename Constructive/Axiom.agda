@@ -309,7 +309,6 @@ MP∨ A p = {P Q : A → Set p} → MP∨-i P Q
 Σ-Π-Peirce : ∀ {a} (A : Set a) p → Set (a ⊔ lsuc p)
 Σ-Π-Peirce A p = {P Q : A → Set p} → Σ-Π-Peirce-i P Q
 
-
 -- Kripke's Schema
 KS : ∀ {a} (A : Set a) p q → Set (a ⊔ lsuc p ⊔ lsuc q)
 KS A p q = ∀ (P : Set p) → Σ (A → Set q) λ Q → DecU Q × (P <=> ∃ Q)
