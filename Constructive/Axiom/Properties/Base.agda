@@ -183,14 +183,14 @@ wem⇒dem₃ wem ¬[A×B] with wem | wem
 dem₃⇒wem : ∀ {a} → DEM₃ a a → WEM a
 dem₃⇒wem dem₃ = dem₃ ¬[A×¬A]
 
--- WEM <=> DN-distrib-⊎
 dgp-i⇒DN-distrib-⊎-i : ∀ {a b} {A : Set a} {B : Set b} →
-                       DGP-i B A → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
+                       DGP-i A B → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
 dgp-i⇒DN-distrib-⊎-i dgp-i ¬¬[A⊎B] =
   Sum.map (λ B→A ¬A → ¬¬[A⊎B] Sum.[ ¬A , contraposition B→A ¬A ])
           (λ A→B ¬B → ¬¬[A⊎B] Sum.[ contraposition A→B ¬B , ¬B ])
-          dgp-i
+          (Sum.swap dgp-i)
 
+-- WEM <=> DN-distrib-⊎
 wem⇒DN-distrib-⊎ : ∀ {a b} → WEM (a ⊔ b) →
                    {A : Set a} {B : Set b} → ¬ ¬ (A ⊎ B) → ¬ ¬ A ⊎ ¬ ¬ B
 wem⇒DN-distrib-⊎ {a} {b} wem ¬¬[A⊎B] with lower-wem a b wem | lower-wem b a wem
@@ -252,9 +252,7 @@ dne⇒¬[A×¬B]→A→B dne = dne λ x → x λ y z → ⊥-elim (y (z , (λ w 
 
 -- EM <=> [A→B]→¬A⊎B
 em⇒[A→B]→¬A⊎B : ∀ {a b} → EM b → {A : Set a} {B : Set b} → (A → B) → ¬ A ⊎ B
-em⇒[A→B]→¬A⊎B em f with em
-... | inj₁ y  = inj₂ y
-... | inj₂ ¬B = inj₁ (contraposition f ¬B)
+em⇒[A→B]→¬A⊎B em f = Sum.swap (Sum.map₂ (contraposition f) em)
 
 [A→B]→¬A⊎B⇒em : ∀ {a} → ({A B : Set a} → (A → B) → ¬ A ⊎ B) → EM a
 [A→B]→¬A⊎B⇒em f = Sum.swap (f id)
@@ -562,7 +560,7 @@ llpo⇒Σ-dgp has llpo {P = P} {Q} P? Q? =
   ¬¬[∃P⊎∃Q] = DN-map ∃-distrib-⊎ ¬¬[∃x→Px⊎Qx]
 
   ¬¬∃P⊎¬¬∃Q : ¬ ¬ ∃ P ⊎ ¬ ¬ ∃ Q
-  ¬¬∃P⊎¬¬∃Q = dgp-i⇒DN-distrib-⊎-i (Σ-dgp Q? P?) ¬¬[∃P⊎∃Q]
+  ¬¬∃P⊎¬¬∃Q = dgp-i⇒DN-distrib-⊎-i (Σ-dgp P? Q?) ¬¬[∃P⊎∃Q]
 
 -- Σ-DGP => Π-DGP
 Σ-dgp⇒Π-dgp : ∀ {p a} {A : Set a} → Σ-DGP A p → Π-DGP A p
@@ -573,7 +571,7 @@ llpo⇒Σ-dgp has llpo {P = P} {Q} P? Q? =
 -- Π-DGP => LLPO-Alt
 Π-dgp⇒llpo-Alt : ∀ {a p} {A : Set a} → Π-DGP A p → LLPO-Alt A p
 Π-dgp⇒llpo-Alt Π-dgp P? Q? = Sum.map (P?⇒¬¬∀P→∀P P?) (P?⇒¬¬∀P→∀P Q?) ∘′
-                             dgp-i⇒DN-distrib-⊎-i (Π-dgp Q? P?)
+                             dgp-i⇒DN-distrib-⊎-i (Π-dgp P? Q?)
 
 -- LLPO => MP∨
 llpo⇒mp∨ : ∀ {r p a} {A : Set a} →

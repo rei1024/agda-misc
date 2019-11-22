@@ -59,7 +59,7 @@ proj₂ x = x false
 
 Fin : ℕ → Set
 Fin zero    = ⊥
-Fin (suc n) = Fin n ⊎ ⊤
+Fin (suc n) = ⊤ ⊎ Fin n
 
 Vec : Set → ℕ → Set
 Vec A n = Fin n → A
