@@ -472,6 +472,22 @@ record HasProperties
   First : (A → Set p) → A → Set (a ⊔ p ⊔ r)
   First P x = (∀ y → y < x → ¬ P y) × P x
 
+  First? : {P : A → Set p} → DecU P → DecU (First P)
+  First? P? = DecU-× (<-all-dec (¬-DecU P?)) P?
+
+  None : (A → Set p) → A → Set (a ⊔ p ⊔ r)
+  None P x = (∀ y → y < x → ¬ P y) × ¬ P x
+
+  None? : {P : A → Set p} → DecU P → DecU (None P)
+  None? P? = DecU-× (<-all-dec (¬-DecU P?)) (¬-DecU P?)
+
+  ∃⊎None : {P : A → Set p} → DecU P → ∀ x → ∃ P ⊎ None P x
+  ∃⊎None P? x with P? x | <-any-dec P? x
+  ... | inj₁ Px  | _                 = inj₁ (x , Px)
+  ... | inj₂ ¬Px | inj₁ (y , _ , Py) = inj₁ (y , Py)
+  ... | inj₂ ¬Px | inj₂ ¬∃           =
+    inj₂ ((λ y y<x Py → ¬∃ (y , (y<x , Py))) , ¬Px)
+
   findFirst : {P : A → Set p} → DecU P →
               ∃ P → ∃ (First P)
   findFirst {P} P? (x , Px) = go x (<-wf x) Px
@@ -489,52 +505,39 @@ record HasProperties
   ... | tri> _ _ x>y = contradiction Py (∀i→i<x→¬Pi y x>y)
 
   module HasPropertiesLemma
-    {P : A → Set p} {Q : A → Set p} (P? : DecU P) (Q? : DecU Q)
+    {P Q : A → Set p} (P? : DecU P) (Q? : DecU Q)
     where
-    -- ex. R 5
-    -- n : 0 1 2 3 4 5 6 7 8
-    -- P : 0 0 0 0 0 1 ? ? ?
-    -- Q : 0 0 0 0 0 0 ? ? ?
-    R S : A → Set (r ⊔ p ⊔ a)
-    R n = (∀ i → i < n → ¬ P i × ¬ Q i) × P n × ¬ Q n
-    S n = (∀ i → i < n → ¬ P i × ¬ Q i) × ¬ P n × Q n
 
-    private
-      lem : DecU (λ n → ∀ i → i < n → ¬ P i × ¬ Q i)
-      lem = <-all-dec (DecU-× (¬-DecU P?) (¬-DecU Q?))
+    R S : A → Set (r ⊔ p ⊔ a)
+    R x = First P x × None Q x
+    S x = First Q x × None P x
 
     R? : DecU R
-    R? = DecU-× lem (DecU-× P? (¬-DecU Q?))
+    R? = DecU-× (First? P?) (None? Q?)
 
     S? : DecU S
-    S? = DecU-× lem (DecU-× (¬-DecU P?) Q?)
+    S? = DecU-× (First? Q?) (None? P?)
 
     ¬[∃R×∃S] : ¬ (∃ R × ∃ S)
-    ¬[∃R×∃S] ((m , ∀i→i<m→¬Pi×¬Qi , Pm  , ¬Qm) ,
-              (n , ∀i→i<n→¬Pi×¬Qi , ¬Pn , Qn)) with <-cmp m n
-    ... | tri< m<n _ _ = proj₁ (∀i→i<n→¬Pi×¬Qi m m<n) Pm
-    ... | tri≈ _ m≡n _ = ¬Pn (subst P m≡n Pm)
-    ... | tri> _ _ n<m = proj₂ (∀i→i<m→¬Pi×¬Qi n n<m) Qn
+    ¬[∃R×∃S] ((x , (∀i→i<x→¬Pi , Px) , ∀i→i<x→¬Qi , ¬Qx) ,
+              (y , (∀i→i<y→¬Qi , Qy) , ∀i→i<y→¬Pi , ¬Py )) with <-cmp x y
+    ... | tri< x<y _ _ = ∀i→i<y→¬Pi x x<y Px
+    ... | tri≈ _ x≡y _ = ¬Py (subst P x≡y Px)
+    ... | tri> _ _ y<x = ∀i→i<x→¬Qi y y<x Qy
 
     ¬∃R→∃P→∃Q : ¬ ∃ R → ∃ P → ∃ Q
     ¬∃R→∃P→∃Q ¬∃R ∃P with findFirst P? ∃P
-    ... | (x , ∀y→y<x→¬Px , Px) with Q? x
-    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₁  Qx = x , Qx
-    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx with <-any-dec Q? x
-    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₁ (y , _ , Qy) = y , Qy
-    ¬∃R→∃P→∃Q ¬∃R _ | x , ∀y→y<x→¬Px , Px | inj₂ ¬Qx | inj₂ ¬∃           =
-      ⊥-elim $ ¬∃R (x , ((λ i i<x → ∀y→y<x→¬Px i i<x ,
-                   (λ Qi → ¬∃ (i , i<x , Qi))) , (Px , ¬Qx)))
+    ¬∃R→∃P→∃Q ¬∃R ∃P | x , firstP with ∃⊎None Q? x
+    ¬∃R→∃P→∃Q ¬∃R ∃P | x , firstP | inj₁ ∃Q    = ∃Q
+    ¬∃R→∃P→∃Q ¬∃R ∃P | x , firstP | inj₂ noneQ =
+      contradiction (x , firstP , noneQ) ¬∃R
 
     ¬∃S→∃Q→∃P : ¬ ∃ S → ∃ Q → ∃ P
     ¬∃S→∃Q→∃P ¬∃S ∃Q with findFirst Q? ∃Q
-    ... | (x , ∀y→y<x→¬Qx , Qx) with P? x
-    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₁  Px = x , Px
-    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px with <-any-dec P? x
-    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₁ (y , _ , Py) = y , Py
-    ¬∃S→∃Q→∃P ¬∃S _ | x , ∀y→y<x→¬Qx , Qx | inj₂ ¬Px | inj₂ ¬∃           =
-      ⊥-elim $ ¬∃S (x , (λ i i<x →
-                   (λ Pi → ¬∃ (i , i<x , Pi)) , ∀y→y<x→¬Qx i i<x) , (¬Px , Qx))
+    ¬∃S→∃Q→∃P ¬∃S ∃Q | x , firstQ with ∃⊎None P? x
+    ¬∃S→∃Q→∃P ¬∃S ∃Q | x , firstQ | inj₁ ∃P    = ∃P
+    ¬∃S→∃Q→∃P ¬∃S ∃Q | x , firstQ | inj₂ noneP =
+      contradiction (x , firstQ , noneP) ¬∃S
 
 -- Proposition 8.6.1. [1]
 -- Σ-DGP <=> LLPO
