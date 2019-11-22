@@ -725,17 +725,13 @@ wpfp∧mp⊎-Alt⇒wlpo wpfp mp⊎-Alt {P = P} P? with wpfp P?
   ¬∀P⊎¬∀Q : ¬ (∀ x → P x) ⊎ ¬ (∀ x → Q x)
   ¬∀P⊎¬∀Q = mp⊎-Alt P? Q? ¬[∀P×∀Q]
 
--- WPFP ∧ LLPO => WLPO
-wpfp∧llpo⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → LLPO A p → WLPO A p
-wpfp∧llpo⇒wlpo wpfp llpo {P = P} P? with wpfp P?
-... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P =
-  Sum.map (P?⇒¬∃¬P→∀P P?)
-          (λ ¬∃¬Q ∀P → ∀P→¬∀Q ∀P (P?⇒¬∃¬P→∀P Q? ¬∃¬Q))
-          ¬∃¬P⊎¬∃¬Q
+-- WPFP ∧ LLPO-Alt => WLPO
+wpfp∧llpo-Alt⇒wlpo : ∀ {a p} {A : Set a} → WPFP A p p → LLPO-Alt A p → WLPO A p
+wpfp∧llpo-Alt⇒wlpo wpfp llpo-Alt {P = P} P? with wpfp P?
+... | Q , Q? , ∀P→¬∀Q , ¬∀Q→∀P = Sum.map₂ (λ ∀Q ∀P → ∀P→¬∀Q ∀P ∀Q) ∀P⊎∀Q
   where
-  ¬∃¬P⊎¬∃¬Q : ¬ ∃ (λ x → ¬ P x) ⊎ ¬ ∃ (λ x → ¬ Q x)
-  ¬∃¬P⊎¬∃¬Q = llpo (¬-DecU P?) (¬-DecU Q?)
-                    (λ{(∃¬P , ∃¬Q) → ∀P→¬∃¬P (¬∀Q→∀P (∃¬P→¬∀P ∃¬Q)) ∃¬P})
+  ∀P⊎∀Q : (∀ x → P x) ⊎ (∀ x → Q x)
+  ∀P⊎∀Q = llpo-Alt P? Q? (DN-map (Sum.swap ∘′ Sum.map₂ ¬∀Q→∀P) DN-Dec⊎)
 
 -- WPFP ∧ MR <=> LPO
 wpfp∧mr⇒lpo : ∀ {a p} {A : Set a} → WPFP A p p → MR A p → LPO A p
