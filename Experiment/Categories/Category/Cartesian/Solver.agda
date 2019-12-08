@@ -51,8 +51,9 @@ data Expr : Rel Sig (o ⊔ ℓ) where
   -- :! = ∥ ! !∥
 
 data LExpr : Rel Sig (o ⊔ ℓ) where
-  -- TODO change to :id : LExpr ∥ A ∥ ∥ A ∥
-  :id    : LExpr S S
+  :id    : LExpr ∥ A ∥ ∥ A ∥
+  :π₁    : LExpr (S :× T) S
+  :π₂    : LExpr (S :× T) T
   :π₁∘_  : LExpr S (T :× U) → LExpr S T
   :π₂∘_  : LExpr S (T :× U) → LExpr S U
   ∥_∥∘_  : B ⇒ C → LExpr S ∥ B ∥ → LExpr S ∥ C ∥
@@ -68,6 +69,8 @@ data LExpr : Rel Sig (o ⊔ ℓ) where
 
 ⟦_⟧L : LExpr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
 ⟦ :id          ⟧L = id
+⟦ :π₁          ⟧L = π₁
+⟦ :π₂          ⟧L = π₂
 ⟦ :π₁∘ e       ⟧L = π₁ ∘ ⟦ e ⟧L
 ⟦ :π₂∘ e       ⟧L = π₂ ∘ ⟦ e ⟧L
 ⟦ ∥ f ∥∘ e     ⟧L = f ∘ ⟦ e ⟧L
@@ -75,23 +78,25 @@ data LExpr : Rel Sig (o ⊔ ℓ) where
 
 _∘L_ : LExpr T U → LExpr S T → LExpr S U
 :id          ∘L e₂ = e₂
+:π₁          ∘L e₂ = :π₁∘ e₂
+:π₂          ∘L e₂ = :π₂∘ e₂
 (:π₁∘ e₁)    ∘L e₂ = :π₁∘ (e₁ ∘L e₂)
 (:π₂∘ e₁)    ∘L e₂ = :π₂∘ (e₁ ∘L e₂)
 (∥ x ∥∘ e₁)  ∘L e₂ = ∥ x ∥∘ (e₁ ∘L e₂)
 :⟨ e₁ , e₂ ⟩ ∘L e₃ = :⟨ e₁ ∘L e₃ , e₂ ∘L e₃ ⟩
 
-:π₁-L′ : ∀ S T → LExpr (S :× T) S
-:π₁-L′ S T = :π₁∘ :id
+:π₁′ : ∀ S T → LExpr (S :× T) S
+:π₁′ S T = :π₁
 
-:π₂-L′ : ∀ S T → LExpr (S :× T) T
-:π₂-L′ S T = :π₂∘ :id
+:π₂′ : ∀ S T → LExpr (S :× T) T
+:π₂′ S T = :π₂
 
 :π₁-L : ∀ S T → LExpr (S :× T) S
 :π₂-L : ∀ S T → LExpr (S :× T) T
-:π₁-L ∥ A ∥      T = :π₁-L′ _ _
-:π₁-L (S₁ :× S₂) T = :⟨ :π₁-L _ _ ∘L :π₁-L′ _ _ , :π₂-L _ _ ∘L :π₁-L′ _ _ ⟩
-:π₂-L S ∥ A ∥      = :π₂-L′ _ _
-:π₂-L S (T₁ :× T₂) = :⟨ :π₁-L _ _ ∘L :π₂-L′ _ _ , :π₂-L _ _ ∘L :π₂-L′ _ _ ⟩
+:π₁-L ∥ A ∥      T = :π₁
+:π₁-L (S₁ :× S₂) T = :⟨ :π₁-L _ _ ∘L :π₁ , :π₂-L _ _ ∘L :π₁ ⟩
+:π₂-L S ∥ A ∥      = :π₂
+:π₂-L S (T₁ :× T₂) = :⟨ :π₁-L _ _ ∘L :π₂ , :π₂-L _ _ ∘L :π₂ ⟩
 
 :id-L : ∀ S → LExpr S S
 :id-L ∥ A ∥    = :id
@@ -107,19 +112,23 @@ toLExpr :⟨ e₁ , e₂ ⟩ = :⟨ toLExpr e₁ , toLExpr e₂ ⟩
 toLExpr ∥ f ∥        = ∥ f ∥∘ :id
 
 reduce-π₁ : LExpr S (T :× U) → LExpr S T
-reduce-π₁ :id          = :π₁∘ :id
+reduce-π₁ :π₁          = :π₁∘ :π₁
+reduce-π₁ :π₂          = :π₁∘ :π₂
 reduce-π₁ (:π₁∘ e)     = :π₁∘ :π₁∘ e
 reduce-π₁ (:π₂∘ e)     = :π₁∘ :π₂∘ e
 reduce-π₁ :⟨ e₁ , e₂ ⟩ = e₁
 
 reduce-π₂ : LExpr S (T :× U) → LExpr S U
-reduce-π₂ :id          = :π₂∘ :id
+reduce-π₂ :π₁          = :π₂∘ :π₁
+reduce-π₂ :π₂          = :π₂∘ :π₂
 reduce-π₂ (:π₁∘ e)     = :π₂∘ :π₁∘ e
 reduce-π₂ (:π₂∘ e)     = :π₂∘ :π₂∘ e
 reduce-π₂ :⟨ e₁ , e₂ ⟩ = e₂
 
 reduce : LExpr S T → LExpr S T
 reduce :id          = :id
+reduce :π₁          = :π₁
+reduce :π₂          = :π₂
 reduce (:π₁∘ e)     = reduce-π₁ (reduce e)
 reduce (:π₂∘ e)     = reduce-π₂ (reduce e)
 reduce (∥ f ∥∘ e)   = ∥ f ∥∘ reduce e
@@ -130,6 +139,8 @@ reduceL e = reduce (toLExpr e)
 
 ∘L-homo : (e₁ : LExpr T U) (e₂ : LExpr S T) → ⟦ e₁ ∘L e₂ ⟧L ≈ ⟦ e₁ ⟧L ∘ ⟦ e₂ ⟧L
 ∘L-homo :id          e₂ = ⟺ identityˡ
+∘L-homo :π₁          e₂ = refl
+∘L-homo :π₂          e₂ = refl
 ∘L-homo (:π₁∘ e₁)    e₂ = pushʳ (∘L-homo e₁ e₂)
 ∘L-homo (:π₂∘ e₁)    e₂ = pushʳ (∘L-homo e₁ e₂)
 ∘L-homo (∥ f ∥∘ e₁)  e₂ = pushʳ (∘L-homo e₁ e₂)
@@ -143,32 +154,32 @@ reduceL e = reduce (toLExpr e)
 
 :π₁-L-correct : ∀ S T → ⟦ :π₁-L S T ⟧L ≈ π₁
 :π₂-L-correct : ∀ S T → ⟦ :π₂-L S T ⟧L ≈ π₂
-:π₁-L-correct ∥ A ∥      T = identityʳ
+:π₁-L-correct ∥ A ∥      T = refl
 :π₁-L-correct (S₁ :× S₂) T = begin
-  ⟨ ⟦ :π₁-L S₁ S₂ ∘L :π₁-L′ (S₁ :× S₂) T ⟧L ,
-    ⟦ :π₂-L S₁ S₂ ∘L :π₁-L′ (S₁ :× S₂) T ⟧L ⟩
-    ≈⟨ ⟨⟩-cong₂ (∘L-homo (:π₁-L S₁ S₂) (:π₁-L′ _ T))
-                (∘L-homo (:π₂-L S₁ S₂) (:π₁-L′ _ T)) ⟩
-  ⟨ ⟦ :π₁-L S₁ S₂ ⟧L ∘ ⟦ :π₁-L′ (S₁ :× S₂) T ⟧L ,
-    ⟦ :π₂-L S₁ S₂ ⟧L ∘ ⟦ :π₁-L′ (S₁ :× S₂) T ⟧L ⟩
+  ⟨ ⟦ :π₁-L S₁ S₂ ∘L :π₁′ (S₁ :× S₂) T ⟧L ,
+    ⟦ :π₂-L S₁ S₂ ∘L :π₁′ (S₁ :× S₂) T ⟧L ⟩
+    ≈⟨ ⟨⟩-cong₂ (∘L-homo (:π₁-L S₁ S₂) (:π₁′ _ T))
+                (∘L-homo (:π₂-L S₁ S₂) (:π₁′ _ T)) ⟩
+  ⟨ ⟦ :π₁-L S₁ S₂ ⟧L ∘ ⟦ :π₁′ (S₁ :× S₂) T ⟧L ,
+    ⟦ :π₂-L S₁ S₂ ⟧L ∘ ⟦ :π₁′ (S₁ :× S₂) T ⟧L ⟩
     ≈˘⟨ ⟨⟩∘ ⟩
-  ⟨ ⟦ :π₁-L S₁ S₂ ⟧L , ⟦ :π₂-L S₁ S₂ ⟧L ⟩ ∘ ⟦ :π₁-L′ (S₁ :× S₂) T ⟧L
-    ≈⟨ ⟨⟩-cong₂ (:π₁-L-correct S₁ S₂) (:π₂-L-correct S₁ S₂) ⟩∘⟨ identityʳ ⟩
+  ⟨ ⟦ :π₁-L S₁ S₂ ⟧L , ⟦ :π₂-L S₁ S₂ ⟧L ⟩ ∘ ⟦ :π₁′ (S₁ :× S₂) T ⟧L
+    ≈⟨ ⟨⟩-cong₂ (:π₁-L-correct S₁ S₂) (:π₂-L-correct S₁ S₂) ⟩∘⟨refl ⟩
   ⟨ π₁ , π₂ ⟩ ∘ π₁
     ≈⟨ elimˡ η ⟩
   π₁
     ∎
-:π₂-L-correct S ∥ A ∥      = identityʳ
+:π₂-L-correct S ∥ A ∥      = refl
 :π₂-L-correct S (T₁ :× T₂) = begin
-  ⟨ ⟦ :π₁-L T₁ T₂ ∘L :π₂-L′ S (T₁ :× T₂) ⟧L ,
-    ⟦ :π₂-L T₁ T₂ ∘L :π₂-L′ S (T₁ :× T₂) ⟧L ⟩
-    ≈⟨ ⟨⟩-cong₂ (∘L-homo (:π₁-L T₁ T₂) (:π₂-L′ S _))
-                (∘L-homo (:π₂-L T₁ T₂) (:π₂-L′ S _)) ⟩
-  ⟨ ⟦ :π₁-L T₁ T₂ ⟧L ∘ ⟦ :π₂-L′ S (T₁ :× T₂) ⟧L ,
-    ⟦ :π₂-L T₁ T₂ ⟧L ∘ ⟦ :π₂-L′ S (T₁ :× T₂) ⟧L ⟩
+  ⟨ ⟦ :π₁-L T₁ T₂ ∘L :π₂′ S (T₁ :× T₂) ⟧L ,
+    ⟦ :π₂-L T₁ T₂ ∘L :π₂′ S (T₁ :× T₂) ⟧L ⟩
+    ≈⟨ ⟨⟩-cong₂ (∘L-homo (:π₁-L T₁ T₂) (:π₂′ S _))
+                (∘L-homo (:π₂-L T₁ T₂) (:π₂′ S _)) ⟩
+  ⟨ ⟦ :π₁-L T₁ T₂ ⟧L ∘ ⟦ :π₂′ S (T₁ :× T₂) ⟧L ,
+    ⟦ :π₂-L T₁ T₂ ⟧L ∘ ⟦ :π₂′ S (T₁ :× T₂) ⟧L ⟩
     ≈˘⟨ ⟨⟩∘ ⟩
-  ⟨ ⟦ :π₁-L T₁ T₂ ⟧L , ⟦ :π₂-L T₁ T₂ ⟧L ⟩ ∘ ⟦ :π₂-L′ S (T₁ :× T₂) ⟧L
-    ≈⟨ ⟨⟩-cong₂ (:π₁-L-correct T₁ T₂) (:π₂-L-correct T₁ T₂) ⟩∘⟨ identityʳ ⟩
+  ⟨ ⟦ :π₁-L T₁ T₂ ⟧L , ⟦ :π₂-L T₁ T₂ ⟧L ⟩ ∘ ⟦ :π₂′ S (T₁ :× T₂) ⟧L
+    ≈⟨ ⟨⟩-cong₂ (:π₁-L-correct T₁ T₂) (:π₂-L-correct T₁ T₂) ⟩∘⟨refl ⟩
   ⟨ π₁ , π₂ ⟩ ∘ π₂
     ≈⟨ elimˡ η ⟩
   π₂
@@ -191,19 +202,23 @@ toLExpr-correct :⟨ e₁ , e₂ ⟩         = ⟨⟩-cong₂ (toLExpr-correct e
 toLExpr-correct ∥ f ∥                = identityʳ
 
 reduce-π₁-correct : (e : LExpr S (T :× U)) → ⟦ reduce-π₁ e ⟧L ≈ π₁ ∘ ⟦ e ⟧L
-reduce-π₁-correct :id          = refl
+reduce-π₁-correct :π₁          = refl
+reduce-π₁-correct :π₂          = refl
 reduce-π₁-correct (:π₁∘ e)     = refl
 reduce-π₁-correct (:π₂∘ e)     = refl
 reduce-π₁-correct :⟨ e₁ , e₂ ⟩ = ⟺ project₁
 
 reduce-π₂-correct : (e : LExpr S (T :× U)) → ⟦ reduce-π₂ e ⟧L ≈ π₂ ∘ ⟦ e ⟧L
-reduce-π₂-correct :id          = refl
+reduce-π₂-correct :π₁          = refl
+reduce-π₂-correct :π₂          = refl
 reduce-π₂-correct (:π₁∘ e)     = refl
 reduce-π₂-correct (:π₂∘ e)     = refl
 reduce-π₂-correct :⟨ e₁ , e₂ ⟩ = ⟺ project₂
 
 reduce-correct : (e : LExpr S T) → ⟦ reduce e ⟧L ≈ ⟦ e ⟧L
 reduce-correct :id          = refl
+reduce-correct :π₁          = refl
+reduce-correct :π₂          = refl
 reduce-correct (:π₁∘ e)     =
   reduce-π₁-correct (reduce e) ○ ∘-resp-≈ʳ (reduce-correct e)
 reduce-correct (:π₂∘ e)     =
