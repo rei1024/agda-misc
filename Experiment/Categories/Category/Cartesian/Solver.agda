@@ -1,4 +1,5 @@
 -- Solver for cartesian category
+-- Normalisation is based on https://arxiv.org/abs/math/9911059
 
 {-# OPTIONS --without-K --safe #-}
 
@@ -50,7 +51,7 @@ data Expr : Rel Sig (o ⊔ ℓ) where
   ∥_∥    : A ⇒ B → Expr ∥ A ∥ ∥ B ∥
   ∥_!∥   : A ⇒ ⊤ → Expr ∥ A ∥ :⊤
 
--- Atomized expression
+-- Atomised expression
 data AExpr : Rel Sig (o ⊔ ℓ) where
   :id   : AExpr ∥ A ∥ ∥ A ∥
   :π₁   : AExpr (S :× T) S
@@ -58,7 +59,7 @@ data AExpr : Rel Sig (o ⊔ ℓ) where
   :π₁∘_ : AExpr S (T :× U) → AExpr S T
   :π₂∘_ : AExpr S (T :× U) → AExpr S U
 
--- Normalized expression
+-- Normalised expression
 data NExpr : Rel Sig (o ⊔ ℓ) where
   :!-N   : NExpr S :⊤
   ⟪_⟫    : AExpr S T → NExpr S T
@@ -111,27 +112,27 @@ _∘N_ : NExpr T U → NExpr S T → NExpr S U
 
 :π₁-N : ∀ S T → NExpr (S :× T) S
 :π₂-N : ∀ S T → NExpr (S :× T) T
-:π₁-N ∥ A ∥      T = ⟪ :π₁ ⟫
+:π₁-N ∥ _ ∥      T = ⟪ :π₁ ⟫
 :π₁-N :⊤         T = ⟪ :π₁ ⟫
 :π₁-N (S₁ :× S₂) T = :⟨ :π₁-N _ _ ∘N ⟪ :π₁ ⟫ , :π₂-N _ _ ∘N ⟪ :π₁ ⟫ ⟩
-:π₂-N S ∥ A ∥      = ⟪ :π₂ ⟫
+:π₂-N S ∥ _ ∥      = ⟪ :π₂ ⟫
 :π₂-N S :⊤         = ⟪ :π₂ ⟫
 :π₂-N S (T₁ :× T₂) = :⟨ :π₁-N _ _ ∘N ⟪ :π₂ ⟫ , :π₂-N _ _ ∘N ⟪ :π₂ ⟫ ⟩
 
 :id-N : ∀ S → NExpr S S
-:id-N ∥ A ∥    = ⟪ :id ⟫
+:id-N ∥ _ ∥    = ⟪ :id ⟫
 :id-N :⊤       = :!-N
 :id-N (S :× T) = :⟨ :π₁-N S T , :π₂-N S T ⟩
 
 -- expand id, π₁ and π₂
-toNExpr : Expr S T → NExpr S T
-toNExpr :id          = :id-N _
-toNExpr (e₁ :∘ e₂)   = toNExpr e₁ ∘N toNExpr e₂
-toNExpr :π₁          = :π₁-N _ _
-toNExpr :π₂          = :π₂-N _ _
-toNExpr :⟨ e₁ , e₂ ⟩ = :⟨ toNExpr e₁ , toNExpr e₂ ⟩
-toNExpr ∥ f ∥        = ∥ f ∥∘ ⟪ :id ⟫
-toNExpr ∥ g !∥       = :!-N
+normalise : Expr S T → NExpr S T
+normalise :id          = :id-N _
+normalise (e₁ :∘ e₂)   = normalise e₁ ∘N normalise e₂
+normalise :π₁          = :π₁-N _ _
+normalise :π₂          = :π₂-N _ _
+normalise :⟨ e₁ , e₂ ⟩ = :⟨ normalise e₁ , normalise e₂ ⟩
+normalise ∥ f ∥        = ∥ f ∥∘ ⟪ :id ⟫
+normalise ∥ g !∥       = :!-N
 
 :π₁∘-N-correct : (e : NExpr S (T :× U)) → ⟦ :π₁∘-N e ⟧N ≈ π₁ ∘ ⟦ e ⟧N
 :π₁∘-N-correct ⟪ e ⟫        = refl
@@ -162,9 +163,9 @@ toNExpr ∥ g !∥       = :!-N
 
 private
   :π₁′ : ∀ S T → NExpr (S :× T) S
-  :π₁′ S T = ⟪ :π₁ ⟫
+  :π₁′ _ _ = ⟪ :π₁ ⟫
   :π₂′ : ∀ S T → NExpr (S :× T) T
-  :π₂′ S T = ⟪ :π₂ ⟫
+  :π₂′ _ _  = ⟪ :π₂ ⟫
 
 :π₁-N-correct : ∀ S T → ⟦ :π₁-N S T ⟧N ≈ π₁
 :π₂-N-correct : ∀ S T → ⟦ :π₂-N S T ⟧N ≈ π₂
@@ -202,28 +203,29 @@ private
     ∎
 
 :id-N-correct : ∀ S → ⟦ :id-N S ⟧N ≈ id
-:id-N-correct ∥ A ∥      = refl
+:id-N-correct ∥ _ ∥      = refl
 :id-N-correct :⊤         = !-unique id
 :id-N-correct (S₁ :× S₂) =
   ⟨⟩-cong₂ (:π₁-N-correct S₁ S₂) (:π₂-N-correct S₁ S₂) ○ η
 
-toNExpr-correct : ∀ (e : Expr S T) → ⟦ toNExpr e ⟧N ≈ ⟦ e ⟧
-toNExpr-correct {S} :id          = :id-N-correct S
-toNExpr-correct (e₁ :∘ e₂)       = begin
-  ⟦ toNExpr e₁ ∘N toNExpr e₂ ⟧N     ≈⟨ ∘N-homo (toNExpr e₁) (toNExpr e₂) ⟩
-  ⟦ toNExpr e₁ ⟧N ∘ ⟦ toNExpr e₂ ⟧N ≈⟨ toNExpr-correct e₁ ⟩∘⟨ toNExpr-correct e₂ ⟩
-  ⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧                   ∎
-toNExpr-correct {S :× T} {S} :π₁ = :π₁-N-correct S T
-toNExpr-correct {S :× T} {T} :π₂ = :π₂-N-correct S T
-toNExpr-correct :⟨ e₁ , e₂ ⟩     = ⟨⟩-cong₂ (toNExpr-correct e₁) (toNExpr-correct e₂)
-toNExpr-correct ∥ f ∥            = identityʳ
-toNExpr-correct ∥ g !∥           = !-unique g
+correct : ∀ (e : Expr S T) → ⟦ normalise e ⟧N ≈ ⟦ e ⟧
+correct {S} :id          = :id-N-correct S
+correct (e₁ :∘ e₂)       = begin
+  ⟦ normalise e₁ ∘N normalise e₂ ⟧N     ≈⟨ ∘N-homo (normalise e₁) (normalise e₂) ⟩
+  ⟦ normalise e₁ ⟧N ∘ ⟦ normalise e₂ ⟧N ≈⟨ correct e₁ ⟩∘⟨ correct e₂ ⟩
+  ⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧                       ∎
+correct {S :× T} {S} :π₁ = :π₁-N-correct S T
+correct {S :× T} {T} :π₂ = :π₂-N-correct S T
+correct :⟨ e₁ , e₂ ⟩     = ⟨⟩-cong₂ (correct e₁) (correct e₂)
+correct ∥ f ∥            = identityʳ
+correct ∥ g !∥           = !-unique g
 
-solve : (e₁ e₂ : Expr S T) → ⟦ toNExpr e₁ ⟧N ≈ ⟦ toNExpr e₂ ⟧N → ⟦ e₁ ⟧ ≈ ⟦ e₂ ⟧
+solve : (e₁ e₂ : Expr S T) →
+        ⟦ normalise e₁ ⟧N ≈ ⟦ normalise e₂ ⟧N → ⟦ e₁ ⟧ ≈ ⟦ e₂ ⟧
 solve e₁ e₂ eq = begin
-  ⟦ e₁ ⟧          ≈˘⟨ toNExpr-correct e₁ ⟩
-  ⟦ toNExpr e₁ ⟧N ≈⟨ eq ⟩
-  ⟦ toNExpr e₂ ⟧N ≈⟨ toNExpr-correct e₂ ⟩
+  ⟦ e₁ ⟧          ≈˘⟨ correct e₁ ⟩
+  ⟦ normalise e₁ ⟧N ≈⟨ eq ⟩
+  ⟦ normalise e₂ ⟧N ≈⟨ correct e₂ ⟩
   ⟦ e₂ ⟧          ∎
 
 -- Combinators
