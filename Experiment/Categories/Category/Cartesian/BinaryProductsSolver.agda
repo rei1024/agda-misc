@@ -5,8 +5,8 @@
 open import Categories.Category
 open import Categories.Category.Cartesian
 
-module Experiment.Categories.Category.Cartesian.Solver
-  {o ℓ e} {𝒞 : Category o ℓ e} (cartesian : Cartesian 𝒞) where
+module Experiment.Categories.Category.Cartesian.BinaryProductsSolver
+  {o ℓ e} {𝒞 : Category o ℓ e} (prods : BinaryProducts 𝒞) where
 
 open import Level
 open import Relation.Binary using (Rel)
@@ -14,7 +14,7 @@ open import Relation.Binary using (Rel)
 import Categories.Morphism.Reasoning as MR
 
 open Category 𝒞
-open Cartesian cartesian
+open BinaryProducts prods
 open HomReasoning
 open MR 𝒞
 
@@ -28,12 +28,10 @@ infix 11 :⟨_,_⟩
 
 data Sig : Set o where
   ∥_∥  : Obj → Sig
-  :⊤   : Sig
   _:×_ : Sig → Sig → Sig
 
 ⟦_⟧Sig : Sig → Obj
 ⟦ ∥ A ∥    ⟧Sig = A
-⟦ :⊤       ⟧Sig = ⊤
 ⟦ S₁ :× S₂ ⟧Sig = ⟦ S₁ ⟧Sig × ⟦ S₂ ⟧Sig
 
 private
@@ -47,11 +45,9 @@ data Expr : Rel Sig (o ⊔ ℓ) where
   :π₂    : Expr (S :× T) T
   :⟨_,_⟩ : Expr U S → Expr U T → Expr U (S :× T)
   ∥_∥    : A ⇒ B → Expr ∥ A ∥ ∥ B ∥
-  ∥_!∥   : A ⇒ ⊤ → Expr ∥ A ∥ :⊤
 
 -- normalized expression
 data NExpr : Rel Sig (o ⊔ ℓ) where
-  :!     : NExpr S :⊤
   :id    : NExpr ∥ A ∥ ∥ A ∥
   :π₁    : NExpr (S :× T) S
   :π₂    : NExpr (S :× T) T
@@ -67,10 +63,8 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 ⟦ :π₂          ⟧ = π₂
 ⟦ :⟨ e₁ , e₂ ⟩ ⟧ = ⟨ ⟦ e₁ ⟧ , ⟦ e₂ ⟧ ⟩
 ⟦ ∥ f ∥        ⟧ = f
-⟦ ∥ g !∥       ⟧ = g
 
 ⟦_⟧N : NExpr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
-⟦ :!           ⟧N = !
 ⟦ :id          ⟧N = id
 ⟦ :π₁          ⟧N = π₁
 ⟦ :π₂          ⟧N = π₂
@@ -80,7 +74,6 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 ⟦ :⟨ e₁ , e₂ ⟩ ⟧N = ⟨ ⟦ e₁ ⟧N , ⟦ e₂ ⟧N ⟩
 
 _∘N_ : NExpr T U → NExpr S T → NExpr S U
-:!           ∘N e₂ = :!
 :id          ∘N e₂ = e₂
 :π₁          ∘N e₂ = :π₁∘ e₂
 :π₂          ∘N e₂ = :π₂∘ e₂
@@ -98,15 +91,12 @@ _∘N_ : NExpr T U → NExpr S T → NExpr S U
 :π₁-N : ∀ S T → NExpr (S :× T) S
 :π₂-N : ∀ S T → NExpr (S :× T) T
 :π₁-N ∥ A ∥      T = :π₁
-:π₁-N :⊤         T = :π₁
 :π₁-N (S₁ :× S₂) T = :⟨ :π₁-N _ _ ∘N :π₁ , :π₂-N _ _ ∘N :π₁ ⟩
 :π₂-N S ∥ A ∥      = :π₂
-:π₂-N S :⊤         = :π₂
 :π₂-N S (T₁ :× T₂) = :⟨ :π₁-N _ _ ∘N :π₂ , :π₂-N _ _ ∘N :π₂ ⟩
 
 :id-N : ∀ S → NExpr S S
 :id-N ∥ A ∥    = :id
-:id-N :⊤       = :!
 :id-N (S :× T) = :⟨ :π₁-N S T , :π₂-N S T ⟩
 
 -- normalize _∘_ and distribute ⟨_,_⟩ and expand id, π₁ and π₂
@@ -117,7 +107,6 @@ toNExpr :π₁          = :π₁-N _ _
 toNExpr :π₂          = :π₂-N _ _
 toNExpr :⟨ e₁ , e₂ ⟩ = :⟨ toNExpr e₁ , toNExpr e₂ ⟩
 toNExpr ∥ f ∥        = ∥ f ∥∘ :id
-toNExpr ∥ g !∥       = :!
 
 reduce-π₁ : NExpr S (T :× U) → NExpr S T
 reduce-π₁ :π₁          = :π₁∘ :π₁
@@ -134,7 +123,6 @@ reduce-π₂ (:π₂∘ e)     = :π₂∘ :π₂∘ e
 reduce-π₂ :⟨ e₁ , e₂ ⟩ = e₂
 
 reduce : NExpr S T → NExpr S T
-reduce :!           = :!
 reduce :id          = :id
 reduce :π₁          = :π₁
 reduce :π₂          = :π₂
@@ -147,7 +135,6 @@ reduceN : Expr S T → NExpr S T
 reduceN e = reduce (toNExpr e)
 
 ∘N-homo : (e₁ : NExpr T U) (e₂ : NExpr S T) → ⟦ e₁ ∘N e₂ ⟧N ≈ ⟦ e₁ ⟧N ∘ ⟦ e₂ ⟧N
-∘N-homo :!           e₂ = !-unique (! ∘ ⟦ e₂ ⟧N)
 ∘N-homo :id          e₂ = ⟺ identityˡ
 ∘N-homo :π₁          e₂ = refl
 ∘N-homo :π₂          e₂ = refl
@@ -165,7 +152,6 @@ reduceN e = reduce (toNExpr e)
 :π₁-N-correct : ∀ S T → ⟦ :π₁-N S T ⟧N ≈ π₁
 :π₂-N-correct : ∀ S T → ⟦ :π₂-N S T ⟧N ≈ π₂
 :π₁-N-correct ∥ A ∥      T = refl
-:π₁-N-correct :⊤         T = refl
 :π₁-N-correct (S₁ :× S₂) T = begin
   ⟨ ⟦ :π₁-N S₁ S₂ ∘N :π₁′ (S₁ :× S₂) T ⟧N ,
     ⟦ :π₂-N S₁ S₂ ∘N :π₁′ (S₁ :× S₂) T ⟧N ⟩
@@ -181,7 +167,6 @@ reduceN e = reduce (toNExpr e)
   π₁
     ∎
 :π₂-N-correct S ∥ A ∥      = refl
-:π₂-N-correct S :⊤         = refl
 :π₂-N-correct S (T₁ :× T₂) = begin
   ⟨ ⟦ :π₁-N T₁ T₂ ∘N :π₂′ S (T₁ :× T₂) ⟧N ,
     ⟦ :π₂-N T₁ T₂ ∘N :π₂′ S (T₁ :× T₂) ⟧N ⟩
@@ -199,7 +184,6 @@ reduceN e = reduce (toNExpr e)
 
 :id-N-correct : ∀ S → ⟦ :id-N S ⟧N ≈ id
 :id-N-correct ∥ A ∥      = refl
-:id-N-correct :⊤         = !-unique id
 :id-N-correct (S₁ :× S₂) =
   ⟨⟩-cong₂ (:π₁-N-correct S₁ S₂) (:π₂-N-correct S₁ S₂) ○ η
 
@@ -213,7 +197,6 @@ toNExpr-correct {S = S :× T} {S} :π₁ = :π₁-N-correct S T
 toNExpr-correct {S = S :× T} {T} :π₂ = :π₂-N-correct S T
 toNExpr-correct :⟨ e₁ , e₂ ⟩         = ⟨⟩-cong₂ (toNExpr-correct e₁) (toNExpr-correct e₂)
 toNExpr-correct ∥ f ∥                = identityʳ
-toNExpr-correct ∥ g !∥               = !-unique g
 
 reduce-π₁-correct : (e : NExpr S (T :× U)) → ⟦ reduce-π₁ e ⟧N ≈ π₁ ∘ ⟦ e ⟧N
 reduce-π₁-correct :π₁          = refl
@@ -230,7 +213,6 @@ reduce-π₂-correct (:π₂∘ e)     = refl
 reduce-π₂-correct :⟨ e₁ , e₂ ⟩ = ⟺ project₂
 
 reduce-correct : (e : NExpr S T) → ⟦ reduce e ⟧N ≈ ⟦ e ⟧N
-reduce-correct :!           = refl
 reduce-correct :id          = refl
 reduce-correct :π₁          = refl
 reduce-correct :π₂          = refl
@@ -253,11 +235,6 @@ solve e₁ e₂ eq = begin
 
 -- combinators
 -- TODO add more
-
--- TODO rename to `:!`
-:!′ : Expr ∥ A ∥ :⊤
-:!′ = ∥ ! !∥
-
 :swap : Expr (S :× T) (T :× S)
 :swap = :⟨ :π₂ , :π₁ ⟩
 
@@ -296,9 +273,3 @@ private
       where
       lhs = (:id :⁂ :assocˡ) :∘ :assocˡ :∘ (:assocˡ :⁂ :id)
       rhs = :assocˡ :∘ :assocˡ {S = ∥ A ∥ :× ∥ B ∥} {T = ∥ C ∥} {U = ∥ D ∥}
-
-  module _ {A B} {f : A ⇒ B} where
-    commute : ⟨ ! , id ⟩ ∘ f ≈ ⟨ id ∘ π₁ , f ∘ π₂ ⟩ ∘ ⟨ ! , id ⟩
-    commute = solve (:⟨ :!′ , :id ⟩ :∘ ∥ f ∥)
-                    (:⟨ :id :∘ :π₁ , ∥ f ∥ :∘ :π₂ ⟩ :∘ :⟨ :!′ , :id ⟩)
-                    refl
