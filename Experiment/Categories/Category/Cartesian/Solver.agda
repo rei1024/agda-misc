@@ -20,7 +20,7 @@ open MR 𝒞
 
 private
   variable
-    A B C : Obj
+    A B C D E F : Obj
 
 infixr 9 _:∘_
 infixr 7 _:×_
@@ -82,7 +82,6 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 ⟦ :π₁∘ e   ⟧A = π₁ ∘ ⟦ e ⟧A
 ⟦ :π₂∘ e   ⟧A = π₂ ∘ ⟦ e ⟧A
 
-
 ⟦_⟧N : NExpr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
 ⟦ :!-N         ⟧N = !
 ⟦ ⟪ e ⟫        ⟧N = ⟦ e ⟧A
@@ -124,7 +123,7 @@ _∘N_ : NExpr T U → NExpr S T → NExpr S U
 :id-N :⊤       = :!-N
 :id-N (S :× T) = :⟨ :π₁-N S T , :π₂-N S T ⟩
 
--- distribute ⟨_,_⟩ and expand id, π₁ and π₂
+-- expand id, π₁ and π₂
 toNExpr : Expr S T → NExpr S T
 toNExpr :id          = :id-N _
 toNExpr (e₁ :∘ e₂)   = toNExpr e₁ ∘N toNExpr e₂
@@ -227,7 +226,7 @@ solve e₁ e₂ eq = begin
   ⟦ toNExpr e₂ ⟧N ≈⟨ toNExpr-correct e₂ ⟩
   ⟦ e₂ ⟧          ∎
 
--- combinators
+-- Combinators
 :! : Expr ∥ A ∥ :⊤
 :! = ∥ ! !∥
 
@@ -266,7 +265,7 @@ private
   assocʳ∘assocˡ≈id {A} {B} {C} =
     solve (:assocʳ {∥ A ∥} {∥ B ∥} {∥ C ∥} :∘ :assocˡ) :id refl
 
-  module _ {A B C D E F} {f : B ⇒ C} (f′ : A ⇒ B) {g : E ⇒ F} {g′ : D ⇒ E} where
+  module _ {f : B ⇒ C} (f′ : A ⇒ B) {g : E ⇒ F} {g′ : D ⇒ E} where
     ⁂-∘ : (f ⁂ g) ∘ (f′ ⁂ g′) ≈ (f ∘ f′) ⁂ (g ∘ g′)
     ⁂-∘ = solve lhs rhs refl where
       lhs = (∥ f ∥ :⁂ ∥ g ∥) :∘ (∥ f′ ∥ :⁂ ∥ g′ ∥)
