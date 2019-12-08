@@ -47,6 +47,17 @@ import Constructive.Common
 -- Searchable set
 import Constructive.Searchable
 
+-- Experiment
+
+-- Category theory
+import Experiment.Categories.Category.Solver
+
+import Experiment.Categories.Category.Cartesian.Solver
+
+import Experiment.Categories.Functor.Solver
+
+import Experiment.Categories.Functor.MultiSolver
+
 ------------------------------------------------------------------------
 -- Formal language
 

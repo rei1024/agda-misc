@@ -1,5 +1,7 @@
 -- Solver for Functor
 
+{-# OPTIONS --without-K --safe #-}
+
 open import Categories.Category
 open import Categories.Functor renaming (id to idF)
 

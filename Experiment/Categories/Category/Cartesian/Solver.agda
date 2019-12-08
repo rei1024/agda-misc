@@ -260,8 +260,7 @@ private
               refl
 
   swap∘swap≈id : ∀ {A B} → swap {A}{B} ∘ swap {B}{A} ≈ id
-  swap∘swap≈id {A} {B} =
-    solve (:swap {∥ A ∥} {∥ B ∥} :∘ :swap) :id refl
+  swap∘swap≈id {A} {B} = solve (:swap {∥ A ∥} {∥ B ∥} :∘ :swap) :id refl
 
   assocʳ∘assocˡ≈id : ∀ {A B C} → assocʳ {A}{B}{C} ∘ assocˡ {A}{B}{C} ≈ id
   assocʳ∘assocˡ≈id {A} {B} {C} =
@@ -269,16 +268,14 @@ private
 
   module _ {A B C D E F} {f : B ⇒ C} (f′ : A ⇒ B) {g : E ⇒ F} {g′ : D ⇒ E} where
     ⁂-∘ : (f ⁂ g) ∘ (f′ ⁂ g′) ≈ (f ∘ f′) ⁂ (g ∘ g′)
-    ⁂-∘ = solve lhs rhs refl
-      where
+    ⁂-∘ = solve lhs rhs refl where
       lhs = (∥ f ∥ :⁂ ∥ g ∥) :∘ (∥ f′ ∥ :⁂ ∥ g′ ∥)
       rhs = (∥ f ∥ :∘ ∥ f′ ∥) :⁂ (∥ g ∥ :∘ ∥ g′ ∥)
 
   module _ {A B C D} where
     pentagon′ : (id ⁂ assocˡ) ∘ assocˡ ∘ (assocˡ ⁂ id) ≈
                 assocˡ ∘ assocˡ {A × B} {C} {D}
-    pentagon′ = solve lhs rhs refl
-      where
+    pentagon′ = solve lhs rhs refl where
       lhs = (:id :⁂ :assocˡ) :∘ :assocˡ :∘ (:assocˡ :⁂ :id)
       rhs = :assocˡ :∘ :assocˡ {∥ A ∥ :× ∥ B ∥} {∥ C ∥} {∥ D ∥}
 
