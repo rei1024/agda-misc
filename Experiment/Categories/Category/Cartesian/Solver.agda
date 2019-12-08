@@ -253,8 +253,6 @@ solve e₁ e₂ eq = begin
   ⟦ e₂ ⟧          ∎
 
 -- combinators
--- TODO add more
-
 :! : Expr ∥ A ∥ :⊤
 :! = ∥ ! !∥
 
@@ -272,15 +270,21 @@ infixr 8 _:⁂_
 _:⁂_ : Expr S T → Expr U V → Expr (S :× U) (T :× V)
 e₁ :⁂ e₂ = :⟨ e₁ :∘ :π₁ , e₂ :∘ :π₂ ⟩
 
+:first : Expr S T → Expr (S :× U) (T :× U)
+:first e = e :⁂ :id
+
+:second : Expr T U → Expr (S :× T) (S :× U)
+:second e = :id :⁂ e
+
 -- Example
 private
   swap∘swap≈id : ∀ {A B} → swap {A}{B} ∘ swap {B}{A} ≈ id
   swap∘swap≈id {A} {B} =
-    solve (:swap {S = ∥ A ∥} {T = ∥ B ∥} :∘ :swap) :id refl
+    solve (:swap {∥ A ∥} {∥ B ∥} :∘ :swap) :id refl
 
   assocʳ∘assocˡ≈id : ∀ {A B C} → assocʳ {A}{B}{C} ∘ assocˡ {A}{B}{C} ≈ id
   assocʳ∘assocˡ≈id {A} {B} {C} =
-    solve (:assocʳ {S = ∥ A ∥} {T = ∥ B ∥} {U = ∥ C ∥} :∘ :assocˡ) :id refl
+    solve (:assocʳ {∥ A ∥} {∥ B ∥} {∥ C ∥} :∘ :assocˡ) :id refl
 
   module _ {A B C D E F} {f : B ⇒ C} (f′ : A ⇒ B) {g : E ⇒ F} {g′ : D ⇒ E} where
     ⁂-∘ : (f ⁂ g) ∘ (f′ ⁂ g′) ≈ (f ∘ f′) ⁂ (g ∘ g′)
@@ -291,11 +295,11 @@ private
 
   module _ {A B C D} where
     pentagon′ : (id ⁂ assocˡ) ∘ assocˡ ∘ (assocˡ ⁂ id) ≈
-                assocˡ ∘ assocˡ {A = A × B} {B = C} {C = D}
+                assocˡ ∘ assocˡ {A × B} {C} {D}
     pentagon′ = solve lhs rhs refl
       where
       lhs = (:id :⁂ :assocˡ) :∘ :assocˡ :∘ (:assocˡ :⁂ :id)
-      rhs = :assocˡ :∘ :assocˡ {S = ∥ A ∥ :× ∥ B ∥} {T = ∥ C ∥} {U = ∥ D ∥}
+      rhs = :assocˡ :∘ :assocˡ {∥ A ∥ :× ∥ B ∥} {∥ C ∥} {∥ D ∥}
 
   module _ {A B} {f : A ⇒ B} where
     commute : ⟨ ! , id ⟩ ∘ f ≈ ⟨ id ∘ π₁ , f ∘ π₂ ⟩ ∘ ⟨ ! , id ⟩

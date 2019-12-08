@@ -1,4 +1,4 @@
--- Solver for cartesian category
+-- Solver for BinaryProducts
 
 {-# OPTIONS --without-K --safe #-}
 
@@ -234,7 +234,6 @@ solve e₁ e₂ eq = begin
   ⟦ e₂ ⟧          ∎
 
 -- combinators
--- TODO add more
 :swap : Expr (S :× T) (T :× S)
 :swap = :⟨ :π₂ , :π₁ ⟩
 
@@ -248,6 +247,12 @@ infixr 8 _:⁂_
 
 _:⁂_ : Expr S T → Expr U V → Expr (S :× U) (T :× V)
 e₁ :⁂ e₂ = :⟨ e₁ :∘ :π₁ , e₂ :∘ :π₂ ⟩
+
+:first : Expr S T → Expr (S :× U) (T :× U)
+:first e = e :⁂ :id
+
+:second : Expr T U → Expr (S :× T) (S :× U)
+:second e = :id :⁂ e
 
 -- Example
 private
