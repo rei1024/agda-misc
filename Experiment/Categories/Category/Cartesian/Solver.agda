@@ -1,4 +1,5 @@
 -- Solver for cartesian category
+
 {-# OPTIONS --without-K --safe #-}
 
 open import Categories.Category
