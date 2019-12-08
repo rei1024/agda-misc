@@ -40,6 +40,7 @@ private
   variable
     S T U V : Sig
 
+-- Expression for cartesian category
 data Expr : Rel Sig (o ⊔ ℓ) where
   :id    : Expr S S
   _:∘_   : Expr T U → Expr S T → Expr S U
@@ -49,9 +50,9 @@ data Expr : Rel Sig (o ⊔ ℓ) where
   ∥_∥    : A ⇒ B → Expr ∥ A ∥ ∥ B ∥
   ∥_!∥   : A ⇒ ⊤ → Expr ∥ A ∥ :⊤
 
--- normalized expression
+-- Normalized expression
 data NExpr : Rel Sig (o ⊔ ℓ) where
-  :!     : NExpr S :⊤
+  :!-N   : NExpr S :⊤
   :id    : NExpr ∥ A ∥ ∥ A ∥
   :π₁    : NExpr (S :× T) S
   :π₂    : NExpr (S :× T) T
@@ -70,7 +71,7 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 ⟦ ∥ g !∥       ⟧ = g
 
 ⟦_⟧N : NExpr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
-⟦ :!           ⟧N = !
+⟦ :!-N         ⟧N = !
 ⟦ :id          ⟧N = id
 ⟦ :π₁          ⟧N = π₁
 ⟦ :π₂          ⟧N = π₂
@@ -80,7 +81,7 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 ⟦ :⟨ e₁ , e₂ ⟩ ⟧N = ⟨ ⟦ e₁ ⟧N , ⟦ e₂ ⟧N ⟩
 
 _∘N_ : NExpr T U → NExpr S T → NExpr S U
-:!           ∘N e₂ = :!
+:!-N         ∘N e₂ = :!-N
 :id          ∘N e₂ = e₂
 :π₁          ∘N e₂ = :π₁∘ e₂
 :π₂          ∘N e₂ = :π₂∘ e₂
@@ -88,12 +89,6 @@ _∘N_ : NExpr T U → NExpr S T → NExpr S U
 (:π₂∘ e₁)    ∘N e₂ = :π₂∘ (e₁ ∘N e₂)
 (∥ f ∥∘ e₁)  ∘N e₂ = ∥ f ∥∘ (e₁ ∘N e₂)
 :⟨ e₁ , e₂ ⟩ ∘N e₃ = :⟨ e₁ ∘N e₃ , e₂ ∘N e₃ ⟩
-
-:π₁′ : ∀ S T → NExpr (S :× T) S
-:π₁′ S T = :π₁
-
-:π₂′ : ∀ S T → NExpr (S :× T) T
-:π₂′ S T = :π₂
 
 :π₁-N : ∀ S T → NExpr (S :× T) S
 :π₂-N : ∀ S T → NExpr (S :× T) T
@@ -106,10 +101,10 @@ _∘N_ : NExpr T U → NExpr S T → NExpr S U
 
 :id-N : ∀ S → NExpr S S
 :id-N ∥ A ∥    = :id
-:id-N :⊤       = :!
+:id-N :⊤       = :!-N
 :id-N (S :× T) = :⟨ :π₁-N S T , :π₂-N S T ⟩
 
--- normalize _∘_ and distribute ⟨_,_⟩ and expand id, π₁ and π₂
+-- distribute ⟨_,_⟩ and expand id, π₁ and π₂
 toNExpr : Expr S T → NExpr S T
 toNExpr :id          = :id-N _
 toNExpr (e₁ :∘ e₂)   = toNExpr e₁ ∘N toNExpr e₂
@@ -117,7 +112,7 @@ toNExpr :π₁          = :π₁-N _ _
 toNExpr :π₂          = :π₂-N _ _
 toNExpr :⟨ e₁ , e₂ ⟩ = :⟨ toNExpr e₁ , toNExpr e₂ ⟩
 toNExpr ∥ f ∥        = ∥ f ∥∘ :id
-toNExpr ∥ g !∥       = :!
+toNExpr ∥ g !∥       = :!-N
 
 reduce-π₁ : NExpr S (T :× U) → NExpr S T
 reduce-π₁ :π₁          = :π₁∘ :π₁
@@ -134,7 +129,7 @@ reduce-π₂ (:π₂∘ e)     = :π₂∘ :π₂∘ e
 reduce-π₂ :⟨ e₁ , e₂ ⟩ = e₂
 
 reduce : NExpr S T → NExpr S T
-reduce :!           = :!
+reduce :!-N         = :!-N
 reduce :id          = :id
 reduce :π₁          = :π₁
 reduce :π₂          = :π₂
@@ -147,7 +142,7 @@ reduceN : Expr S T → NExpr S T
 reduceN e = reduce (toNExpr e)
 
 ∘N-homo : (e₁ : NExpr T U) (e₂ : NExpr S T) → ⟦ e₁ ∘N e₂ ⟧N ≈ ⟦ e₁ ⟧N ∘ ⟦ e₂ ⟧N
-∘N-homo :!           e₂ = !-unique (! ∘ ⟦ e₂ ⟧N)
+∘N-homo :!-N         e₂ = !-unique (! ∘ ⟦ e₂ ⟧N)
 ∘N-homo :id          e₂ = ⟺ identityˡ
 ∘N-homo :π₁          e₂ = refl
 ∘N-homo :π₂          e₂ = refl
@@ -161,6 +156,12 @@ reduceN e = reduce (toNExpr e)
     ≈˘⟨ ⟨⟩∘ ⟩
   ⟨ ⟦ e₁ ⟧N , ⟦ e₂ ⟧N ⟩ ∘ ⟦ e₃ ⟧N
     ∎
+
+private
+  :π₁′ : ∀ S T → NExpr (S :× T) S
+  :π₁′ S T = :π₁
+  :π₂′ : ∀ S T → NExpr (S :× T) T
+  :π₂′ S T = :π₂
 
 :π₁-N-correct : ∀ S T → ⟦ :π₁-N S T ⟧N ≈ π₁
 :π₂-N-correct : ∀ S T → ⟦ :π₂-N S T ⟧N ≈ π₂
@@ -230,7 +231,7 @@ reduce-π₂-correct (:π₂∘ e)     = refl
 reduce-π₂-correct :⟨ e₁ , e₂ ⟩ = ⟺ project₂
 
 reduce-correct : (e : NExpr S T) → ⟦ reduce e ⟧N ≈ ⟦ e ⟧N
-reduce-correct :!           = refl
+reduce-correct :!-N         = refl
 reduce-correct :id          = refl
 reduce-correct :π₁          = refl
 reduce-correct :π₂          = refl
@@ -254,9 +255,8 @@ solve e₁ e₂ eq = begin
 -- combinators
 -- TODO add more
 
--- TODO rename to `:!`
-:!′ : Expr ∥ A ∥ :⊤
-:!′ = ∥ ! !∥
+:! : Expr ∥ A ∥ :⊤
+:! = ∥ ! !∥
 
 :swap : Expr (S :× T) (T :× S)
 :swap = :⟨ :π₂ , :π₁ ⟩
@@ -299,6 +299,6 @@ private
 
   module _ {A B} {f : A ⇒ B} where
     commute : ⟨ ! , id ⟩ ∘ f ≈ ⟨ id ∘ π₁ , f ∘ π₂ ⟩ ∘ ⟨ ! , id ⟩
-    commute = solve (:⟨ :!′ , :id ⟩ :∘ ∥ f ∥)
-                    (:⟨ :id :∘ :π₁ , ∥ f ∥ :∘ :π₂ ⟩ :∘ :⟨ :!′ , :id ⟩)
+    commute = solve (:⟨ :! , :id ⟩ :∘ ∥ f ∥)
+                    (:⟨ :id :∘ :π₁ , ∥ f ∥ :∘ :π₂ ⟩ :∘ :⟨ :! , :id ⟩)
                     refl
