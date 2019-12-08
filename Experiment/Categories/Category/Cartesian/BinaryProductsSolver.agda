@@ -56,6 +56,7 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
   ∥_∥∘_  : B ⇒ C → NExpr S ∥ B ∥ → NExpr S ∥ C ∥
   :⟨_,_⟩ : NExpr U S → NExpr U T → NExpr U (S :× T)
 
+-- Semantics
 ⟦_⟧ : Expr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
 ⟦ :id          ⟧ = id
 ⟦ e₁ :∘ e₂     ⟧ = ⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧
@@ -81,12 +82,6 @@ _∘N_ : NExpr T U → NExpr S T → NExpr S U
 (:π₂∘ e₁)    ∘N e₂ = :π₂∘ (e₁ ∘N e₂)
 (∥ f ∥∘ e₁)  ∘N e₂ = ∥ f ∥∘ (e₁ ∘N e₂)
 :⟨ e₁ , e₂ ⟩ ∘N e₃ = :⟨ e₁ ∘N e₃ , e₂ ∘N e₃ ⟩
-
-:π₁′ : ∀ S T → NExpr (S :× T) S
-:π₁′ S T = :π₁
-
-:π₂′ : ∀ S T → NExpr (S :× T) T
-:π₂′ S T = :π₂
 
 :π₁-N : ∀ S T → NExpr (S :× T) S
 :π₂-N : ∀ S T → NExpr (S :× T) T
@@ -148,6 +143,12 @@ reduceN e = reduce (toNExpr e)
     ≈˘⟨ ⟨⟩∘ ⟩
   ⟨ ⟦ e₁ ⟧N , ⟦ e₂ ⟧N ⟩ ∘ ⟦ e₃ ⟧N
     ∎
+
+private
+  :π₁′ : ∀ S T → NExpr (S :× T) S
+  :π₁′ S T = :π₁
+  :π₂′ : ∀ S T → NExpr (S :× T) T
+  :π₂′ S T = :π₂
 
 :π₁-N-correct : ∀ S T → ⟦ :π₁-N S T ⟧N ≈ π₁
 :π₂-N-correct : ∀ S T → ⟦ :π₂-N S T ⟧N ≈ π₂
@@ -258,11 +259,11 @@ e₁ :⁂ e₂ = :⟨ e₁ :∘ :π₁ , e₂ :∘ :π₂ ⟩
 private
   swap∘swap≈id : ∀ {A B} → swap {A}{B} ∘ swap {B}{A} ≈ id
   swap∘swap≈id {A} {B} =
-    solve (:swap {S = ∥ A ∥} {T = ∥ B ∥} :∘ :swap) :id refl
+    solve (:swap {∥ A ∥} {∥ B ∥} :∘ :swap) :id refl
 
   assocʳ∘assocˡ≈id : ∀ {A B C} → assocʳ {A}{B}{C} ∘ assocˡ {A}{B}{C} ≈ id
   assocʳ∘assocˡ≈id {A} {B} {C} =
-    solve (:assocʳ {S = ∥ A ∥} {T = ∥ B ∥} {U = ∥ C ∥} :∘ :assocˡ) :id refl
+    solve (:assocʳ {∥ A ∥} {∥ B ∥} {∥ C ∥} :∘ :assocˡ) :id refl
 
   module _ {A B C D E F} {f : B ⇒ C} (f′ : A ⇒ B) {g : E ⇒ F} {g′ : D ⇒ E} where
     ⁂-∘ : (f ⁂ g) ∘ (f′ ⁂ g′) ≈ (f ∘ f′) ⁂ (g ∘ g′)
@@ -273,8 +274,8 @@ private
 
   module _ {A B C D} where
     pentagon′ : (id ⁂ assocˡ) ∘ assocˡ ∘ (assocˡ ⁂ id) ≈
-                assocˡ ∘ assocˡ {A = A × B} {B = C} {C = D}
+                assocˡ ∘ assocˡ {A × B} {C} {D}
     pentagon′ = solve lhs rhs refl
       where
       lhs = (:id :⁂ :assocˡ) :∘ :assocˡ :∘ (:assocˡ :⁂ :id)
-      rhs = :assocˡ :∘ :assocˡ {S = ∥ A ∥ :× ∥ B ∥} {T = ∥ C ∥} {U = ∥ D ∥}
+      rhs = :assocˡ :∘ :assocˡ {∥ A ∥ :× ∥ B ∥} {∥ C ∥} {∥ D ∥}
