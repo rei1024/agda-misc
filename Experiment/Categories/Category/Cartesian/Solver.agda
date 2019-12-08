@@ -61,6 +61,7 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
   ∥_∥∘_  : B ⇒ C → NExpr S ∥ B ∥ → NExpr S ∥ C ∥
   :⟨_,_⟩ : NExpr U S → NExpr U T → NExpr U (S :× T)
 
+-- Semantics
 ⟦_⟧ : Expr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
 ⟦ :id          ⟧ = id
 ⟦ e₁ :∘ e₂     ⟧ = ⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧
