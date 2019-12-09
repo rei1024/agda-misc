@@ -102,11 +102,11 @@ _∘AN_ : AExpr T A → NExpr S T → NExpr S ∥ A ∥
 (e₁ ∘:π₂) ∘AN e₂ = e₁ ∘AN :π₂∘-N e₂
 
 _∘:π₁-N : NExpr S U → NExpr (S :× T) U
-_∘:π₁-N :id          = ⟪ :π₁ ⟫
-_∘:π₁-N :!-N         = :!-N
-_∘:π₁-N ⟪ e ⟫        = ⟪ e ∘:π₁ ⟫
-_∘:π₁-N :⟨ e₁ , e₂ ⟩ = :⟨ e₁ ∘:π₁-N , e₂ ∘:π₁-N ⟩
-_∘:π₁-N (∥ f ∥∘ e)   = ∥ f ∥∘ (e ∘:π₁-N)
+:id          ∘:π₁-N = ⟪ :π₁ ⟫
+:!-N         ∘:π₁-N = :!-N
+⟪ e ⟫        ∘:π₁-N = ⟪ e ∘:π₁ ⟫
+:⟨ e₁ , e₂ ⟩ ∘:π₁-N = :⟨ e₁ ∘:π₁-N , e₂ ∘:π₁-N ⟩
+(∥ f ∥∘ e)   ∘:π₁-N = ∥ f ∥∘ (e ∘:π₁-N)
 
 _∘:π₂-N : NExpr T U → NExpr (S :× T) U
 :id          ∘:π₂-N = ⟪ :π₂ ⟫
@@ -278,7 +278,7 @@ e₁ :⁂ e₂ = :⟨ e₁ :∘ :π₁ , e₂ :∘ :π₂ ⟩
 
 -- Example
 private
-  module _ {A B C D E} {f : D ⇒ E} {g : C ⇒ D} {h : B ⇒ C} {i : A ⇒ B} where
+  module _ {f : D ⇒ E} {g : C ⇒ D} {h : B ⇒ C} {i : A ⇒ B} where
     _ : (f ∘ g) ∘ id ∘ h ∘ i ≈ f ∘ (g ∘ h) ∘ i
     _ = solve ((∥ f ∥ :∘ ∥ g ∥) :∘ :id :∘ ∥ h ∥ :∘ ∥ i ∥)
               (∥ f ∥ :∘ (∥ g ∥ :∘ ∥ h ∥) :∘ ∥ i ∥)
@@ -311,7 +311,7 @@ private
       lhs = (:id :⁂ :swap) :∘ :assocˡ :∘ (:swap :⁂ :id)
       rhs = :assocˡ :∘ :swap :∘ :assocˡ {∥ A ∥}{∥ B ∥}{∥ C ∥}
 
-  module _ {A B} {f : A ⇒ B} where
+  module _ {f : A ⇒ B} where
     commute : ⟨ ! , id ⟩ ∘ f ≈ ⟨ id ∘ π₁ , f ∘ π₂ ⟩ ∘ ⟨ ! , id ⟩
     commute = solve (:⟨ :! , :id ⟩ :∘ ∥ f ∥)
                     (:⟨ :id :∘ :π₁ , ∥ f ∥ :∘ :π₂ ⟩ :∘ :⟨ :! , :id ⟩)
@@ -323,7 +323,7 @@ private
   _ : π₁ {⊤} {⊤} ≈ π₂
   _ = solve (:π₁ {:⊤} {:⊤}) :π₂ refl
 
-  module _ {A B C D} {f : A ⇒ B} {g : C ⇒ D} where
+  module _ {f : A ⇒ B} {g : C ⇒ D} where
     first↔second′ : first f ∘ second g ≈ second g ∘ first f
     first↔second′ = solve (:first ∥ f ∥ :∘ :second ∥ g ∥)
                           (:second ∥ g ∥ :∘ :first ∥ f ∥)
