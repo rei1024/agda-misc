@@ -7,6 +7,8 @@ open import Categories.Functor renaming (id to idF)
 
 module Experiment.Categories.Functor.MultiSolver {o ℓ e} where
 
+import Categories.Morphism.Reasoning as MR
+
 open import Level
 open import Relation.Binary using (Rel)
 
@@ -47,12 +49,12 @@ N∘≈⟦⟧ 𝒞 𝒟 F :id                g = begin
         open HomReasoning
 N∘≈⟦⟧ 𝒞 𝒟 F (e₁ :∘ e₂)         g = begin
   N∘ 𝒞 𝒟 F e₁ (N∘ 𝒞 𝒟 F e₂ g)       ≈⟨ N∘≈⟦⟧ 𝒞 𝒟 F e₁ (N∘ 𝒞 𝒟 F e₂ g) ⟩
-  F₁ (𝒟 ⟦ e₁ ⟧) ∘ N∘ 𝒞 𝒟 F e₂ g      ≈⟨ refl⟩∘⟨ N∘≈⟦⟧ 𝒞 𝒟 F e₂ g ⟩
-  F₁ (𝒟 ⟦ e₁ ⟧) ∘ F₁ (𝒟 ⟦ e₂ ⟧) ∘ g   ≈⟨ sym-assoc ⟩
+  F₁ (𝒟 ⟦ e₁ ⟧) ∘ N∘ 𝒞 𝒟 F e₂ g      ≈⟨ pushʳ (N∘≈⟦⟧ 𝒞 𝒟 F e₂ g) ⟩
   (F₁ (𝒟 ⟦ e₁ ⟧) ∘ F₁ (𝒟 ⟦ e₂ ⟧)) ∘ g ≈˘⟨ homomorphism ⟩∘⟨refl ⟩
   F₁ (𝒟 [ 𝒟 ⟦ e₁ ⟧ ∘ 𝒟 ⟦ e₂ ⟧ ]) ∘ g ∎
   where open Category 𝒞
         open HomReasoning
+        open MR 𝒞
         open Functor F
 N∘≈⟦⟧ 𝒞 𝒟 F (:F₁ {𝒟 = ℰ} G e) g = N∘≈⟦⟧ 𝒞 ℰ (F ∘F G) e g
 N∘≈⟦⟧ 𝒞 𝒟 F ∥ f ∥              g = Category.Equiv.refl 𝒞

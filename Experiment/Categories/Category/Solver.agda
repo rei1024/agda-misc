@@ -9,8 +9,11 @@ module Experiment.Categories.Category.Solver {o ℓ e} (𝒞 : Category o ℓ e)
 open import Level
 open import Relation.Binary using (Rel)
 
+import Categories.Morphism.Reasoning as MR
+
 open Category 𝒞
 open HomReasoning
+open MR 𝒞
 
 private
   variable
@@ -40,8 +43,7 @@ data Expr : Rel Obj (o ⊔ ℓ) where
 ⟦e⟧N∘f≈⟦e⟧∘f :id        g = ⟺ identityˡ
 ⟦e⟧N∘f≈⟦e⟧∘f (e₁ :∘ e₂) g = begin
   ⟦ e₁ ⟧N∘ (⟦ e₂ ⟧N∘ g) ≈⟨ ⟦e⟧N∘f≈⟦e⟧∘f e₁ (⟦ e₂ ⟧N∘ g) ⟩
-  ⟦ e₁ ⟧ ∘ (⟦ e₂ ⟧N∘ g) ≈⟨ refl⟩∘⟨ ⟦e⟧N∘f≈⟦e⟧∘f e₂ g ⟩
-  ⟦ e₁ ⟧ ∘ (⟦ e₂ ⟧ ∘ g) ≈⟨ sym-assoc ⟩
+  ⟦ e₁ ⟧ ∘ (⟦ e₂ ⟧N∘ g) ≈⟨ pushʳ (⟦e⟧N∘f≈⟦e⟧∘f e₂ g) ⟩
   (⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧) ∘ g ∎
 ⟦e⟧N∘f≈⟦e⟧∘f ∥ f ∥      g = refl
 

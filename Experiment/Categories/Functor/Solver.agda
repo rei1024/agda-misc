@@ -13,6 +13,8 @@ module Experiment.Categories.Functor.Solver
 open import Level
 open import Relation.Binary using (Rel)
 
+import Categories.Morphism.Reasoning as MR
+
 import Experiment.Categories.Category.Solver
 
 module 𝒞 = Category 𝒞
@@ -21,6 +23,7 @@ open CS using (:id; _:∘_; ∥_∥) renaming (∥-∥ to ∥-∥′) public
 
 open Category 𝒟
 open HomReasoning
+open MR 𝒟
 
 open Functor F
 
@@ -64,8 +67,7 @@ F₁⟦e⟧N∘f≈F₁⟦e⟧∘f :id        g = begin
   F₁ 𝒞.id ∘ g ∎
 F₁⟦e⟧N∘f≈F₁⟦e⟧∘f (e₁ :∘ e₂) g = begin
   F₁⟦ e₁ ⟧N∘ (F₁⟦ e₂ ⟧N∘ g)         ≈⟨ F₁⟦e⟧N∘f≈F₁⟦e⟧∘f e₁ (F₁⟦ e₂ ⟧N∘ g) ⟩
-  F₁ CS.⟦ e₁ ⟧ ∘ (F₁⟦ e₂ ⟧N∘ g)     ≈⟨ refl⟩∘⟨ F₁⟦e⟧N∘f≈F₁⟦e⟧∘f e₂ g ⟩
-  F₁ CS.⟦ e₁ ⟧ ∘ (F₁ CS.⟦ e₂ ⟧ ∘ g) ≈⟨ sym-assoc ⟩
+  F₁ CS.⟦ e₁ ⟧ ∘ (F₁⟦ e₂ ⟧N∘ g)     ≈⟨ pushʳ (F₁⟦e⟧N∘f≈F₁⟦e⟧∘f e₂ g) ⟩
   (F₁ CS.⟦ e₁ ⟧ ∘ F₁ CS.⟦ e₂ ⟧) ∘ g ≈˘⟨ homomorphism ⟩∘⟨refl ⟩
   F₁ (CS.⟦ e₁ ⟧ 𝒞.∘ CS.⟦ e₂ ⟧) ∘ g ∎
 F₁⟦e⟧N∘f≈F₁⟦e⟧∘f ∥ x ∥      g = refl
@@ -74,8 +76,7 @@ F₁⟦e⟧N∘f≈F₁⟦e⟧∘f ∥ x ∥      g = refl
 ⟦e⟧N∘f≈⟦e⟧∘f :id        g = ⟺ identityˡ
 ⟦e⟧N∘f≈⟦e⟧∘f (e₁ :∘ e₂) g = begin
   ⟦ e₁ ⟧N∘ (⟦ e₂ ⟧N∘ g) ≈⟨ ⟦e⟧N∘f≈⟦e⟧∘f e₁ (⟦ e₂ ⟧N∘ g) ⟩
-  ⟦ e₁ ⟧ ∘ (⟦ e₂ ⟧N∘ g) ≈⟨ refl⟩∘⟨ ⟦e⟧N∘f≈⟦e⟧∘f e₂ g ⟩
-  ⟦ e₁ ⟧ ∘ (⟦ e₂ ⟧ ∘ g) ≈⟨ sym-assoc ⟩
+  ⟦ e₁ ⟧ ∘ (⟦ e₂ ⟧N∘ g) ≈⟨ pushʳ (⟦e⟧N∘f≈⟦e⟧∘f e₂ g) ⟩
   (⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧) ∘ g ∎
 ⟦e⟧N∘f≈⟦e⟧∘f (:F₁ e)    g = F₁⟦e⟧N∘f≈F₁⟦e⟧∘f e g
 ⟦e⟧N∘f≈⟦e⟧∘f ∥ f ∥      g = refl
