@@ -53,7 +53,6 @@ data Expr : Rel Sig (o ⊔ ℓ) where
 
 -- Atomised expression
 data AExpr : REL Sig Obj (o ⊔ ℓ) where
-  :id   : AExpr ∥ A ∥ A
   :π₁   : AExpr (∥ A ∥ :× T) A
   :π₂   : AExpr (S :× ∥ B ∥) B
   _∘:π₁ : AExpr S A → AExpr (S :× T) A
@@ -61,6 +60,7 @@ data AExpr : REL Sig Obj (o ⊔ ℓ) where
 
 -- Normalised expression
 data NExpr : Rel Sig (o ⊔ ℓ) where
+  :id    : NExpr ∥ A ∥ ∥ A ∥
   :!-N   : NExpr S :⊤
   ⟪_⟫    : AExpr S A → NExpr S ∥ A ∥
   :⟨_,_⟩ : NExpr U S → NExpr U T → NExpr U (S :× T)
@@ -77,13 +77,13 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 ⟦ ∥ g !∥       ⟧ = g
 
 ⟦_⟧A : AExpr S B → ⟦ S ⟧Sig ⇒ B
-⟦ :id      ⟧A = id
 ⟦ :π₁      ⟧A = π₁
 ⟦ :π₂      ⟧A = π₂
 ⟦ e ∘:π₁   ⟧A = ⟦ e ⟧A ∘ π₁
 ⟦ e ∘:π₂   ⟧A = ⟦ e ⟧A ∘ π₂
 
 ⟦_⟧N : NExpr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
+⟦ :id          ⟧N = id
 ⟦ :!-N         ⟧N = !
 ⟦ ⟪ e ⟫        ⟧N = ⟦ e ⟧A
 ⟦ :⟨ e₁ , e₂ ⟩ ⟧N = ⟨ ⟦ e₁ ⟧N , ⟦ e₂ ⟧N ⟩
@@ -96,25 +96,27 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 :π₂∘-N :⟨ e₁ , e₂ ⟩ = e₂
 
 _∘AN_ : AExpr T A → NExpr S T → NExpr S ∥ A ∥
-:id       ∘AN e₂ = e₂
 :π₁       ∘AN e₂ = :π₁∘-N e₂
 :π₂       ∘AN e₂ = :π₂∘-N e₂
 (e₁ ∘:π₁) ∘AN e₂ = e₁ ∘AN :π₁∘-N e₂
 (e₁ ∘:π₂) ∘AN e₂ = e₁ ∘AN :π₂∘-N e₂
 
 _∘:π₁-N : NExpr S U → NExpr (S :× T) U
+_∘:π₁-N :id          = ⟪ :π₁ ⟫
 _∘:π₁-N :!-N         = :!-N
 _∘:π₁-N ⟪ e ⟫        = ⟪ e ∘:π₁ ⟫
 _∘:π₁-N :⟨ e₁ , e₂ ⟩ = :⟨ e₁ ∘:π₁-N , e₂ ∘:π₁-N ⟩
 _∘:π₁-N (∥ f ∥∘ e)   = ∥ f ∥∘ (e ∘:π₁-N)
 
 _∘:π₂-N : NExpr T U → NExpr (S :× T) U
+:id          ∘:π₂-N = ⟪ :π₂ ⟫
 :!-N         ∘:π₂-N = :!-N
 ⟪ e ⟫        ∘:π₂-N = ⟪ e ∘:π₂ ⟫
 :⟨ e₁ , e₂ ⟩ ∘:π₂-N = :⟨ e₁ ∘:π₂-N , e₂ ∘:π₂-N ⟩
 (∥ f ∥∘ e)   ∘:π₂-N = ∥ f ∥∘ (e ∘:π₂-N)
 
 _∘N_ : NExpr T U → NExpr S T → NExpr S U
+:id          ∘N e₂ = e₂
 :!-N         ∘N e₂ = :!-N
 ⟪ e₁ ⟫       ∘N e₂ = e₁ ∘AN e₂
 :⟨ e₁ , e₂ ⟩ ∘N e₃ = :⟨ e₁ ∘N e₃ , e₂ ∘N e₃ ⟩
@@ -130,7 +132,7 @@ _∘N_ : NExpr T U → NExpr S T → NExpr S U
 :π₂-N S (T₁ :× T₂) = :⟨ (:π₁-N T₁ T₂) ∘:π₂-N , (:π₂-N T₁ T₂) ∘:π₂-N ⟩
 
 :id-N : ∀ S → NExpr S S
-:id-N ∥ _ ∥    = ⟪ :id ⟫
+:id-N ∥ _ ∥    = :id
 :id-N :⊤       = :!-N
 :id-N (S :× T) = :⟨ :π₁-N S T , :π₂-N S T ⟩
 
@@ -141,7 +143,7 @@ normalise (e₁ :∘ e₂)   = normalise e₁ ∘N normalise e₂
 normalise :π₁          = :π₁-N _ _
 normalise :π₂          = :π₂-N _ _
 normalise :⟨ e₁ , e₂ ⟩ = :⟨ normalise e₁ , normalise e₂ ⟩
-normalise ∥ f ∥        = ∥ f ∥∘ ⟪ :id ⟫
+normalise ∥ f ∥        = ∥ f ∥∘ :id
 normalise ∥ g !∥       = :!-N
 
 :π₁∘-N-correct : (e : NExpr S (T :× U)) → ⟦ :π₁∘-N e ⟧N ≈ π₁ ∘ ⟦ e ⟧N
@@ -151,7 +153,6 @@ normalise ∥ g !∥       = :!-N
 :π₂∘-N-correct :⟨ e₁ , e₂ ⟩ = ⟺ project₂
 
 ∘AN-homo : (e₁ : AExpr T A) (e₂ : NExpr S T) → ⟦ e₁ ∘AN e₂ ⟧N ≈ ⟦ e₁ ⟧A ∘ ⟦ e₂ ⟧N
-∘AN-homo :id       e₂ = ⟺ identityˡ
 ∘AN-homo :π₁       e₂ = :π₁∘-N-correct e₂
 ∘AN-homo :π₂       e₂ = :π₂∘-N-correct e₂
 ∘AN-homo (e₁ ∘:π₁) e₂ = begin
@@ -164,18 +165,14 @@ normalise ∥ g !∥       = :!-N
   (⟦ e₁ ⟧A ∘ π₂) ∘ ⟦ e₂ ⟧N ∎
 
 ∘N-homo : (e₁ : NExpr T U) (e₂ : NExpr S T) → ⟦ e₁ ∘N e₂ ⟧N ≈ ⟦ e₁ ⟧N ∘ ⟦ e₂ ⟧N
+∘N-homo :id          e₂ = ⟺ identityˡ
 ∘N-homo :!-N         e₂ = !-unique _
 ∘N-homo ⟪ e₁ ⟫       e₂ = ∘AN-homo e₁ e₂
 ∘N-homo :⟨ e₁ , e₂ ⟩ e₃ = ⟨⟩-cong₂ (∘N-homo e₁ e₃) (∘N-homo e₂ e₃) ○ ⟺ ⟨⟩∘
 ∘N-homo (∥ f ∥∘ e₁)  e₂ = pushʳ (∘N-homo e₁ e₂)
 
-private
-  ∘:π₁-N′ : ∀ S T → NExpr S U → NExpr (S :× T) U
-  ∘:π₁-N′ _ _ = _∘:π₁-N
-  ∘:π₂-N′ : ∀ S T → NExpr T U → NExpr (S :× T) U
-  ∘:π₂-N′ _ _ = _∘:π₂-N
-
 ∘:π₁-N-correct : ∀ (e : NExpr S U) → ⟦ (_∘:π₁-N {T = T}) e ⟧N ≈ ⟦ e ⟧N ∘ π₁
+∘:π₁-N-correct :id          = ⟺ identityˡ
 ∘:π₁-N-correct :!-N         = !-unique _
 ∘:π₁-N-correct ⟪ e ⟫        = refl
 ∘:π₁-N-correct :⟨ e₁ , e₂ ⟩ =
@@ -183,11 +180,18 @@ private
 ∘:π₁-N-correct (∥ f ∥∘ e)   = pushʳ (∘:π₁-N-correct e)
 
 ∘:π₂-N-correct : ∀ (e : NExpr T U) → ⟦ (_∘:π₂-N {S = S}) e ⟧N ≈ ⟦ e ⟧N ∘ π₂
+∘:π₂-N-correct :id          = ⟺ identityˡ
 ∘:π₂-N-correct :!-N         = !-unique _
 ∘:π₂-N-correct ⟪ e ⟫        = refl
 ∘:π₂-N-correct :⟨ e₁ , e₂ ⟩ =
   ⟨⟩-cong₂ (∘:π₂-N-correct e₁) (∘:π₂-N-correct e₂) ○ ⟺ ⟨⟩∘
 ∘:π₂-N-correct (∥ f ∥∘ e)   = pushʳ (∘:π₂-N-correct e)
+
+private
+  ∘:π₁-N′ : ∀ S T → NExpr S U → NExpr (S :× T) U
+  ∘:π₁-N′ _ _ = _∘:π₁-N
+  ∘:π₂-N′ : ∀ S T → NExpr T U → NExpr (S :× T) U
+  ∘:π₂-N′ _ _ = _∘:π₂-N
 
 :π₁-N-correct : ∀ S T → ⟦ :π₁-N S T ⟧N ≈ π₁
 :π₂-N-correct : ∀ S T → ⟦ :π₂-N S T ⟧N ≈ π₂
@@ -306,5 +310,11 @@ private
                     (:⟨ :id :∘ :π₁ , ∥ f ∥ :∘ :π₂ ⟩ :∘ :⟨ :! , :id ⟩)
                     refl
 
-  test : π₁ {⊤} {⊤} ≈ π₂
-  test = solve (:π₁ {:⊤} {:⊤}) :π₂ refl
+  _ : π₁ {⊤} {⊤} ≈ π₂
+  _ = solve (:π₁ {:⊤} {:⊤}) :π₂ refl
+
+  module _ {A B C D} {f : A ⇒ B} {g : C ⇒ D} where
+    first↔second′ : first f ∘ second g ≈ second g ∘ first f
+    first↔second′ = solve (:first ∥ f ∥ :∘ :second ∥ g ∥)
+                          (:second ∥ g ∥ :∘ :first ∥ f ∥)
+                          refl
