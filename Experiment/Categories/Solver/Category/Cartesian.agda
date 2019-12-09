@@ -61,7 +61,7 @@ data AExpr : REL Sig Obj (o ⊔ ℓ) where
 -- Normalised expression
 data NExpr : Rel Sig (o ⊔ ℓ) where
   :id    : NExpr ∥ A ∥ ∥ A ∥
-  :!-N   : NExpr S :⊤
+  :!N   : NExpr S :⊤
   ⟪_⟫    : AExpr S A → NExpr S ∥ A ∥
   :⟨_,_⟩ : NExpr U S → NExpr U T → NExpr U (S :× T)
   ∥_∥∘_  : B ⇒ C → NExpr S ∥ B ∥ → NExpr S ∥ C ∥
@@ -84,7 +84,7 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 
 ⟦_⟧N : NExpr S T → ⟦ S ⟧Sig ⇒ ⟦ T ⟧Sig
 ⟦ :id          ⟧N = id
-⟦ :!-N         ⟧N = !
+⟦ :!N          ⟧N = !
 ⟦ ⟪ e ⟫        ⟧N = ⟦ e ⟧A
 ⟦ :⟨ e₁ , e₂ ⟩ ⟧N = ⟨ ⟦ e₁ ⟧N , ⟦ e₂ ⟧N ⟩
 ⟦ ∥ f ∥∘ e     ⟧N = f ∘ ⟦ e ⟧N
@@ -95,50 +95,50 @@ _∘AN_ : AExpr T A → NExpr S T → NExpr S ∥ A ∥
 (e₁ ∘:π₁) ∘AN :⟨ e₂ , e₃ ⟩ = e₁ ∘AN e₂
 (e₁ ∘:π₂) ∘AN :⟨ e₂ , e₃ ⟩ = e₁ ∘AN e₃
 
-_∘:π₁-N : NExpr S U → NExpr (S :× T) U
-:id          ∘:π₁-N = ⟪ :π₁ ⟫
-:!-N         ∘:π₁-N = :!-N
-⟪ e ⟫        ∘:π₁-N = ⟪ e ∘:π₁ ⟫
-:⟨ e₁ , e₂ ⟩ ∘:π₁-N = :⟨ e₁ ∘:π₁-N , e₂ ∘:π₁-N ⟩
-(∥ f ∥∘ e)   ∘:π₁-N = ∥ f ∥∘ (e ∘:π₁-N)
+-- TODO rename to :∘π₁N
+_∘:π₁N : NExpr S U → NExpr (S :× T) U
+:id          ∘:π₁N = ⟪ :π₁ ⟫
+:!N          ∘:π₁N = :!N
+⟪ e ⟫        ∘:π₁N = ⟪ e ∘:π₁ ⟫
+:⟨ e₁ , e₂ ⟩ ∘:π₁N = :⟨ e₁ ∘:π₁N , e₂ ∘:π₁N ⟩
+(∥ f ∥∘ e)   ∘:π₁N = ∥ f ∥∘ (e ∘:π₁N)
 
-_∘:π₂-N : NExpr T U → NExpr (S :× T) U
-:id          ∘:π₂-N = ⟪ :π₂ ⟫
-:!-N         ∘:π₂-N = :!-N
-⟪ e ⟫        ∘:π₂-N = ⟪ e ∘:π₂ ⟫
-:⟨ e₁ , e₂ ⟩ ∘:π₂-N = :⟨ e₁ ∘:π₂-N , e₂ ∘:π₂-N ⟩
-(∥ f ∥∘ e)   ∘:π₂-N = ∥ f ∥∘ (e ∘:π₂-N)
+_∘:π₂N : NExpr T U → NExpr (S :× T) U
+:id          ∘:π₂N = ⟪ :π₂ ⟫
+:!N          ∘:π₂N = :!N
+⟪ e ⟫        ∘:π₂N = ⟪ e ∘:π₂ ⟫
+:⟨ e₁ , e₂ ⟩ ∘:π₂N = :⟨ e₁ ∘:π₂N , e₂ ∘:π₂N ⟩
+(∥ f ∥∘ e)   ∘:π₂N = ∥ f ∥∘ (e ∘:π₂N)
 
 _∘N_ : NExpr T U → NExpr S T → NExpr S U
 :id          ∘N e₂ = e₂
-:!-N         ∘N e₂ = :!-N
+:!N          ∘N e₂ = :!N
 ⟪ e₁ ⟫       ∘N e₂ = e₁ ∘AN e₂
 :⟨ e₁ , e₂ ⟩ ∘N e₃ = :⟨ e₁ ∘N e₃ , e₂ ∘N e₃ ⟩
 (∥ f ∥∘ e₁)  ∘N e₂ = ∥ f ∥∘ (e₁ ∘N e₂)
 
-:π₁-N : ∀ S T → NExpr (S :× T) S
-:π₂-N : ∀ S T → NExpr (S :× T) T
-:π₁-N ∥ _ ∥      T = ⟪ :π₁ ⟫
-:π₁-N :⊤         T = :!-N
-:π₁-N (S₁ :× S₂) T = :⟨ (:π₁-N S₁ S₂) ∘:π₁-N , (:π₂-N S₁ S₂) ∘:π₁-N ⟩
-:π₂-N S ∥ _ ∥      = ⟪ :π₂ ⟫
-:π₂-N S :⊤         = :!-N
-:π₂-N S (T₁ :× T₂) = :⟨ (:π₁-N T₁ T₂) ∘:π₂-N , (:π₂-N T₁ T₂) ∘:π₂-N ⟩
+:π₁N : ∀ S T → NExpr (S :× T) S
+:π₂N : ∀ S T → NExpr (S :× T) T
+:π₁N ∥ _ ∥      T = ⟪ :π₁ ⟫
+:π₁N :⊤         T = :!N
+:π₁N (S₁ :× S₂) T = :⟨ (:π₁N S₁ S₂) ∘:π₁N , (:π₂N S₁ S₂) ∘:π₁N ⟩
+:π₂N S ∥ _ ∥      = ⟪ :π₂ ⟫
+:π₂N S :⊤         = :!N
+:π₂N S (T₁ :× T₂) = :⟨ (:π₁N T₁ T₂) ∘:π₂N , (:π₂N T₁ T₂) ∘:π₂N ⟩
 
-:id-N : ∀ S → NExpr S S
-:id-N ∥ _ ∥    = :id
-:id-N :⊤       = :!-N
-:id-N (S :× T) = :⟨ :π₁-N S T , :π₂-N S T ⟩
+:idN : ∀ S → NExpr S S
+:idN ∥ _ ∥    = :id
+:idN :⊤       = :!N
+:idN (S :× T) = :⟨ :π₁N S T , :π₂N S T ⟩
 
 -- expand id, π₁ and π₂
 normalise : Expr S T → NExpr S T
-normalise :id          = :id-N _
+normalise :id          = :idN _
 normalise (e₁ :∘ e₂)   = normalise e₁ ∘N normalise e₂
-normalise :π₁          = :π₁-N _ _
-normalise :π₂          = :π₂-N _ _
+normalise :π₁          = :π₁N _ _
 normalise :⟨ e₁ , e₂ ⟩ = :⟨ normalise e₁ , normalise e₂ ⟩
 normalise ∥ f ∥        = ∥ f ∥∘ :id
-normalise ∥ g !∥       = :!-N
+normalise ∥ g !∥       = :!N
 
 ∘AN-homo : (e₁ : AExpr T A) (e₂ : NExpr S T) → ⟦ e₁ ∘AN e₂ ⟧N ≈ ⟦ e₁ ⟧A ∘ ⟦ e₂ ⟧N
 ∘AN-homo :π₁       :⟨ e₂ , e₃ ⟩ = ⟺ project₁
@@ -148,80 +148,75 @@ normalise ∥ g !∥       = :!-N
 
 ∘N-homo : (e₁ : NExpr T U) (e₂ : NExpr S T) → ⟦ e₁ ∘N e₂ ⟧N ≈ ⟦ e₁ ⟧N ∘ ⟦ e₂ ⟧N
 ∘N-homo :id          e₂ = ⟺ identityˡ
-∘N-homo :!-N         e₂ = !-unique _
+∘N-homo :!N          e₂ = !-unique _
 ∘N-homo ⟪ e₁ ⟫       e₂ = ∘AN-homo e₁ e₂
 ∘N-homo :⟨ e₁ , e₂ ⟩ e₃ = ⟨⟩-cong₂ (∘N-homo e₁ e₃) (∘N-homo e₂ e₃) ○ ⟺ ⟨⟩∘
 ∘N-homo (∥ f ∥∘ e₁)  e₂ = pushʳ (∘N-homo e₁ e₂)
 
-∘:π₁-N-correct : ∀ (e : NExpr S U) → ⟦ (_∘:π₁-N {T = T}) e ⟧N ≈ ⟦ e ⟧N ∘ π₁
-∘:π₁-N-correct :id          = ⟺ identityˡ
-∘:π₁-N-correct :!-N         = !-unique _
-∘:π₁-N-correct ⟪ e ⟫        = refl
-∘:π₁-N-correct :⟨ e₁ , e₂ ⟩ =
-  ⟨⟩-cong₂ (∘:π₁-N-correct e₁) (∘:π₁-N-correct e₂) ○ ⟺ ⟨⟩∘
-∘:π₁-N-correct (∥ f ∥∘ e)   = pushʳ (∘:π₁-N-correct e)
+∘:π₁N-homo : ∀ (e : NExpr S U) → ⟦ (_∘:π₁N {T = T}) e ⟧N ≈ ⟦ e ⟧N ∘ π₁
+∘:π₁N-homo :id          = ⟺ identityˡ
+∘:π₁N-homo :!N          = !-unique _
+∘:π₁N-homo ⟪ e ⟫        = refl
+∘:π₁N-homo :⟨ e₁ , e₂ ⟩ = ⟨⟩-cong₂ (∘:π₁N-homo e₁) (∘:π₁N-homo e₂) ○ ⟺ ⟨⟩∘
+∘:π₁N-homo (∥ f ∥∘ e)   = pushʳ (∘:π₁N-homo e)
 
-∘:π₂-N-correct : ∀ (e : NExpr T U) → ⟦ (_∘:π₂-N {S = S}) e ⟧N ≈ ⟦ e ⟧N ∘ π₂
-∘:π₂-N-correct :id          = ⟺ identityˡ
-∘:π₂-N-correct :!-N         = !-unique _
-∘:π₂-N-correct ⟪ e ⟫        = refl
-∘:π₂-N-correct :⟨ e₁ , e₂ ⟩ =
-  ⟨⟩-cong₂ (∘:π₂-N-correct e₁) (∘:π₂-N-correct e₂) ○ ⟺ ⟨⟩∘
-∘:π₂-N-correct (∥ f ∥∘ e)   = pushʳ (∘:π₂-N-correct e)
+∘:π₂N-homo : ∀ (e : NExpr T U) → ⟦ (_∘:π₂N {S = S}) e ⟧N ≈ ⟦ e ⟧N ∘ π₂
+∘:π₂N-homo :id          = ⟺ identityˡ
+∘:π₂N-homo :!N          = !-unique _
+∘:π₂N-homo ⟪ e ⟫        = refl
+∘:π₂N-homo :⟨ e₁ , e₂ ⟩ = ⟨⟩-cong₂ (∘:π₂N-homo e₁) (∘:π₂N-homo e₂) ○ ⟺ ⟨⟩∘
+∘:π₂N-homo (∥ f ∥∘ e)   = pushʳ (∘:π₂N-homo e)
 
 private
-  ∘:π₁-N′ : ∀ S T → NExpr S U → NExpr (S :× T) U
-  ∘:π₁-N′ _ _ = _∘:π₁-N
-  ∘:π₂-N′ : ∀ S T → NExpr T U → NExpr (S :× T) U
-  ∘:π₂-N′ _ _ = _∘:π₂-N
+  ∘:π₁N′ : ∀ S T → NExpr S U → NExpr (S :× T) U
+  ∘:π₁N′ _ _ = _∘:π₁N
+  ∘:π₂N′ : ∀ S T → NExpr T U → NExpr (S :× T) U
+  ∘:π₂N′ _ _ = _∘:π₂N
 
-:π₁-N-correct : ∀ S T → ⟦ :π₁-N S T ⟧N ≈ π₁
-:π₂-N-correct : ∀ S T → ⟦ :π₂-N S T ⟧N ≈ π₂
-:π₁-N-correct ∥ A ∥      T = refl
-:π₁-N-correct :⊤         T = !-unique _
-:π₁-N-correct (S₁ :× S₂) T = begin
-  ⟨ ⟦ ∘:π₁-N′ (S₁ :× S₂) T (:π₁-N S₁ S₂) ⟧N ,
-    ⟦ ∘:π₁-N′ (S₁ :× S₂) T (:π₂-N S₁ S₂) ⟧N ⟩
-    ≈⟨ ⟨⟩-cong₂ (∘:π₁-N-correct (:π₁-N S₁ S₂))
-                (∘:π₁-N-correct (:π₂-N S₁ S₂)) ⟩
-  ⟨ ⟦ :π₁-N S₁ S₂ ⟧N ∘ π₁ , ⟦ :π₂-N S₁ S₂ ⟧N ∘ π₁ ⟩
+:π₁N-homo : ∀ S T → ⟦ :π₁N S T ⟧N ≈ π₁
+:π₂N-homo : ∀ S T → ⟦ :π₂N S T ⟧N ≈ π₂
+:π₁N-homo ∥ A ∥      T = refl
+:π₁N-homo :⊤         T = !-unique _
+:π₁N-homo (S₁ :× S₂) T = begin
+  ⟨ ⟦ ∘:π₁N′ (S₁ :× S₂) T (:π₁N S₁ S₂) ⟧N ,
+    ⟦ ∘:π₁N′ (S₁ :× S₂) T (:π₂N S₁ S₂) ⟧N ⟩
+    ≈⟨ ⟨⟩-cong₂ (∘:π₁N-homo (:π₁N S₁ S₂)) (∘:π₁N-homo (:π₂N S₁ S₂)) ⟩
+  ⟨ ⟦ :π₁N S₁ S₂ ⟧N ∘ π₁ , ⟦ :π₂N S₁ S₂ ⟧N ∘ π₁ ⟩
     ≈˘⟨ ⟨⟩∘ ⟩
-  ⟨ ⟦ :π₁-N S₁ S₂ ⟧N , ⟦ :π₂-N S₁ S₂ ⟧N ⟩ ∘ π₁
-    ≈⟨ ⟨⟩-cong₂ (:π₁-N-correct S₁ S₂) (:π₂-N-correct S₁ S₂) ⟩∘⟨refl ⟩
+  ⟨ ⟦ :π₁N S₁ S₂ ⟧N , ⟦ :π₂N S₁ S₂ ⟧N ⟩ ∘ π₁
+    ≈⟨ ⟨⟩-cong₂ (:π₁N-homo S₁ S₂) (:π₂N-homo S₁ S₂) ⟩∘⟨refl ⟩
   ⟨ π₁ , π₂ ⟩ ∘ π₁
     ≈⟨ elimˡ η ⟩
   π₁
     ∎
-:π₂-N-correct S ∥ A ∥      = refl
-:π₂-N-correct S :⊤         = !-unique _
-:π₂-N-correct S (T₁ :× T₂) = begin
-  ⟨ ⟦ ∘:π₂-N′ S (T₁ :× T₂) (:π₁-N T₁ T₂) ⟧N ,
-    ⟦ ∘:π₂-N′ S (T₁ :× T₂) (:π₂-N T₁ T₂) ⟧N ⟩
-    ≈⟨ ⟨⟩-cong₂ (∘:π₂-N-correct (:π₁-N T₁ T₂))
-                (∘:π₂-N-correct (:π₂-N T₁ T₂)) ⟩
-  ⟨ ⟦ :π₁-N T₁ T₂ ⟧N ∘ π₂ , ⟦ :π₂-N T₁ T₂ ⟧N ∘ π₂ ⟩
+:π₂N-homo S ∥ A ∥      = refl
+:π₂N-homo S :⊤         = !-unique _
+:π₂N-homo S (T₁ :× T₂) = begin
+  ⟨ ⟦ ∘:π₂N′ S (T₁ :× T₂) (:π₁N T₁ T₂) ⟧N ,
+    ⟦ ∘:π₂N′ S (T₁ :× T₂) (:π₂N T₁ T₂) ⟧N ⟩
+    ≈⟨ ⟨⟩-cong₂ (∘:π₂N-homo (:π₁N T₁ T₂)) (∘:π₂N-homo (:π₂N T₁ T₂)) ⟩
+  ⟨ ⟦ :π₁N T₁ T₂ ⟧N ∘ π₂ , ⟦ :π₂N T₁ T₂ ⟧N ∘ π₂ ⟩
     ≈˘⟨ ⟨⟩∘ ⟩
-  ⟨ ⟦ :π₁-N T₁ T₂ ⟧N , ⟦ :π₂-N T₁ T₂ ⟧N ⟩ ∘ π₂
-    ≈⟨ ⟨⟩-cong₂ (:π₁-N-correct T₁ T₂) (:π₂-N-correct T₁ T₂) ⟩∘⟨refl ⟩
+  ⟨ ⟦ :π₁N T₁ T₂ ⟧N , ⟦ :π₂N T₁ T₂ ⟧N ⟩ ∘ π₂
+    ≈⟨ ⟨⟩-cong₂ (:π₁N-homo T₁ T₂) (:π₂N-homo T₁ T₂) ⟩∘⟨refl ⟩
   ⟨ π₁ , π₂ ⟩ ∘ π₂
     ≈⟨ elimˡ η ⟩
   π₂
     ∎
 
-:id-N-correct : ∀ S → ⟦ :id-N S ⟧N ≈ id
-:id-N-correct ∥ _ ∥      = refl
-:id-N-correct :⊤         = !-unique id
-:id-N-correct (S₁ :× S₂) =
-  ⟨⟩-cong₂ (:π₁-N-correct S₁ S₂) (:π₂-N-correct S₁ S₂) ○ η
+:idN-homo : ∀ S → ⟦ :idN S ⟧N ≈ id
+:idN-homo ∥ _ ∥      = refl
+:idN-homo :⊤         = !-unique id
+:idN-homo (S₁ :× S₂) = ⟨⟩-cong₂ (:π₁N-homo S₁ S₂) (:π₂N-homo S₁ S₂) ○ η
 
 correct : ∀ (e : Expr S T) → ⟦ normalise e ⟧N ≈ ⟦ e ⟧
-correct {S} :id          = :id-N-correct S
+correct {S} :id          = :idN-homo S
 correct (e₁ :∘ e₂)       = begin
   ⟦ normalise e₁ ∘N normalise e₂ ⟧N     ≈⟨ ∘N-homo (normalise e₁) (normalise e₂) ⟩
   ⟦ normalise e₁ ⟧N ∘ ⟦ normalise e₂ ⟧N ≈⟨ correct e₁ ⟩∘⟨ correct e₂ ⟩
   ⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧                       ∎
-correct {S :× T} {S} :π₁ = :π₁-N-correct S T
-correct {S :× T} {T} :π₂ = :π₂-N-correct S T
+correct {S :× T} {S} :π₁ = :π₁N-homo S T
+correct {S :× T} {T} :π₂ = :π₂N-homo S T
 correct :⟨ e₁ , e₂ ⟩     = ⟨⟩-cong₂ (correct e₁) (correct e₂)
 correct ∥ f ∥            = identityʳ
 correct ∥ g !∥           = !-unique g
