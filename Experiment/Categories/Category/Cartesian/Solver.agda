@@ -304,11 +304,21 @@ private
       lhs = (:id :⁂ :assocˡ) :∘ :assocˡ :∘ (:assocˡ :⁂ :id)
       rhs = :assocˡ :∘ :assocˡ {∥ A ∥ :× ∥ B ∥} {∥ C ∥} {∥ D ∥}
 
+  module _ {A B C} where
+    hexagon₁′ : (id ⁂ swap) ∘ assocˡ ∘ (swap ⁂ id) ≈
+                assocˡ ∘ swap ∘ assocˡ {A}{B}{C}
+    hexagon₁′ = solve lhs rhs refl where
+      lhs = (:id :⁂ :swap) :∘ :assocˡ :∘ (:swap :⁂ :id)
+      rhs = :assocˡ :∘ :swap :∘ :assocˡ {∥ A ∥}{∥ B ∥}{∥ C ∥}
+
   module _ {A B} {f : A ⇒ B} where
     commute : ⟨ ! , id ⟩ ∘ f ≈ ⟨ id ∘ π₁ , f ∘ π₂ ⟩ ∘ ⟨ ! , id ⟩
     commute = solve (:⟨ :! , :id ⟩ :∘ ∥ f ∥)
                     (:⟨ :id :∘ :π₁ , ∥ f ∥ :∘ :π₂ ⟩ :∘ :⟨ :! , :id ⟩)
                     refl
+
+  _ : id {⊤} ≈ !
+  _ = solve (∥ id !∥) :! refl
 
   _ : π₁ {⊤} {⊤} ≈ π₂
   _ = solve (:π₁ {:⊤} {:⊤}) :π₂ refl
