@@ -26,6 +26,7 @@ data Expr : Rel Obj (o ⊔ ℓ) where
   _:∘_ : Expr B C → Expr A B → Expr A C
   ∥_∥  : A ⇒ B → Expr A B
 
+-- Semantics
 ⟦_⟧ : Expr A B → A ⇒ B
 ⟦ :id      ⟧ = id
 ⟦ e₁ :∘ e₂ ⟧ = ⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧

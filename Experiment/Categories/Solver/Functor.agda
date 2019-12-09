@@ -39,6 +39,7 @@ data Expr : Rel Obj (o ⊔ o′ ⊔ ℓ ⊔ ℓ′) where
   :F₁  : ∀ {A B} → CS.Expr A B → Expr (F₀ A) (F₀ B)
   ∥_∥  : A ⇒ B → Expr A B
 
+-- Semantics
 ⟦_⟧ : Expr A B → A ⇒ B
 ⟦ :id      ⟧ = id
 ⟦ e₁ :∘ e₂ ⟧ = ⟦ e₁ ⟧ ∘ ⟦ e₂ ⟧

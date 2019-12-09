@@ -21,6 +21,7 @@ data Expr : (𝒞 : Category o ℓ e) → Rel (Category.Obj 𝒞) (suc (o ⊔ �
          Expr 𝒟 A B → Expr 𝒞 (Functor.F₀ F A) (Functor.F₀ F B)
   ∥_∥  : ∀ {𝒞 A B} → 𝒞 [ A , B ] → Expr 𝒞 A B
 
+-- Semantics
 _⟦_⟧ : ∀ 𝒞 {A B} → Expr 𝒞 A B → 𝒞 [ A , B ]
 𝒞 ⟦ :id ⟧      = Category.id 𝒞
 𝒞 ⟦ e₁ :∘ e₂ ⟧ = 𝒞 [ 𝒞 ⟦ e₁ ⟧ ∘ 𝒞 ⟦ e₂ ⟧ ]
