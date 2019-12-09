@@ -252,6 +252,9 @@ solve e₁ e₂ eq = begin
   ⟦ normalise e₂ ⟧N ≈⟨ correct e₂ ⟩
   ⟦ e₂ ⟧          ∎
 
+∥-∥ : ∀ {f : A ⇒ B} → Expr ∥ A ∥ ∥ B ∥
+∥-∥ {f = f} = ∥ f ∥
+
 -- Combinators
 :! : Expr ∥ A ∥ :⊤
 :! = ∥ ! !∥

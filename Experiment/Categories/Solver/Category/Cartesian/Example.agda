@@ -20,16 +20,13 @@ private
 
 module _ {f : D ⇒ E} {g : C ⇒ D} {h : B ⇒ C} {i : A ⇒ B} where
   _ : (f ∘ g) ∘ id ∘ h ∘ i ≈ f ∘ (g ∘ h) ∘ i
-  _ = solve ((∥ f ∥ :∘ ∥ g ∥) :∘ :id :∘ ∥ h ∥ :∘ ∥ i ∥)
-            (∥ f ∥ :∘ (∥ g ∥ :∘ ∥ h ∥) :∘ ∥ i ∥)
-            refl
+  _ = solve ((∥-∥ :∘ ∥-∥) :∘ :id :∘ ∥-∥ :∘ ∥-∥) (∥-∥ :∘ (∥-∥ :∘ ∥-∥) :∘ ∥-∥) refl
 
 swap∘swap≈id : ∀ {A B} → swap {A}{B} ∘ swap {B}{A} ≈ id
 swap∘swap≈id {A} {B} = solve (:swap {∥ A ∥} {∥ B ∥} :∘ :swap) :id refl
 
 assocʳ∘assocˡ≈id : ∀ {A B C} → assocʳ {A}{B}{C} ∘ assocˡ {A}{B}{C} ≈ id
-assocʳ∘assocˡ≈id {A} {B} {C} =
-  solve (:assocʳ {∥ A ∥} {∥ B ∥} {∥ C ∥} :∘ :assocˡ) :id refl
+assocʳ∘assocˡ≈id = solve (:assocʳ {∥ _ ∥} {∥ _ ∥} {∥ _ ∥} :∘ :assocˡ) :id refl
 
 module _ {f : B ⇒ C} (f′ : A ⇒ B) {g : E ⇒ F} {g′ : D ⇒ E} where
   ⁂-∘ : (f ⁂ g) ∘ (f′ ⁂ g′) ≈ (f ∘ f′) ⁂ (g ∘ g′)
