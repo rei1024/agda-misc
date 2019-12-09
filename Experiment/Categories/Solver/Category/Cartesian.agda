@@ -89,17 +89,11 @@ data NExpr : Rel Sig (o ⊔ ℓ) where
 ⟦ :⟨ e₁ , e₂ ⟩ ⟧N = ⟨ ⟦ e₁ ⟧N , ⟦ e₂ ⟧N ⟩
 ⟦ ∥ f ∥∘ e     ⟧N = f ∘ ⟦ e ⟧N
 
-:π₁∘-N : NExpr S (T :× U) → NExpr S T
-:π₁∘-N :⟨ e₁ , e₂ ⟩ = e₁
-
-:π₂∘-N : NExpr S (T :× U) → NExpr S U
-:π₂∘-N :⟨ e₁ , e₂ ⟩ = e₂
-
 _∘AN_ : AExpr T A → NExpr S T → NExpr S ∥ A ∥
-:π₁       ∘AN e₂ = :π₁∘-N e₂
-:π₂       ∘AN e₂ = :π₂∘-N e₂
-(e₁ ∘:π₁) ∘AN e₂ = e₁ ∘AN :π₁∘-N e₂
-(e₁ ∘:π₂) ∘AN e₂ = e₁ ∘AN :π₂∘-N e₂
+:π₁       ∘AN :⟨ e₂ , e₃ ⟩ = e₂
+:π₂       ∘AN :⟨ e₂ , e₃ ⟩ = e₃
+(e₁ ∘:π₁) ∘AN :⟨ e₂ , e₃ ⟩ = e₁ ∘AN e₂
+(e₁ ∘:π₂) ∘AN :⟨ e₂ , e₃ ⟩ = e₁ ∘AN e₃
 
 _∘:π₁-N : NExpr S U → NExpr (S :× T) U
 :id          ∘:π₁-N = ⟪ :π₁ ⟫
@@ -146,23 +140,11 @@ normalise :⟨ e₁ , e₂ ⟩ = :⟨ normalise e₁ , normalise e₂ ⟩
 normalise ∥ f ∥        = ∥ f ∥∘ :id
 normalise ∥ g !∥       = :!-N
 
-:π₁∘-N-correct : (e : NExpr S (T :× U)) → ⟦ :π₁∘-N e ⟧N ≈ π₁ ∘ ⟦ e ⟧N
-:π₁∘-N-correct :⟨ e₁ , e₂ ⟩ = ⟺ project₁
-
-:π₂∘-N-correct : (e : NExpr S (T :× U)) → ⟦ :π₂∘-N e ⟧N ≈ π₂ ∘ ⟦ e ⟧N
-:π₂∘-N-correct :⟨ e₁ , e₂ ⟩ = ⟺ project₂
-
 ∘AN-homo : (e₁ : AExpr T A) (e₂ : NExpr S T) → ⟦ e₁ ∘AN e₂ ⟧N ≈ ⟦ e₁ ⟧A ∘ ⟦ e₂ ⟧N
-∘AN-homo :π₁       e₂ = :π₁∘-N-correct e₂
-∘AN-homo :π₂       e₂ = :π₂∘-N-correct e₂
-∘AN-homo (e₁ ∘:π₁) e₂ = begin
-  ⟦ e₁ ∘AN :π₁∘-N e₂ ⟧N    ≈⟨ ∘AN-homo e₁ (:π₁∘-N e₂) ⟩
-  ⟦ e₁ ⟧A ∘ ⟦ :π₁∘-N e₂ ⟧N ≈⟨ pushʳ (:π₁∘-N-correct e₂) ⟩
-  (⟦ e₁ ⟧A ∘ π₁) ∘ ⟦ e₂ ⟧N ∎
-∘AN-homo (e₁ ∘:π₂) e₂ = begin
-  ⟦ e₁ ∘AN :π₂∘-N e₂ ⟧N    ≈⟨ ∘AN-homo e₁ (:π₂∘-N e₂) ⟩
-  ⟦ e₁ ⟧A ∘ ⟦ :π₂∘-N e₂ ⟧N ≈⟨ pushʳ (:π₂∘-N-correct e₂) ⟩
-  (⟦ e₁ ⟧A ∘ π₂) ∘ ⟦ e₂ ⟧N ∎
+∘AN-homo :π₁       :⟨ e₂ , e₃ ⟩ = ⟺ project₁
+∘AN-homo :π₂       :⟨ e₂ , e₃ ⟩ = ⟺ project₂
+∘AN-homo (e₁ ∘:π₁) :⟨ e₂ , e₃ ⟩ = ∘AN-homo e₁ e₂ ○ pushʳ (⟺ project₁)
+∘AN-homo (e₁ ∘:π₂) :⟨ e₂ , e₃ ⟩ = ∘AN-homo e₁ e₃ ○ pushʳ (⟺ project₂)
 
 ∘N-homo : (e₁ : NExpr T U) (e₂ : NExpr S T) → ⟦ e₁ ∘N e₂ ⟧N ≈ ⟦ e₁ ⟧N ∘ ⟦ e₂ ⟧N
 ∘N-homo :id          e₂ = ⟺ identityˡ
