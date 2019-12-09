@@ -59,10 +59,3 @@ solve e₁ e₂ eq = begin
 
 ∥-∥ : ∀ {f : A ⇒ B} → Expr A B
 ∥-∥ {f = f} = ∥ f ∥
-
-private
-  module _ (f : D ⇒ E) (g : C ⇒ D) (h : B ⇒ C) (i : A ⇒ B) where
-    _ : (f ∘ id ∘ g) ∘ id ∘ h ∘ i ≈ f ∘ (g ∘ h) ∘ i
-    _ = solve ((∥-∥ :∘ :id :∘ ∥-∥) :∘ :id :∘ ∥-∥ :∘ ∥-∥)
-              (∥-∥ :∘ (∥-∥ :∘ ∥-∥) :∘ ∥-∥)
-              refl

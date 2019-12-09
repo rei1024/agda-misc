@@ -52,11 +52,19 @@ import Constructive.Searchable
 -- Category theory
 import Experiment.Categories.Solver.Category
 
+import Experiment.Categories.Solver.Category.Example
+
 import Experiment.Categories.Solver.Category.Cartesian
+
+import Experiment.Categories.Solver.Category.Cartesian.Example
 
 import Experiment.Categories.Solver.Functor
 
+import Experiment.Categories.Solver.Functor.Example
+
 import Experiment.Categories.Solver.MultiFunctor
+
+import Experiment.Categories.Solver.MultiFunctor.Example
 
 ------------------------------------------------------------------------
 -- Formal language
