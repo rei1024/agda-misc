@@ -5,7 +5,7 @@
 open import Categories.Category
 open import Categories.Functor renaming (id to idF)
 
-module Experiment.Categories.Functor.Solver
+module Experiment.Categories.Solver.Functor
   {o ℓ e o′ ℓ′ e′} {𝒞 : Category o ℓ e} {𝒟 : Category o′ ℓ′ e′}
   (F : Functor 𝒞 𝒟)
   where
@@ -15,10 +15,10 @@ open import Relation.Binary using (Rel)
 
 import Categories.Morphism.Reasoning as MR
 
-import Experiment.Categories.Category.Solver
+import Experiment.Categories.Solver.Category
 
 module 𝒞 = Category 𝒞
-module CS = Experiment.Categories.Category.Solver 𝒞
+module CS = Experiment.Categories.Solver.Category 𝒞
 open CS using (:id; _:∘_; ∥_∥) renaming (∥-∥ to ∥-∥′) public
 
 open Category 𝒟

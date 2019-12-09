@@ -50,13 +50,13 @@ import Constructive.Searchable
 -- Experiment
 
 -- Category theory
-import Experiment.Categories.Category.Solver
+import Experiment.Categories.Solver.Category
 
-import Experiment.Categories.Category.Cartesian.Solver
+import Experiment.Categories.Solver.Category.Cartesian
 
-import Experiment.Categories.Functor.Solver
+import Experiment.Categories.Solver.Functor
 
-import Experiment.Categories.Functor.MultiSolver
+import Experiment.Categories.Solver.MultiFunctor
 
 ------------------------------------------------------------------------
 -- Formal language

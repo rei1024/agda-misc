@@ -2,7 +2,7 @@
 
 {-# OPTIONS --without-K --safe #-}
 
-module Experiment.Categories.Category.Solver.Reflection where
+module Experiment.Categories.Solver.Category.Reflection where
 
 open import Data.Nat
 open import Data.List
@@ -14,7 +14,7 @@ open import Agda.Builtin.Reflection as Builtin
 
 open import Categories.Category
 
-open import Experiment.Categories.Category.Solver hiding (solve)
+open import Experiment.Categories.Solver.Category hiding (solve)
 
 _==_ = Builtin.primQNameEquality
 {-# INLINE _==_ #-}

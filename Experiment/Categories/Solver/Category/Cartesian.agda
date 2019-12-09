@@ -6,7 +6,7 @@
 open import Categories.Category
 open import Categories.Category.Cartesian
 
-module Experiment.Categories.Category.Cartesian.Solver
+module Experiment.Categories.Solver.Category.Cartesian
   {o ℓ e} {𝒞 : Category o ℓ e} (cartesian : Cartesian 𝒞) where
 
 open import Level

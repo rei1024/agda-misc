@@ -4,7 +4,7 @@
 
 open import Categories.Category
 
-module Experiment.Categories.Category.Solver {o ℓ e} (𝒞 : Category o ℓ e) where
+module Experiment.Categories.Solver.Category {o ℓ e} (𝒞 : Category o ℓ e) where
 
 open import Level
 open import Relation.Binary using (Rel)

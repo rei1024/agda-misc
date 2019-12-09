@@ -5,7 +5,7 @@
 open import Categories.Category
 open import Categories.Functor renaming (id to idF)
 
-module Experiment.Categories.Functor.MultiSolver {o ℓ e} where
+module Experiment.Categories.Solver.MultiFunctor {o ℓ e} where
 
 import Categories.Morphism.Reasoning as MR
 
