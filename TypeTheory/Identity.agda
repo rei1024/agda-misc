@@ -39,9 +39,17 @@ module JBundleProperties {a} (jBundle : JBundle a) where
     sym (sym q) ≡⟨ sym-involutive q ⟩
     q           ∎
     where open P.≡-Reasoning
-
+{-
   trans : ∀ {x y z} → x ≈ y → y ≈ z → x ≈ z
   trans {x} {y} {z} x≈y y≈z = J D (λ u → λ w q → q) x y x≈y z y≈z
     where
     D : ∀ u v → u ≈ v → Set _
     D u v u≈v = ∀ w → (q : v ≈ w) → u ≈ w
+-}
+  trans : ∀ {x y z} → x ≈ y → y ≈ z → x ≈ z
+  trans {x} {y} {z} x≈y y≈z = J D (λ u → λ w q → J E (λ _ → ≈-refl) u w q) x y x≈y z y≈z
+    where
+    D : ∀ u v → u ≈ v → Set _
+    D u v u≈v = ∀ w → v ≈ w → u ≈ w
+    E : ∀ u v → u ≈ v → Set _
+    E u v q = u ≈ v

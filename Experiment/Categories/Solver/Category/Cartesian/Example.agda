@@ -22,8 +22,13 @@ module _ {f : D ⇒ E} {g : C ⇒ D} {h : B ⇒ C} {i : A ⇒ B} where
   _ : (f ∘ g) ∘ id ∘ h ∘ i ≈ f ∘ (g ∘ h) ∘ i
   _ = solve ((∥-∥ :∘ ∥-∥) :∘ :id :∘ ∥-∥ :∘ ∥-∥) (∥-∥ :∘ (∥-∥ :∘ ∥-∥) :∘ ∥-∥) refl
 
-swap∘swap≈id : ∀ {A B} → swap {A}{B} ∘ swap {B}{A} ≈ id
-swap∘swap≈id {A} {B} = solve (:swap {∥ A ∥} {∥ B ∥} :∘ :swap) :id refl
+swap∘swap≈id :
+  ∀ {A B} → swap {A}{B} ∘ swap {B}{A} ≈ id
+swap∘swap≈id {A} {B} =
+  solve (:swap {∥ A ∥} {∥ B ∥} :∘ :swap)
+        :id
+        refl
+
 
 assocʳ∘assocˡ≈id : ∀ {A B C} → assocʳ {A}{B}{C} ∘ assocˡ {A}{B}{C} ≈ id
 assocʳ∘assocˡ≈id = solve (:assocʳ {∥ _ ∥} {∥ _ ∥} {∥ _ ∥} :∘ :assocˡ) :id refl

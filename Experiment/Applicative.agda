@@ -187,9 +187,9 @@ record Applicative (F : Set → Set) : Set₁ where
     pure _∘′_ <*> u <*> v <*> w
       ≡⟨ cong (λ t → t <*> v <*> w) $ <*>-fmap _∘′_ u ⟩
     fmap _∘′_ u <*> v <*> w
-      ≡⟨ refl ⟩
+      ≡⟨⟩
     fmap app (fmap _∘′_ u <,> v) <*> w
-      ≡⟨ refl ⟩
+      ≡⟨⟩
     fmap app (fmap app (fmap _∘′_ u <,> v) <,> w)
       ≡⟨ cong (λ t → fmap app (fmap app t <,> w)) $ natural₁ _∘′_ u v ⟩
     fmap app (fmap app (fmap (Prod.map₁ _∘′_) (u <,> v)) <,> w)
@@ -211,7 +211,7 @@ record Applicative (F : Set → Set) : Set₁ where
     fmap app (fmap (Prod.map₂ app) (u <,> (v <,> w)))
       ≡⟨ sym $ cong (fmap app) $ natural₂ app u (v <,> w) ⟩
     fmap app (u <,> fmap app (v <,> w))
-      ≡⟨ refl ⟩
+      ≡⟨⟩
     u <*> (v <*> w)
       ∎
     where open ≡-Reasoning

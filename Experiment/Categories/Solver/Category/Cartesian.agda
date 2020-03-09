@@ -61,7 +61,7 @@ data AExpr : REL Sig Obj (o ⊔ ℓ) where
 -- Normalised expression
 data NExpr : Rel Sig (o ⊔ ℓ) where
   :id    : NExpr ∥ A ∥ ∥ A ∥
-  :!N   : NExpr S :⊤
+  :!N    : NExpr S :⊤
   ⟪_⟫    : AExpr S A → NExpr S ∥ A ∥
   :⟨_,_⟩ : NExpr U S → NExpr U T → NExpr U (S :× T)
   ∥_∥∘_  : B ⇒ C → NExpr S ∥ B ∥ → NExpr S ∥ C ∥
@@ -227,10 +227,11 @@ solve e₁ e₂ eq = begin
   ⟦ normalise e₂ ⟧N ≈⟨ correct e₂ ⟩
   ⟦ e₂ ⟧            ∎
 
+-- Combinators
+
 ∥-∥ : ∀ {f : A ⇒ B} → Expr ∥ A ∥ ∥ B ∥
 ∥-∥ {f = f} = ∥ f ∥
 
--- Combinators
 :! : Expr ∥ A ∥ :⊤
 :! = ∥ ! !∥
 

@@ -15,7 +15,9 @@
   * [Dependently Typed Programming in Agda](http://www.cse.chalmers.se/~ulfn/papers/afp08/tutorial.pdf)
 
 #### レポジトリ
-  * [Agda repository](https://github.com/agda/agda)
+  * [agda](https://github.com/agda)
+
+  * [Agda repository](https://github.com/agda/agda), [primitive](https://github.com/agda/agda/tree/master/src/data/lib/prim/Agda)
 
   * [The Agda standard library](https://github.com/agda/agda-stdlib)
 
@@ -24,6 +26,8 @@
   * [cubical](https://github.com/agda/cubical)
 
   * [HoTT-Agda](https://github.com/HoTT/HoTT-Agda)
+
+  * [agda-prelude](https://github.com/UlfNorell/agda-prelude)
 
 #### ブログ
   * [Donnacha Oisín Kidney](https://doisinkidney.com/)
