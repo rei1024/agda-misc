@@ -297,6 +297,7 @@ module _ {a p} {A : Set a} {P : A → Set p} where
   ¬¬∃P<=>¬∀¬P : ¬ ¬ ∃ P <=> ¬ (∀ x → ¬ P x)
   ¬¬∃P<=>¬∀¬P = mk<=> ¬¬∃P→¬∀¬P ¬∀¬P→¬¬∃P
 
+  -- remove?
   ∀¬¬P→¬∃¬P : (∀ x → ¬ ¬ P x) → ¬ ∃ λ x → ¬ (P x)
   ∀¬¬P→¬∃¬P = uncurry
 

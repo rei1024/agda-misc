@@ -16,6 +16,12 @@ module InsertionSortOperation
   {a r} {A : Set a} {_≤_ : Rel A r} (_≤?_ : B.Decidable _≤_)
   where
 
+-- swap : A x A → A × A
+-- swap ∘ swap ≡ id
+-- ifTrueSwap : Bool → A × A → A × A
+-- ifTrueSwap x ∘ ifTrueSwap y ≡ ifTrueSwap (xor x y)
+-- x : A → A ≡ Unit ⊎ (Σ A (λ y → x ≢ y))
+
   insert : A → List A → List A
   insert x []           = [ x ]
   insert x (y ∷ ys) with x ≤? y
